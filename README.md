@@ -1,3 +1,28 @@
+# Hacking Archives of India - Hugo Theme
+
+
+This theme used [hugo-xmin](https://github.com/yihui/hugo-xmin) as the base template and then massive modifications are done to fit it to our requirements
+
+
+The theme has been customized to cater to website need and as such uses different templates for 
+
+- hacker
+- conference
+- tool
+- tag
+
+
+We will update the details in some days.
+
+The website also leverages booster functions via [hugo-booster theme](https://github.com/anantshri/hugo_booster)
+
+
+
+
+
+# OLD Details from XMIN BElow
+
+
 # HUGO XMIN
 
 ## _Keep it simple, but not simpler_
