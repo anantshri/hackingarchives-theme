@@ -1,0 +1,14 @@
+  <footer>
+  {{ partial "foot_custom.html" . }}
+  <hr/>
+  <span>Last update date: {{ now.Format "Jan 2, 2006 (IST)" }}</span>
+  <br />
+  {{ with .Site.Params.footer }}
+  {{ . | markdownify }} {{ now.Format "2006" }}
+  {{ end }}
+  </footer>
+  <hr/>
+  <script defer data-api="/api/event" data-domain="hackingarchivesofindia.com" src="/js/script.js"></script>
+
+  </body>
+</html>

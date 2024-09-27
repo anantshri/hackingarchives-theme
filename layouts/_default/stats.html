@@ -1,0 +1,24 @@
+{{ partial "header.html" . }}
+
+<h1>{{ .Title | markdownify | humanize | title }}</h1>
+
+{{ .Content }}
+
+
+
+<section>
+  <ul>
+    {{ range $taxonomyname, $taxonomy := .Site.Taxonomies }}
+      <li><a href="{{ "/" | relLangURL}}{{ $taxonomyname | urlize }}">{{ $taxonomyname }} ({{ len $taxonomy }})</a>
+        <ul>
+          {{ range $key, $value := $taxonomy }}
+          <li> {{ $key }} ({{ len $value }}) </li>
+          {{ end }}
+        </ul>
+      </li>
+    {{ end }}
+  </ul>
+</section>
+
+
+{{ partial "footer.html" . }}

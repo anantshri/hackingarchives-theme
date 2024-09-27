@@ -1,0 +1,170 @@
+{{ $count := 1 }}
+
+
+<h1> Personal Details<h1>
+
+<table>
+<tr>
+<th>S.No </th>
+<th> Name of Entry </th>
+<th> What is missing</th>
+</tr>
+{{ range $name, $taxonomy := $.Site.Taxonomies.hacker.ByCount -}}
+
+  {{ $isimportant := "N" }}
+  {{ $whatismissing := ""}}
+
+  {{ $jpgpath := printf ".jpg" | printf "%s%s" .Name | printf "%s%s" "static/hacker/" |  printf "%s" }}
+  {{ $pngpath := printf ".png" | printf "%s%s" .Name | printf "%s%s" "static/hacker/" |  printf "%s" }}
+  {{ $jpegpath := printf ".jpeg" | printf "%s%s" .Name | printf "%s%s" "static/hacker/" |  printf "%s" }}
+  {{ $jfifpath := printf ".jfif" | printf "%s%s" .Name | printf "%s%s" "static/hacker/" | printf "%s" }}
+  {{ $photopath := "" }}
+  {{ if fileExists $jpgpath }}
+    {{ $photopath = "a" }}
+  {{ else if fileExists $pngpath }}
+    {{ $photopath = "b" }}
+  {{ else if fileExists $jpegpath }}
+    {{ $photopath = "c" }}
+  {{ else if fileExists $jfifpath }}
+    {{ $photopath = "d" }}
+  {{ end }}
+
+  {{- with $.Site.GetPage $taxonomy.Name -}}
+
+    {{ if ( not .Params.twitter ) }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, Twitter" }}
+      {{ else }}
+        {{ $whatismissing = "Twitter" }}
+      {{ end }}
+    {{ end }}
+
+    {{ if ( not .Params.linkedin ) }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, Linkedin" }}
+      {{ else }}
+        {{ $whatismissing = "Linkedin" }}
+      {{ end }}
+    {{ end }}
+
+    {{/* if ( not .Params.home ) }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, Home" }}
+      {{ else }}
+        {{ $whatismissing = "Home" }}
+      {{ end }}
+    {{ end }}
+
+    {{ if ( not .Params.github ) }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, Github" }}
+      {{ else }}
+        {{ $whatismissing = "Github" }}
+      {{ end }}
+    {{ end }}
+
+    {{ if ( not .Params.gitlab ) }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, Gitlab" }}
+      {{ else }}
+        {{ $whatismissing = "Gitlab" }}
+      {{ end }}
+    {{ end }}
+
+    {{ if ( not .Params.bitbucket ) }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, BitBucket" }}
+      {{ else }}
+       {{ $whatismissing = "BitBucket" }}
+      {{ end }}
+    {{ end */}}
+
+    {{ if not $photopath }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, Photo" }}
+      {{ else }}
+        {{ $whatismissing = "Photo" }}
+      {{ end }}
+    {{ end }}
+
+    {{ if not .Params.request_to_hide }}
+      {{ if or (not $photopath) (and (not .Params.twitter) (not .Params.linkedin)) }}
+        {{ $isimportant = "Y" }}
+      {{ end }}
+    {{ end }}
+
+    {{ if and (eq $isimportant "Y") }}
+      <tr>
+      <td>{{ $count }}</td>
+      <td><a href="{{ .Permalink }}" target="_blank">{{ .Name }}</a></td>
+      <td>{{ $whatismissing }}</td>
+      </tr>
+      {{ $count = add $count 1 }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+</table>
+<h1>Presentation Details</h1>
+{{ $pages := .Site.RegularPages }}
+<table>
+<tr>
+<th>S.No</th>
+<th> Name of Entry </th>
+<th> What is missing</th>
+</tr>    
+{{ $count := 1 }}
+{{ range (where $pages "Section" "!=" "") }}
+  {{ $isimportant := "N" }}
+  {{ $whatismissing := ""}}
+
+  {{ if  ( not  .Params.presentation ) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, presentation" }}
+    {{ else }}
+      {{ $whatismissing = "presentation" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if  ( not  .Params.conf_link ) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, Conference Link" }}
+    {{ else }}
+      {{ $whatismissing = "Conference Link" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if ( not .Params.video ) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, Video" }}
+    {{ else }}
+      {{ $whatismissing = "Video" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if eq .Type "Tool Demo" }}
+    {{ if not .Params.source }}
+      {{ $whatismissing = "Source Code" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if eq .Type "talk" }}
+    {{ if or (not .Params.presentation) (not .Params.conf_link) }}
+      {{ $isimportant = "Y" }}
+    {{ end }}
+  {{ else if eq .Type "Tool Demo" }}
+    {{ if not .Params.source }}
+      {{ $isimportant = "Y" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if eq $isimportant "Y" }}
+    <tr>
+    <td>{{ $count }}</td>
+    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>{{ $whatismissing }}</td>
+    </tr>
+    {{ $count = add $count 1 }}
+  {{ end }}
+{{ end }}
+</table>

@@ -1,0 +1,138 @@
+{{ partial "header.html" . }}
+{{ $hacker_names := slice }}
+{{ $unique_hacker_names := slice }}
+{{ range .Pages }}
+  {{ $hacker_names = $hacker_names | append .Params.hacker }}
+{{ end }}
+{{ $unique_hacker_names = uniq (sort $hacker_names) }}
+{{ $name_of_tool := urlize .Data.Term }}
+
+{{if not .IsHome }}
+<center>
+  <div class="card">
+  {{ $imgpath := path.Join "static" "tool" $name_of_tool }}
+  {{ $jpgpath := printf ".jpg" | printf "%s%s" $imgpath  }}
+  {{ $pngpath := printf ".png" | printf "%s%s" $imgpath }}
+  {{ $jpegpath := printf ".jpeg" | printf "%s%s" $imgpath }}
+  {{ $jfifpath := printf ".jfif" | printf "%s%s" $imgpath }}
+  {{ $photopath := "" }}
+  {{ if fileExists $jpgpath }}
+    {{ $photopath = printf ".jpg" | printf "%s%s" $name_of_tool | printf "%s%s" "/tool/" |  printf "%s" }}
+  {{ else if fileExists $pngpath }}
+    {{ $photopath = printf ".png" | printf "%s%s" $name_of_tool | printf "%s%s" "/tool/" |  printf "%s" }}
+  {{ else if fileExists $jpegpath }}
+    {{ $photopath = printf ".jpeg" | printf "%s%s" $name_of_tool | printf "%s%s" "/tool/" |  printf "%s" }}
+  {{ else if fileExists $jfifpath }}
+    {{ $photopath = printf ".jfif" | printf "%s%s" $name_of_tool | printf "%s%s" "/tool/" |  printf "%s" }}
+  {{ end }}
+  <div class="container">
+  {{ if $photopath }}
+    <img class="confphoto" src="{{ lower $photopath }}" alt="Avatar">
+    <br />
+  {{ end }}
+    <br />
+    <h2><b>{{ .Title | markdownify | title }}</b></h2>
+      <p>  
+{{ partial "social.html" . }}
+<br />
+  {{ if .Params.hacker }}
+      {{ $sorted_params_hacker := uniq (sort .Params.hacker "value" "asc" ) }}
+      {{ if eq $sorted_params_hacker $unique_hacker_names }} 
+        {{ range $unique_hacker_names }}
+          <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+        {{ end }} 
+      {{ else }}
+        {{ range $sorted_params_hacker }}
+          <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+        {{ end }} 
+        <br />
+        {{ range $unique_hacker_names }}
+          <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+        {{ end }} 
+      {{ end }}
+  {{ else }}
+      {{ range $unique_hacker_names }}
+        <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+      {{ end }} 
+  {{ end  }}
+      </p>
+  </div>
+</div>
+</center>
+{{ end }}
+
+{{ if .Params.github }}
+<br />
+<div>
+{{ $reponame := split .Params.github "/" }}
+<center>
+<img src="https://flat.badgen.net/github/license/{{ index $reponame 3 }}/{{ index $reponame 4 }}" />
+<img src="https://flat.badgen.net/github/last-commit/{{ index $reponame 3 }}/{{ index $reponame 4 }}" />
+<img src="https://flat.badgen.net/github/release/{{ index $reponame 3 }}/{{ index $reponame 4 }}" />
+<img src="https://flat.badgen.net/github/tag/{{ index $reponame 3 }}/{{ index $reponame 4 }}" />
+<img src="https://flat.badgen.net/github/contributors/{{ index $reponame 3 }}/{{ index $reponame 4 }}" />
+<img src="https://flat.badgen.net/github/commits/{{ index $reponame 3 }}/{{ index $reponame 4 }}" />
+<img src="https://flat.badgen.net/github/stars/{{ index $reponame 3 }}/{{ index $reponame 4 }}" />
+
+</center>
+<br />
+</div>
+
+{{ end }}
+{{ if .Params.gitlab }}
+<br />
+<div>
+{{ $reponame := split .Params.gitlab "/" }}
+<center>
+  <img src="https://gitlab.com/{{ index $reponame 3 }}/{{ index $reponame 4 }}/-/badges/release.svg" />
+</center>
+<br />
+</div>
+
+{{ end }}
+
+<div class="confcontent">
+{{ .Content  }}
+</div>
+<div class="listing">
+  <h2>List of Sessions</h2>
+  <hr/>
+  
+  
+
+{{ range .Pages.GroupByParam "type"}}
+  <center class="type-key"><b>---- {{ .Key | humanize | title }} ----</b></center>
+  {{ range .Pages.GroupByDate "2006" }}
+    <center class="year-key"><b>----  {{ .Key }} ----</b></center>
+    <ul>
+      {{ range .Pages }}
+        <li>
+          <span class="date">{{ .Date.Format "2006/01/02" }}</span>
+          <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :  <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
+          {{ range .Params.hacker }}
+            <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+          {{ end }} 
+          {{ range .Params.morehackers }}
+           <u>{{ . | humanize | title }}</u>
+          {{ end }}
+          {{if .Params.presentation }}
+          <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" style="width:15px;padding-left:2px;"></a>
+          {{ end }}
+          {{if .Params.whitepaper }}
+          <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" style="width:15px;padding-left:2px;"></a>
+          {{ end }}
+          {{if .Params.Source }}
+          <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" style="width:15px;padding-left:2px;"></a>
+          {{ end }}
+          {{if .Params.video }}
+          <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" style="width:15px;padding-left:2px;"></a>
+          {{ end }}
+        </li>
+      {{ end }}
+    </ul>
+  {{ end }}
+  <hr />
+{{ end }}
+
+</div>
+{{ partial "footer.html" . }}

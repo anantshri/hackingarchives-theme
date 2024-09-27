@@ -1,0 +1,32 @@
+  {{ $socialLinks := dict
+  "linkedin" "/fontawesome/linkedin.svg"
+  "twitter" "/fontawesome/twitter.svg"
+  "home" "/fontawesome/home.svg"
+  "github" "/fontawesome/github.svg"
+  "gitlab" "/fontawesome/gitlab.svg"
+  "bitbucket" "/fontawesome/bitbucket.svg"
+  "wikipedia" "/fontawesome/wikipedia.svg"
+  "youtube" "/fontawesome/youtube.svg" 
+  "facebook" "/fontawesome/facebook.svg"
+  "producthunt" "/fontawesome/producthunt.svg"
+  "documents" "/fontawesome/whitepaper.svg"
+}}
+
+  {{ $protocols := slice "http://" "https://" }}
+
+  {{ range $key, $value := $socialLinks }}
+    {{ with index $.Params $key }} <!-- Note the use of $ to access the root context -->
+      {{ $url := . }}
+      {{ $hasProtocol := false }}
+      {{ range $protocols }}
+        {{ if strings.HasPrefix $url . }}
+          {{ $hasProtocol = true }}
+          {{ break }}
+        {{ end }}
+      {{ end }}
+      {{ if not $hasProtocol }}
+        {{ $url = print "https://" $url }}
+      {{ end }}
+      <a href="{{ $url }}" target="_blank" rel="noreferrer noopener"><img src="{{ $value }}" class="icons"></a>
+    {{ end }}
+  {{ end }}

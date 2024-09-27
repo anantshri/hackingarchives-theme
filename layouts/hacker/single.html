@@ -1,0 +1,112 @@
+{{ partial "header.html" . }}
+<pre>
+  {{ debug.Dump .Kind }}
+</pre>
+
+<div class="article-meta">
+<h1><span class="title">{{ .Title | markdownify }}</span></h1>
+<h2 class="author">
+{{ range .Params.hacker }}
+	&nbsp;<a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>&nbsp;
+{{ end }}
+{{ range .Params.morehackers }}
+	{{ $nm := trim . " " }}
+	{{ if (not (eq $nm "" )) }}
+		,&nbsp;<u>{{ . | humanize | title }}</u>&nbsp;
+	{{ end }}
+{{ end }}
+
+</h2>
+
+{{ if (gt .Params.date 0) }}<h2 class="date">{{ .Date.Format "2006/01/02" }}</h2>{{ end }}
+
+{{if .Params.presentation }}
+<a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" class="icons_talks"></a>
+{{ end }}
+{{if .Params.whitepaper }}
+<a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" class="icons_talks"></a>
+{{ end }}
+{{if .Params.Source }}
+<a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" class="icons_talks" ></a>
+{{ end }}
+{{if .Params.video }}
+<a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" class="icons_talks"></a>
+{{ end }}
+{{if .Params.conf_link }}
+<a href="{{ .Params.conf_link }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/link.svg" class="icons_talks"></a>
+{{ end }}
+
+</div>
+{{ if .Params.tool }}
+<div class="talk_tools">
+	This <b>{{ .Params.type }}</b> covers following tools where the speaker has contributed or authored<br/>
+	{{ $tools := .Params.tool }}
+	{{ $type := (printf "%T" $tools) }}
+	{{ if eq $type "string" }}
+		<b><a href="/tool/{{ urlize $tools }}">{{ upper $tools }}</a></b>
+	{{ else }} 
+		{{ range $tools  }}
+			<b><a href="/tool/{{ urlize . }}">{{ upper . }}</a></b>
+		{{ end }}
+	{{ end }}
+</div>
+{{ end }}
+<main>
+
+{{ $presentation_embedable := 0 }}
+{{ $video_embedable := 0 }}
+{{if .Params.presentation}}
+	{{ $embedURL := urls.Parse .Params.presentation }}
+	{{- range $.Site.Data.oembed }}
+	  {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
+	    {{ $presentation_embedable = 1 }}
+	  {{ end }}
+    {{ end }}
+{{ end }}
+{{if .Params.video}}
+	{{ $embedURL := urls.Parse .Params.video }}
+	{{- range $.Site.Data.oembed }}
+	  {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
+	    {{ $video_embedable = 1 }}
+	  {{ end }}
+	{{ end }}
+{{ end }}
+{{ if or (eq $presentation_embedable 1) (eq $video_embedable 1) }}
+<hr >
+<h1> Presentation Material</h1>
+{{ end }}
+{{ if and (eq $presentation_embedable 1) (eq $video_embedable 1) }}
+	<div style="width:45%;float:left;display:box;padding-left:2%;padding-right:3%">
+		<h2><center>Presentation</center></h2>
+		{{ partial "oembed.html" (dict "context" . "url" .Params.presentation) }}
+	</div>
+
+	<div style="width:45%;float:left;display:box;padding-left: 3%;padding-right:2%">
+		<h2><center>Video</center></h2>
+		{{ partial "oembed.html" (dict "context" . "url" .Params.video) }}
+	</div>
+	<div>
+		<br />&nbsp;<br />
+	</div>
+{{ else if eq $presentation_embedable 1 }}
+	{{ partial "oembed.html" (dict "context" . "url" .Params.presentation) }}
+{{ else if eq $video_embedable 1 }}
+	{{ partial "oembed.html" (dict "context" . "url" .Params.video) }}
+{{ end }}
+
+{{ with .Content }}
+<h1>Abstract</h1>
+  {{- . -}}
+{{ end }}
+
+{{ $path := .Path }}
+{{ $pathParts := split $path "/" }}
+{{ $newPath := delimit (slice (index $pathParts 2) (index $pathParts 3)) "_" }}
+{{ $file_path := printf ".md.txt.txt" | printf "%s%s" $newPath | printf "%s%s" "transcribe/summary_transcribe_" | printf "%s"}}
+{{ if fileExists $file_path }}
+<h1> AI Generated Summary<sup><a href="/ai_experiements/">may contain errors</a></sup></h1>
+{{ readFile $file_path | markdownify }}
+{{ end }}
+</main>
+
+{{ partial "footer.html" . }}

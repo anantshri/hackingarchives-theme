@@ -1,0 +1,145 @@
+{{ partial "header.html" . }}
+
+<center>
+  <div class="card">
+    {{- $imgpath := path.Join "static" "hacker" .Data.Term -}}
+    {{- $jpgpath := printf ".jpg" | printf "%s%s" $imgpath  -}}
+    {{- $pngpath := printf ".png" | printf "%s%s" $imgpath -}}
+    {{- $jpegpath := printf ".jpeg" | printf "%s%s" $imgpath -}}
+    {{- $jfifpath := printf ".jfif" | printf "%s%s" $imgpath -}}
+    {{- $photopath := "" -}}
+    {{- if fileExists $jpgpath -}}
+      {{- $photopath = printf ".jpg" | printf "%s%s" .Data.Term | printf "%s%s" "/hacker/" |  printf "%s" -}}
+    {{- else if fileExists $pngpath -}}
+      {{- $photopath = printf ".png" | printf "%s%s" .Data.Term | printf "%s%s" "/hacker/" |  printf "%s" -}}
+    {{- else if fileExists $jpegpath -}}
+      {{- $photopath = printf ".jpeg" | printf "%s%s" .Data.Term | printf "%s%s" "/hacker/" |  printf "%s" -}}
+    {{- else if fileExists $jfifpath -}}
+      {{- $photopath = printf ".jfif" | printf "%s%s" .Data.Term | printf "%s%s" "/hacker/" |  printf "%s" -}}
+    {{- end -}}
+    {{- if $photopath }}
+      <img class="profilephoto" src="{{ $photopath }}" alt="Avatar">
+    {{ end }}
+    <div class="container">
+      <h2><b>{{ .Title | markdownify | title }}</b></h2>
+      <p>  
+{{ partial "social.html" . }}
+ 
+{{ $pages := .Pages }}
+{{ if .IsHome }}{{ $pages = .Site.RegularPages }}{{ end }}
+
+{{ $videoParams := slice }}
+{{ range (where $pages "Section" "!=" "") }}
+{{ if and (ne .Params.video "") (in .Params.video "youtube.com") }}
+{{ $videoURLs := split .Params.video " " }}
+{{ range $videoURLs }}
+{{ $videoURL := . }}
+{{ $queryString := index (split $videoURL "?") 1 }}
+{{ $params := split $queryString "&" }}
+{{ range $params }}
+{{ $param := split . "=" }}
+{{ if eq (index $param 0) "v" }}
+{{ $videoParams = $videoParams | append (index $param 1) }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
+
+{{ if gt (len $videoParams) 0 }}
+  <br />
+<a href="https://www.youtube.com/watch_videos?video_ids={{ delimit $videoParams "," }}" target="_blank" rel="noreferrer noopener">Dynamic Video Playlist</a>
+{{ end }}
+    </p>
+    </div>
+  </div>
+</center>
+
+
+
+{{ $disclosures := where $pages "Section" "!=" "" }}
+{{ $categoryCounts := dict }}
+{{ range $disclosures }}
+  {{ $category := .Params.type }}
+  {{ if $category }}
+    {{ $count := add (index $categoryCounts $category | default 0) 1 }}
+    {{ $categoryCounts = merge $categoryCounts (dict $category $count) }}
+  {{ end }}
+{{ end }}
+<hr />
+
+<p>
+  <b>Type of Sessions Delivered : </b>
+  {{ range $category, $count := $categoryCounts }}
+    <i>{{ $category | humanize | title }} - {{ $count }}</i>;
+  {{ end }}
+
+</p>
+
+{{ $tools := slice }}
+{{ range .Pages }}
+  {{ $tool := .Params.tool }}
+  {{ if $tool }}
+    {{ $type := (printf "%T" $tool) }}
+    {{ if eq $type "string" }}
+      {{ $tools = $tools | append (upper $tool)  }}
+    {{ else }} 
+      {{ range $tool  }}
+        {{ $tools = $tools | append (upper . )  }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{- $uniqueTools := slice -}}
+{{- range $tools -}}
+  {{- if not (in $uniqueTools .) -}}
+    {{- $uniqueTools = $uniqueTools | append ( upper .) -}}
+  {{- end -}}
+{{- end -}}
+
+{{ if len $uniqueTools }}
+<hr />
+  <b>Tools Contributed or Authored : </b>
+{{ end }}
+{{ range $uniqueTools }}
+<b><a href="/tool/{{ . | urlize }}">{{ upper . }}</a></b> 
+  {{ end }}
+</ul>
+
+
+<hr />
+
+<h1> Hacktivity </h1>
+<hr/>
+{{ range .Pages.GroupByDate "2006" }}
+  <center class="year-key"><b>----  {{ .Key }} ----</b></center>
+  <ul>
+    {{ range .Pages }}
+      <li>
+      <span class="date">{{ .Date.Format "2006/01/02" }}</span>
+      <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a>  : <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :	<a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
+      {{ range .Params.hacker }}
+        <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+      {{ end }} 
+      {{ range .Params.morehackers }} :
+        <u>{{ . | humanize | title }}</u>
+      {{ end }}
+      {{if .Params.presentation }}
+        <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" style="width:15px;padding-left:2px;"></a>
+      {{ end }}
+      {{if .Params.whitepaper }}
+        <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" style="width:15px;padding-left:2px;"></a>
+      {{ end }}
+      {{if .Params.Source }}
+        <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" style="width:15px;padding-left:2px;"></a>
+      {{ end }}
+      {{if .Params.video }}
+        <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" style="width:15px;padding-left:2px;"></a>
+      {{ end }}
+      </li>
+    {{ end }}
+  </ul>
+{{ end }}
+
+{{ partial "footer.html" . }}

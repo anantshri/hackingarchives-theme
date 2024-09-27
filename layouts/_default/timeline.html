@@ -1,0 +1,37 @@
+{{ partial "header.html" . }}
+
+{{if not .IsHome }}
+<h1>{{ .Title | markdownify | humanize | title }}</h1>
+{{ end }}
+
+{{ .Content  }}
+
+<ul>
+  {{ $pages := .Site.RegularPages.ByDate }}
+  {{ range (where $pages "Section" "!=" "") }}
+  <li>
+    <span class="date">{{ .Date.Format "2006/01/02" }}</span>
+    <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a> : <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :	<a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
+    {{ range .Params.hacker }}
+    	<a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+   	{{ end }}
+    {{ range .Params.morehackers }}
+     <u>{{ . | humanize | title }}</u>
+    {{ end }}
+    {{if .Params.presentation }}
+    <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" style="width:15px;padding-left:2px;"></a>
+    {{ end }}
+    {{if .Params.whitepaper }}
+    <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" style="width:15px;padding-left:2px;"></a>
+    {{ end }}
+    {{if .Params.Source }}
+    <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" style="width:15px;padding-left:2px;"></a>
+    {{ end }}
+    {{if .Params.video }}
+    <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" style="width:15px;padding-left:2px;"></a>
+    {{ end }}
+  </li>
+  {{ end }}
+</ul>
+
+{{ partial "footer.html" . }}

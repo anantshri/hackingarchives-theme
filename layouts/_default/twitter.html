@@ -1,0 +1,9 @@
+{{ range $name, $taxonomy := $.Site.Taxonomies.hacker.ByCount -}}
+  {{- with $.Site.GetPage $taxonomy.Name -}}
+    {{- range last 1 (split .Params.twitter "/") -}}
+      {{- if (not ( eq . "" ) ) }}
+        {{ . }}
+      {{- end -}}
+    {{ end -}}
+  {{- end -}}
+{{- end }}
