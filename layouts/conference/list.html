@@ -39,6 +39,8 @@
   <hr/>
   {{ range .Pages.GroupByDate "2006" }}
     <center class="year-key"><b>----  {{ .Key }} ----</b></center>
+    {{ range .Pages.GroupByParam "type"}}
+      <center class="type-key"><b><-------- {{ .Key | humanize | title }} --------></b></center>
     <ul>
       {{ range .Pages }}
         <li>
@@ -66,6 +68,6 @@
       {{ end }}
     </ul>
   {{ end }}
-
+{{ end }}
 </div>
 {{ partial "footer.html" . }}
