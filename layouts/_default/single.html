@@ -15,7 +15,7 @@
 	{{ end }}
 	{{ if (gt .Params.date 0) }} on {{ .Date.Format "02 Jan 2006" }}{{ end }}
 
-	{{ if .Params.conference }} @ <a href="/conference/{{ .Params.conference | urlize }}">{{ .Params.conference | humanize | title }}</a>{{ end }}
+	{{ if .Params.conference }} @ <a href="/conference/{{ .Params.conference | urlize }}">{{ .Params.conference | humanize | title }}</a>{{ end }} 
 
 	{{ if .Params.subconference }} - {{ .Params.subconference | humanize | title }}{{ end }}
 	</h2>
@@ -116,6 +116,8 @@
 {{ with .Content }}
 <div class="clear"></div>
 <h1>Abstract</h1>
+{{ if $.Params.award }}Recognized as <a href="{{ $.Params.conf_link }}">{{ $.Params.award | humanize | title }} in the year {{ dateFormat "2006" $.Params.Date }}</a>{{ end }}
+
   {{- . -}}
 {{ end }}
 

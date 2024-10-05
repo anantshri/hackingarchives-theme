@@ -10,9 +10,14 @@
 
 <div>
     As of Now I have  details from : 
-{{ range $name, $taxonomy := $.Site.Taxonomies.conference.ByCount }}
+<br />
+<b>Conferences</b>: {{ range $name, $taxonomy := $.Site.Taxonomies.conference.ByCount }}
     <a href="/conference/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
-{{- end }}. Refer <a href="/roadmap">roadmap</a> for further plans.
+{{- end }}.<br />
+<b>Awards</b>: {{ range $name, $taxonomy := $.Site.Taxonomies.award.ByCount }}
+    <a href="/award/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
+{{- end }}<br /><br />
+Refer <a href="/roadmap">roadmap</a> for further plans.
 </div>
 
 <h1><u>Hackers of India</u></h1>

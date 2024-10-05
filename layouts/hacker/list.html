@@ -118,7 +118,12 @@
     {{ range .Pages }}
       <li>
       <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-      <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a>  : <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :	<a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
+      <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a>  : 
+      {{- if .Params.award -}}
+      <a href="/award/{{ lower .Params.award |  urlize }}">{{ .Params.award | humanize | title }}</a> 
+      {{- else -}}
+      <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> 
+      {{- end -}}:	<a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
       {{ range .Params.hacker }}
         <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
       {{ end }} 

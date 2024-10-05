@@ -1,0 +1,70 @@
+{{ partial "header.html" . }}
+
+{{if not .IsHome }}
+<center>
+  <div class="card">
+  {{ $imgpath := path.Join "static" .Section .Data.Term }}
+  {{ $jpgpath := printf ".jpg" | printf "%s%s" $imgpath  }}
+  {{ $pngpath := printf ".png" | printf "%s%s" $imgpath }}
+  {{ $jpegpath := printf ".jpeg" | printf "%s%s" $imgpath }}
+  {{ $jfifpath := printf ".jfif" | printf "%s%s" $imgpath }}
+  {{ $photopath := "" }}
+  {{ if fileExists $jpgpath }}
+    {{ $photopath = printf ".jpg" | printf "%s%s" .Data.Term | printf "/%s/%s" .Section |  printf "%s" }}
+  {{ else if fileExists $pngpath }}
+    {{ $photopath = printf ".png" | printf "%s%s" .Data.Term | printf "/%s/%s" .Section |  printf "%s" }}
+  {{ else if fileExists $jpegpath }}
+    {{ $photopath = printf ".jpeg" | printf "%s%s" .Data.Term | printf "/%s/%s" .Section |  printf "%s" }}
+  {{ else if fileExists $jfifpath }}
+    {{ $photopath = printf ".jfif" | printf "%s%s" .Data.Term | printf "/%s/%s" .Section |  printf "%s" }}
+  {{ end }}
+  {{ if $photopath }}
+    <img class="confphoto" src="{{ lower $photopath }}" alt="Avatar">
+  {{ end }}
+  <div class="confcontainer">
+    <h2><b>{{ .Title | markdownify | humanize | title }}</b></h2>
+
+      <p>  
+{{ partial "social.html" . }}
+    </p>
+  </div>
+</div>
+</center>
+{{ end }}
+<div class="confcontent">
+{{ .Content  }}
+</div>
+<div class="listing">
+  <h2>List of Conferences</h2>
+  <hr/>
+  {{ range .Pages.GroupByDate "2006" }}
+    <center class="year-key"><b>----  {{ .Key }} ----</b></center>
+    <ul>
+    {{ range .Pages }}
+      <li>
+        <span class="date">{{ .Date.Format "2006/01/02" }}</span>
+        <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a> : <a href="/award/{{ lower .Params.award |  urlize }}">{{ .Params.award | humanize | title }}</a> :  <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
+        {{ range .Params.hacker }}
+          <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+        {{ end }} 
+        {{ range .Params.morehackers }}
+         <u>{{ . | humanize | title }}</u>
+        {{ end }}
+        {{if .Params.presentation }}
+        <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" style="width:15px;padding-left:2px;"></a>
+        {{ end }}
+        {{if .Params.whitepaper }}
+        <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" style="width:15px;padding-left:2px;"></a>
+        {{ end }}
+        {{if .Params.Source }}
+        <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" style="width:15px;padding-left:2px;"></a>
+        {{ end }}
+        {{if .Params.video }}
+        <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" style="width:15px;padding-left:2px;"></a>
+        {{ end }}
+      </li>
+    {{ end }}
+    </ul>
+{{ end }}
+</div>
+{{ partial "footer.html" . }}
