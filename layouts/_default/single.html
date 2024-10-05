@@ -16,8 +16,7 @@
 	{{ if (gt .Params.date 0) }} on {{ .Date.Format "02 Jan 2006" }}{{ end }}
 
 	{{ if .Params.conference }} @ <a href="/conference/{{ .Params.conference | urlize }}">{{ .Params.conference | humanize | title }}</a>{{ end }} 
-
-	{{ if .Params.subconference }} - {{ .Params.subconference | humanize | title }}{{ end }}
+	{{ partial "subconference.html" . }}
 	</h2>
 
 {{ end }}

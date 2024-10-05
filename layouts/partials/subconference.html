@@ -1,0 +1,3 @@
+{{ if .Params.subconference }} - {{ .Params.subconference | humanize | title }}{{ end }}
+{{ if and (eq (lower .Params.conference) "blackhat") ( eq (lower .Params.Type) "tool demo") }} - Arsenal {{ end }}
+{{ if and (eq (lower .Params.conference) "defcon") ( eq (lower .Params.Type) "tool demo") }} - DemoLabs {{ end }}

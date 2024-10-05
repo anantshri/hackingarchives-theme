@@ -123,7 +123,9 @@
       <a href="/award/{{ lower .Params.award |  urlize }}">{{ .Params.award | humanize | title }}</a> 
       {{- else -}}
       <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> 
-      {{- end -}}:	<a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
+      {{- end -}} 
+      {{ partial "subconference.html" . }}
+      :	<a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
       {{ range .Params.hacker }}
         <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
       {{ end }} 
