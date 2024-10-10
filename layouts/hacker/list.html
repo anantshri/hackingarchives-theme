@@ -129,7 +129,7 @@
       {{ range .Params.hacker }}
         <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
       {{ end }} 
-      {{ range .Params.morehackers }} :
+      {{ range .Params.morehackers }}
         <u>{{ . | humanize | title }}</u>
       {{ end }}
       {{if .Params.presentation }}
