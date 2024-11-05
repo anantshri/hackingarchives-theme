@@ -1,0 +1,69 @@
+{{ partial "header.html" . }}
+
+{{ if not .IsHome }}
+    <h1>{{ .Title | markdownify | humanize | title }}</h1>
+{{ end }}
+
+{{ .Content }}
+
+{{ $excludedTypes := slice "panel" "workshop" }}
+
+<div>
+    <u>
+        This site currently lists <b>{{ len (where (where .Site.RegularPages "Section" "!=" "") "Params.type" "not in" $excludedTypes) }}</b> entries by
+        
+        {{ $filteredTaxonomies := slice }}
+        
+        {{ range $name, $taxonomy := $.Site.Taxonomies.hacker.ByCount }}
+            {{ $filteredPages := where $taxonomy.Pages "Params.type" "not in" $excludedTypes }}
+            {{ if gt (len $filteredPages) 0 }}
+                {{ $filteredTaxonomies = $filteredTaxonomies | append (dict "Name" $taxonomy.Name "Pages" $filteredPages) }}
+            {{ end }}
+        {{ end }}
+
+        <b>{{ len $filteredTaxonomies }}</b> unique individuals
+    </u>
+</div>
+
+<div>
+    As of Now I have details from: 
+    <br />
+    <b>Conferences</b>: 
+    {{ range $name, $taxonomy := $.Site.Taxonomies.conference.ByCount }}
+        <a href="/conference/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
+    {{- end }}.<br />
+    <b>Awards</b>: 
+    {{ range $name, $taxonomy := $.Site.Taxonomies.award.ByCount }}
+        <a href="/award/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
+    {{- end }}
+    <br /><br />
+    Refer <a href="/roadmap">roadmap</a> for further plans.
+</div>
+
+<h1><u>Hackers of India</u></h1>
+
+{{ if gt (len $filteredTaxonomies) 0 }}
+    {{ $fontUnit := "rem" }}
+    {{ $largestFontSize := 2.7 }}
+    {{ $smallestFontSize := 1.5 }}
+    {{ $fontSpread := sub $largestFontSize $smallestFontSize }}
+
+    <!-- Calculate min and max based on the filtered taxonomy set -->
+    {{ $max := add (len (index $filteredTaxonomies 0).Pages) 1 }}
+    {{ $min := len (index $filteredTaxonomies (sub (len $filteredTaxonomies) 1)).Pages }}
+    {{ $spread := sub $max $min }}
+    {{ $fontStep := div $fontSpread $spread }}
+
+    <div id="tag-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+        {{ range $taxonomy_sorted := (sort $filteredTaxonomies "Pages | len" "desc") -}}
+            {{- $currentTagCount := len $taxonomy_sorted.Pages -}}
+            {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentTagCount $min) $fontStep) ) -}}
+            {{- $count := len $taxonomy_sorted.Pages -}}
+            {{- $weight := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
+            {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weight) ) -}}
+            <a href="{{ "/hacker/" | relLangURL }}{{ $taxonomy_sorted.Name | urlize }}/" style="font-size:{{- $currentFontSize -}}{{- $fontUnit -}}">{{- $taxonomy_sorted.Name | humanize | title -}}{{- if gt $count 1 -}}<sub>({{- $count -}})</sub>{{- end }}</a>&nbsp;
+        {{- end }}
+    </div>
+{{ end }}
+
+{{ partial "footer.html" . }}
