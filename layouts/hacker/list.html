@@ -139,7 +139,7 @@
           {{- $val := index $paramValue $type -}}
           {{- with $val -}}
             <a href="{{ . }}" target="_blank" rel="noreferrer noopener nofollow">
-              <img src="/fontawesome/{{ $type }}.svg" style="width:15px; padding-left:2px;">
+              <img src="/fontawesome/{{ $type | lower }}.svg" style="width:15px; padding-left:2px;">
             </a>
           {{- end -}}
         {{- end -}}
