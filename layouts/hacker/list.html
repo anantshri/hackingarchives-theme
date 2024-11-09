@@ -1,56 +1,50 @@
 {{ partial "header.html" . }}
 
-{{ $hacker := .Data.Term }}
+{{- $hacker := .Data.Term -}}
 
-{{ $videoParams := slice }}
-{{ $categoryCounts := dict }}
-{{ $tools := slice }}
-{{ $collaborators := dict }}
+{{- $videoParams := slice -}}
+{{- $categoryCounts := dict -}}
+{{- $tools := slice -}}
+{{- $collaborators := dict -}}
 
 <!-- Extracting Useful data -->
-{{ range .Pages }}
+{{- range .Pages -}}
   <!-- Video playlist generation -->
-  {{ if and .Params.video (in .Params.video "youtube.com") }}
-    {{ range (split .Params.video " ") }}
-      {{ $videoID := index (split . "?v=") 1 | default "" }}
-      {{ if $videoID }}
-        {{ $videoParams = $videoParams | append $videoID }}
-      {{ end }}
-    {{ end }}
-  {{ end }}
+  {{- if and .Params.video (in .Params.video "youtube.com") -}}
+    {{- range (split .Params.video " ") -}}
+      {{- $videoID := index (split . "?v=") 1 | default "" -}}
+      {{- if $videoID -}}
+        {{- $videoParams = $videoParams | append $videoID -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
   <!-- Session Type Count -->
-  {{ $category := .Params.type }}
-  {{ if $category }}
-    {{ $categoryCounts = merge $categoryCounts (dict $category (add (index $categoryCounts $category | default 0) 1)) }}
-  {{ end }}
+  {{- $category := .Params.type -}}
+  {{- if $category -}}
+    {{- $categoryCounts = merge $categoryCounts (dict $category (add (index $categoryCounts $category | default 0) 1)) -}}
+  {{- end -}}
 
   <!-- Tools Section -->
 
-  {{ $tool := .Params.tool }}
-  {{ if $tool }}
-    {{ if eq (printf "%T" $tool) "string" }}
-      {{ $tools = $tools | append (upper $tool) }}
-    {{ else if eq (printf "%T" $tool) "[]string" }}
-      {{ $tools = $tools | append (apply $tool "upper" ".") }}
-    {{ end }}
-  {{ end }}
+  {{- $tool := .Params.tool -}}
+  {{- if $tool -}}
+    {{- if eq (printf "%T" $tool) "string" -}}
+      {{- $tools = $tools | append (upper $tool) -}}
+    {{- else if eq (printf "%T" $tool) "[]string" -}}
+      {{- $tools = $tools | append (apply $tool "upper" ".") -}}
+    {{- end -}}
+  {{- end -}}
 
   <!-- Collaborator Section -->
 
-  {{ range .Params.hacker }}
-    {{ $collab := . | lower }}
-    {{ if and (ne $collab $hacker) (ne $collab "") }}
-      {{ $collaborators = merge $collaborators (dict $collab (add (index $collaborators $collab | default 0) 1)) }}
-    {{ end }}
-  {{ end }}
+  {{- range .Params.hacker -}}
+    {{- $collab := . | lower -}}
+    {{- if and (ne $collab $hacker) (ne $collab "") -}}
+      {{- $collaborators = merge $collaborators (dict $collab (add (index $collaborators $collab | default 0) 1)) -}}
+    {{- end -}}
+  {{- end -}}
 
-{{ end }}
-
-
-
-
-
-
+{{- end -}}
 
 <center>
   <div class="card">
@@ -58,12 +52,12 @@
     {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
     {{- $photopath := "" -}}
     
-    {{ range $ext := $extensions }}
-      {{ if (fileExists (print $imgBasePath $ext)) }}
-        {{ $photopath = print "/hacker/" $hacker $ext }}
-        {{ break }}
-      {{ end }}
-    {{ end }}
+    {{- range $ext := $extensions -}}
+      {{- if (fileExists (print $imgBasePath $ext)) -}}
+        {{- $photopath = print "/hacker/" $hacker $ext -}}
+        {{- break -}}
+      {{- end -}}
+    {{- end -}}
 
     {{- if $photopath }}
       <img class="profilephoto" src="{{ $photopath }}" alt="Avatar">
@@ -82,7 +76,7 @@
 </center>
 
 
-{{ if len $categoryCounts }}
+{{- if len $categoryCounts -}}
   <hr />
   <b>Activities:</b>
   <i>{{ range $category, $count := $categoryCounts }}
@@ -110,12 +104,12 @@
 
 
 <!-- Filter and display common collaborators with more than 2 contributions -->
-{{ $commonCollaborators := slice }}
-{{ range $name, $count := $collaborators }}
-  {{ if gt $count 2 }}
-    {{ $commonCollaborators = $commonCollaborators | append (dict "name" $name "count" $count) }}
-  {{ end }}
-{{ end }}
+{{- $commonCollaborators := slice -}}
+{{- range $name, $count := $collaborators -}}
+  {{- if gt $count 1 -}}
+    {{- $commonCollaborators = $commonCollaborators | append (dict "name" $name "count" $count) -}}
+  {{- end -}}
+{{- end -}}
 
 {{ if gt (len $commonCollaborators) 0 }}
 <hr />
@@ -137,18 +131,18 @@
         <a href="/type/{{ .Params.type | urlize }}/">{{ .Params.type | humanize | title }}</a> :
         <a href="/{{ cond .Params.award (printf "award/%s" .Params.award) (printf "conference/%s" .Params.conference) | lower | urlize }}">{{ cond .Params.award .Params.award .Params.conference | humanize | title }}</a>
         : <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> -
-        {{ range .Params.hacker }}<a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a> {{ end }}
-        {{ range .Params.morehackers }}<u>{{ . | humanize | title }}</u>{{ end }}
-        {{ $paramValue := .Params }}
-        {{ range (slice "presentation" "whitepaper" "Source" "video") }}
-          {{ $type := . }}
-          {{ $val := index $paramValue . }}
-          {{ with $val }}
+        {{- range .Params.hacker -}}<a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a> {{ end }}
+        {{- range .Params.morehackers -}}<u>{{- . | humanize | title -}}</u>{{- end -}}
+        {{- $paramValue := .Params -}}
+        {{- range (slice "presentation" "whitepaper" "Source" "video") -}}
+          {{- $type := . -}}
+          {{- $val := index $paramValue $type -}}
+          {{- with $val -}}
             <a href="{{ . }}" target="_blank" rel="noreferrer noopener nofollow">
               <img src="/fontawesome/{{ $type }}.svg" style="width:15px; padding-left:2px;">
             </a>
-          {{ end }}
-        {{ end }}
+          {{- end -}}
+        {{- end -}}
 
       </li>
     {{ end }}
