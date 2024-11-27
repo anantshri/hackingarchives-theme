@@ -154,4 +154,13 @@ clear: both;
   -webkit-filter: invert(100%); /* safari 6.0 - 9.0 */
           filter: invert(100%);
   }
+
+  /* Unvisited link */
+  a:link {
+      color: bluevoilet; /* This will invert to matrix green*/
+  }
+  /* Visited link */
+  a:visited {
+      color: bluevoilet; /* This will invert to smoother color */
+  }
 }
