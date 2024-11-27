@@ -157,10 +157,10 @@ clear: both;
 
   /* Unvisited link */
   a:link {
-      color: bluevoilet; /* This will invert to matrix green*/
+      color: blueviolet; /* This will invert to matrix green*/
   }
   /* Visited link */
   a:visited {
-      color: bluevoilet; /* This will invert to smoother color */
+      color: slateblue; /* This will invert to smoother color */
   }
 }
