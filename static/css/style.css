@@ -164,3 +164,8 @@ clear: both;
       color: slateblue; /* This will invert to smoother color */
   }
 }
+
+a sub {
+  display: inline-block;
+  text-decoration: none; /* Removes underline from <sub> */
+}
