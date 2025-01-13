@@ -132,7 +132,7 @@
         <a href="/{{ cond .Params.award (printf "award/%s" .Params.award) (printf "conference/%s" .Params.conference) | lower | urlize }}">{{ cond .Params.award .Params.award .Params.conference | humanize | title }}</a>
         : <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> -
         {{- range .Params.hacker -}}<a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a> {{ end }}
-        {{- range .Params.morehackers -}}<u>{{- . | humanize | title -}}</u> {{- end -}}
+        {{- range .Params.morehackers -}}<u>{{- . | humanize | title -}}</u>&nbsp;{{- end -}}
         {{- $paramValue := .Params -}}
         {{- range (slice "presentation" "whitepaper" "Source" "video") -}}
           {{- $type := . -}}
