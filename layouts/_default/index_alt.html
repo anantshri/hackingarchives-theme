@@ -16,7 +16,7 @@
         
         {{ range $name, $taxonomy := $.Site.Taxonomies.hacker.ByCount }}
             {{ $filteredPages := where $taxonomy.Pages "Params.type" "not in" $excludedTypes }}
-            {{ if gt (len $filteredPages) 0 }}
+            {{ if gt (len $filteredPages) 1 }}
                 {{ $filteredTaxonomies = $filteredTaxonomies | append (dict "Name" $taxonomy.Name "Pages" $filteredPages) }}
             {{ end }}
         {{ end }}
@@ -42,7 +42,7 @@
 
 <h1><u>Hackers of India</u></h1>
 
-P.S. This list is for all entries except panel and workshops
+P.S. This list is for all entries except panel and workshops and only lists names which have more then 2 entries on it.
 
 <br />
 
@@ -58,14 +58,14 @@ P.S. This list is for all entries except panel and workshops
     {{ $spread := sub $max $min }}
     {{ $fontStep := div $fontSpread $spread }}
 
-    <div id="tag-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+    <div id="tag-cloud">
         {{ range $taxonomy_sorted := (sort $filteredTaxonomies "Pages" "desc") -}}
             {{- $currentTagCount := len $taxonomy_sorted.Pages -}}
             {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentTagCount $min) $fontStep) ) -}}
             {{- $count := len $taxonomy_sorted.Pages -}}
             {{- $weight := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
             {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weight) ) -}}
-            <a href="{{ "/hacker/" | relLangURL }}{{ $taxonomy_sorted.Name | urlize }}/" style="font-size:{{- $currentFontSize -}}{{- $fontUnit -}}">{{- $taxonomy_sorted.Name | humanize | title -}}{{- if gt $count 1 -}}<sub>({{- $count -}})</sub>{{- end }}</a>&nbsp;
+            <a href="{{ "/hacker/" | relLangURL }}{{ $taxonomy_sorted.Name | urlize }}/" style="font-size:{{- $currentFontSize -}}{{- $fontUnit -}};">{{- $taxonomy_sorted.Name | humanize | title -}}{{- if gt $count 1 -}}<sub>({{- $count -}})</sub>{{- end }}</a>&nbsp;
         {{- end }}
     </div>
 {{ end }}
