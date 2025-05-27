@@ -29,25 +29,11 @@
       <br />
         <img src='{{ ($img_link.Resize "x300 q100").RelPermalink }}' />
       <p>
-        {{ if .Params.hacker }}
-          {{ $sorted_params_hacker := uniq (sort .Params.hacker "value" "asc" ) }}
-          {{ if eq $sorted_params_hacker $unique_hacker_names }}
-            {{ range $unique_hacker_names }}
-              <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
-            {{ end }}
-          {{ else }}
-            {{ range $sorted_params_hacker }}
-              <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
-            {{ end }}
-            <br />
-            {{ range $unique_hacker_names }}
-              <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
-            {{ end }}
-          {{ end }}
-        {{ else }}
-          {{ range $unique_hacker_names }}
-            <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
-          {{ end }}
+        {{ range .Params.hacker }}
+           <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+        {{ end }}
+        {{ range .Params.morehackers }}
+           <u>{{ . | humanize | title }}</u>
         {{ end }}
         <br />
         {{ partial "book.html" . }}
@@ -55,9 +41,9 @@
     </div>
   </div>
 </center>
-{{ end }}
 
-<div class="book-details-card">
+
+<div class="book-details-card card">
   <div class="details-grid">
     <div class="detail-item">
       <div class="detail-text">
@@ -92,10 +78,14 @@
     </div>
   </div>
 </div>
-
+{{ end }}
 
 <div class="bookcontent">
   {{ .Content }}
 </div>
+
+<note>
+  * Book purchase links might be affiliate links and would result in some passive earning to Anant Shrivastava
+</note>
 
 {{ partial "footer.html" . }} 
