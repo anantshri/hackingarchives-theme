@@ -1,6 +1,9 @@
 {{ partial "header.html" . }}
 <div class="article-meta">
 
+<h3> DEBUG: using layout = {{ .Layout }}, type = {{ .Type }}, kind = {{ .Kind }} </h3>
+
+
 <h1><span class="title">{{ .Title | markdownify }}</span></h1>
 {{ if .Params.hacker }}
 	<h2 class="author">By

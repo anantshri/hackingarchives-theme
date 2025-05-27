@@ -1,0 +1,22 @@
+{{ partial "header.html" . }}
+
+{{ $books := where .Site.RegularPages "Type" "Book" }}
+
+{{ if not (eq (len $books) 0) }}
+
+<div>
+{{ .Content }}
+
+Total Books listed so far: <b>{{ len $books }}</b>
+</div>
+
+<h2>Books List</h2>
+<hr />
+<div id="book-cloud" class="book-cloud">
+    {{ range $book := $books -}}
+        <a href="{{ $book.RelPermalink }}" class="book-link">{{ $book.Title | title }}</a> <br />
+    {{- end }}
+</div>
+{{- end }}
+
+{{ partial "footer.html" . }} 

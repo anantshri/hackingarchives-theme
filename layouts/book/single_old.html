@@ -1,0 +1,99 @@
+{{ partial "header.html" . }}
+
+<b>Hello</b>
+
+{{ $hacker_names := slice }}
+{{ $unique_hacker_names := slice }}
+{{ range .Pages }}
+  {{ $hacker_names = $hacker_names | append .Params.hacker }}
+{{ end }}
+{{ $unique_hacker_names = uniq (sort $hacker_names) }}
+{{ $name_of_book := urlize .Data.Term }}
+
+
+
+
+{{if not .IsHome }}
+<center>
+  <div class="card">
+    {{ $imgpath := path.Join "static" "book" $name_of_book }}
+    {{ $jpgpath := printf ".jpg" | printf "%s%s" $imgpath }}
+    {{ $pngpath := printf ".png" | printf "%s%s" $imgpath }}
+    {{ $jpegpath := printf ".jpeg" | printf "%s%s" $imgpath }}
+    {{ $jfifpath := printf ".jfif" | printf "%s%s" $imgpath }}
+    {{ $photopath := "" }}
+    {{ if fileExists $jpgpath }}
+      {{ $photopath = printf ".jpg" | printf "%s%s" $name_of_book | printf "%s%s" "/book/" | printf "%s" }}
+    {{ else if fileExists $pngpath }}
+      {{ $photopath = printf ".png" | printf "%s%s" $name_of_book | printf "%s%s" "/book/" | printf "%s" }}
+    {{ else if fileExists $jpegpath }}
+      {{ $photopath = printf ".jpeg" | printf "%s%s" $name_of_book | printf "%s%s" "/book/" | printf "%s" }}
+    {{ else if fileExists $jfifpath }}
+      {{ $photopath = printf ".jfif" | printf "%s%s" $name_of_book | printf "%s%s" "/book/" | printf "%s" }}
+    {{ end }}
+    <div class="container">
+      {{ if $photopath }}
+        <img class="bookphoto" src="{{ lower $photopath }}" alt="Book Cover">
+        <br />
+      {{ end }}
+      <br />
+      <h2><b>{{ .Title | markdownify | title }}</b></h2>
+      <p>
+        {{ partial "social.html" . }}
+        <br />
+        {{ if .Params.hacker }}
+          {{ $sorted_params_hacker := uniq (sort .Params.hacker "value" "asc" ) }}
+          {{ if eq $sorted_params_hacker $unique_hacker_names }}
+            {{ range $unique_hacker_names }}
+              <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+            {{ end }}
+          {{ else }}
+            {{ range $sorted_params_hacker }}
+              <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+            {{ end }}
+            <br />
+            {{ range $unique_hacker_names }}
+              <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+            {{ end }}
+          {{ end }}
+        {{ else }}
+          {{ range $unique_hacker_names }}
+            <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+          {{ end }}
+        {{ end }}
+      </p>
+    </div>
+  </div>
+</center>
+{{ end }}
+
+{{ if .Params.print_isbn13 }}
+<br />
+<div>
+  <center>
+    <b>ISBN-13:</b> {{ .Params.print_isbn13 }}
+  </center>
+</div>
+{{ end }}
+
+<div class="bookcontent">
+  {{ .Content }}
+</div>
+
+<div class="buy-links">
+  <h2>Buy the Book</h2>
+  <hr />
+  <ul>
+    {{ if .Params.amazon_link }}
+      <li><a href="{{ .Params.amazon_link }}" target="_blank" rel="noreferrer noopener nofollow">Buy on Amazon</a></li>
+    {{ end }}
+    {{ if .Params.flipkart_link }}
+      <li><a href="{{ .Params.flipkart_link }}" target="_blank" rel="noreferrer noopener nofollow">Buy on Flipkart</a></li>
+    {{ end }}
+    {{ if .Params.book_link }}
+      <li><a href="{{ .Params.book_link }}" target="_blank" rel="noreferrer noopener nofollow">Buy on Publisher's Site</a></li>
+    {{ end }}
+  </ul>
+</div>
+
+{{ partial "footer.html" . }} 
