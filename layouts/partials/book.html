@@ -1,24 +1,31 @@
-  {{- $socialLinks := dict
+{{- $socialLinks := dict
   "amazon" "/fontawesome/amazon.svg"
   "flipkart" "/fontawesome/flipkart.svg"
-  "packtpub" "/fontawesome/packtpub.svg"
+  "packtpub" "/fontawesome/packt.svg"
 -}}
 
-  {{- $protocols := slice "http://" "https://" -}}
+{{- $protocols := slice "http://" "https://" -}}
 
-  {{- range $key, $value := $socialLinks -}}
-    {{- with index $.Params $key -}} <!-- Note the use of $ to access the root context -->
-      {{- $url := . -}}
-      {{- $hasProtocol := false -}}
-      {{- range $protocols -}}
-        {{- if strings.HasPrefix $url . -}}
-          {{- $hasProtocol = true -}}
-          {{- break -}}
-        {{- end -}}
-      {{- end -}}
-      {{- if not $hasProtocol -}}
-        {{- $url = print "https://" $url -}}
-      {{- end -}}
-      <a href="{{ $url }}" target="_blank" rel="noreferrer noopener"><img src="{{ $value }}" class="icons"></a>
-    {{- end -}}
+{{- /* Handle PacktPub URL from book_link */ -}}
+{{- with $.Params.book_link -}}
+  {{- if strings.HasPrefix . "https://www.packtpub.com" -}}
+    <a href="{{ . }}" target="_blank" rel="noreferrer noopener"><img src="{{ index $socialLinks "packtpub" }}" class="icons"></a>
   {{- end -}}
+{{- end -}}
+
+{{- range $key, $value := $socialLinks -}}
+  {{- with index $.Params $key -}}
+    {{- $url := . -}}
+    {{- $hasProtocol := false -}}
+    {{- range $protocols -}}
+      {{- if strings.HasPrefix $url . -}}
+        {{- $hasProtocol = true -}}
+        {{- break -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $hasProtocol -}}
+      {{- $url = print "https://" $url -}}
+    {{- end -}}
+    <a href="{{ $url }}" target="_blank" rel="noreferrer noopener"><img src="{{ $value }}" class="icons"></a>
+  {{- end -}}
+{{- end -}}
