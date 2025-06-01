@@ -2,16 +2,32 @@
 {{ $aggressive_check := "No" }}
 
 {{/* Section Toggle Variables */}}
-{{ $show_personal_details := "No" }}
-{{ $show_presentation_details := "No" }}
+{{ $show_personal_details := "Yes" }}
+{{ $show_presentation_details := "Yes" }}
 {{ $show_book_details := "Yes" }}
 {{ $show_tool_content := "Yes" }}
 
 {{/* Define pages variable for use in multiple sections */}}
 {{ $pages := .Site.RegularPages }}
 
+{{/* Navigation Links */}}
+<div class="nav-links">
+  {{ if eq $show_personal_details "Yes" }}
+    <a href="#personal-details">Personal Details</a>
+  {{ end }}
+  {{ if eq $show_presentation_details "Yes" }}
+    <a href="#presentation-details">Presentation Details</a>
+  {{ end }}
+  {{ if eq $show_book_details "Yes" }}
+    <a href="#book-details">Book Details</a>
+  {{ end }}
+  {{ if eq $show_tool_content "Yes" }}
+    <a href="#tools">Tools</a>
+  {{ end }}
+</div>
+
 {{ if eq $show_personal_details "Yes" }}
-<h1>Personal Details</h1>
+<h1 id="personal-details">Personal Details</h1>
 <table>
 <tr>
 <th>S.No </th>
@@ -97,8 +113,16 @@
     {{ end }}
 
     {{ if not .Params.request_to_hide }}
-      {{ if or (not $photopath) (and (not .Params.twitter) (not .Params.linkedin)) }}
-        {{ $isimportant = "Y" }}
+      {{ if eq $aggressive_check "Yes" }}
+        {{/* Aggressive check: Need both photo and at least one social media link */}}
+        {{ if and (not $photopath) (and (not .Params.twitter) (not .Params.linkedin)) }}
+          {{ $isimportant = "Y" }}
+        {{ end }}
+      {{ else }}
+        {{/* Non-aggressive check: Need either photo or at least one social media link */}}
+        {{ if and (not $photopath) (not .Params.twitter) (not .Params.linkedin) }}
+          {{ $isimportant = "Y" }}
+        {{ end }}
       {{ end }}
     {{ end }}
 
@@ -116,9 +140,9 @@
 {{ end }}
 
 {{ if eq $show_presentation_details "Yes" }}
-<h1>Presentation Details</h1>
+<h1 id="presentation-details">Presentation Details</h1>
 
-<h2>Talks</h2>
+<h2 id="talks">Talks</h2>
 <table>
 <tr>
 <th>S.No</th>
@@ -175,7 +199,7 @@
 {{ end }}
 </table>
 
-<h2>Tool Demos</h2>
+<h2 id="tool-demos">Tool Demos</h2>
 <table>
 <tr>
 <th>S.No</th>
@@ -233,7 +257,7 @@
 {{ end }}
 
 {{ if eq $show_book_details "Yes" }}
-<h1>Book Details</h1>
+<h1 id="book-details">Book Details</h1>
 <table>
 <tr>
 <th>S.No</th>
@@ -263,9 +287,9 @@
 {{ end }}
 
 {{ if eq $show_tool_content "Yes" }}
-<h1>Tools</h1>
+<h1 id="tools">Tools</h1>
 
-<h2>Tool Demos</h2>
+<h2 id="tool-demos-section">Tool Demos</h2>
 <table>
 <tr>
 <th>S.No</th>
@@ -321,7 +345,7 @@
 {{ end }}
 </table>
 
-<h2>Tool Content</h2>
+<h2 id="tool-content">Tool Content</h2>
 <table>
 <tr>
 <th>S.No</th>
