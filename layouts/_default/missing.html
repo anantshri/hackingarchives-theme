@@ -1,8 +1,17 @@
 {{ $count := 1 }}
+{{ $aggressive_check := "No" }}
 
+{{/* Section Toggle Variables */}}
+{{ $show_personal_details := "No" }}
+{{ $show_presentation_details := "No" }}
+{{ $show_book_details := "Yes" }}
+{{ $show_tool_content := "Yes" }}
 
-<h1> Personal Details<h1>
+{{/* Define pages variable for use in multiple sections */}}
+{{ $pages := .Site.RegularPages }}
 
+{{ if eq $show_personal_details "Yes" }}
+<h1>Personal Details</h1>
 <table>
 <tr>
 <th>S.No </th>
@@ -103,10 +112,13 @@
     {{ end }}
   {{ end }}
 {{ end }}
-
 </table>
+{{ end }}
+
+{{ if eq $show_presentation_details "Yes" }}
 <h1>Presentation Details</h1>
-{{ $pages := .Site.RegularPages }}
+
+<h2>Talks</h2>
 <table>
 <tr>
 <th>S.No</th>
@@ -114,11 +126,11 @@
 <th> What is missing</th>
 </tr>    
 {{ $count := 1 }}
-{{ range (where $pages "Section" "!=" "") }}
+{{ range (where $pages "Type" "talk") }}
   {{ $isimportant := "N" }}
   {{ $whatismissing := ""}}
 
-  {{ if  ( not  .Params.presentation ) }}
+  {{ if (not .Params.presentation) }}
     {{ if $whatismissing }}
       {{ $whatismissing = $whatismissing | printf "%s, presentation" }}
     {{ else }}
@@ -126,7 +138,7 @@
     {{ end }}
   {{ end }}
 
-  {{ if  ( not  .Params.conf_link ) }}
+  {{ if (not .Params.conf_link) }}
     {{ if $whatismissing }}
       {{ $whatismissing = $whatismissing | printf "%s, Conference Link" }}
     {{ else }}
@@ -134,7 +146,7 @@
     {{ end }}
   {{ end }}
 
-  {{ if ( not .Params.video ) }}
+  {{ if (not .Params.video) }}
     {{ if $whatismissing }}
       {{ $whatismissing = $whatismissing | printf "%s, Video" }}
     {{ else }}
@@ -142,18 +154,12 @@
     {{ end }}
   {{ end }}
 
-  {{ if eq .Type "Tool Demo" }}
-    {{ if not .Params.source }}
-      {{ $whatismissing = "Source Code" }}
-    {{ end }}
-  {{ end }}
-
-  {{ if eq .Type "talk" }}
-    {{ if or (not .Params.presentation) (not .Params.conf_link) }}
+  {{ if eq $aggressive_check "Yes" }}
+    {{ if not .Params.presentation }}
       {{ $isimportant = "Y" }}
     {{ end }}
-  {{ else if eq .Type "Tool Demo" }}
-    {{ if not .Params.source }}
+  {{ else }}
+    {{ if and (not .Params.presentation) (not .Params.video) }}
       {{ $isimportant = "Y" }}
     {{ end }}
   {{ end }}
@@ -168,3 +174,213 @@
   {{ end }}
 {{ end }}
 </table>
+
+<h2>Tool Demos</h2>
+<table>
+<tr>
+<th>S.No</th>
+<th> Name of Entry </th>
+<th> What is missing</th>
+</tr>    
+{{ $count := 1 }}
+{{ range (where $pages "Type" "Tool Demo") }}
+  {{ $isimportant := "N" }}
+  {{ $whatismissing := ""}}
+
+  {{ if (not .Params.presentation) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, presentation" }}
+    {{ else }}
+      {{ $whatismissing = "presentation" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if (not .Params.conf_link) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, Conference Link" }}
+    {{ else }}
+      {{ $whatismissing = "Conference Link" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if (not .Params.video) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, Video" }}
+    {{ else }}
+      {{ $whatismissing = "Video" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if not .Params.source }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, Source Code" }}
+    {{ else }}
+      {{ $whatismissing = "Source Code" }}
+    {{ end }}
+    {{ $isimportant = "Y" }}
+  {{ end }}
+
+  {{ if eq $isimportant "Y" }}
+    <tr>
+    <td>{{ $count }}</td>
+    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>{{ $whatismissing }}</td>
+    </tr>
+    {{ $count = add $count 1 }}
+  {{ end }}
+{{ end }}
+</table>
+{{ end }}
+
+{{ if eq $show_book_details "Yes" }}
+<h1>Book Details</h1>
+<table>
+<tr>
+<th>S.No</th>
+<th> Name of Entry </th>
+<th> What is missing</th>
+</tr>
+{{ $count := 1 }}
+{{ range (where $pages "Type" "book") }}
+  {{ $isimportant := "N" }}
+  {{ $whatismissing := ""}}
+
+  {{ if not .Params.amazon }}
+    {{ $whatismissing = "Amazon Link" }}
+    {{ $isimportant = "Y" }}
+  {{ end }}
+
+  {{ if eq $isimportant "Y" }}
+    <tr>
+    <td>{{ $count }}</td>
+    <td><a href="{{ .Permalink }}" target="_blank">{{ .Title }}</a></td>
+    <td>{{ $whatismissing }}</td>
+    </tr>
+    {{ $count = add $count 1 }}
+  {{ end }}
+{{ end }}
+</table>
+{{ end }}
+
+{{ if eq $show_tool_content "Yes" }}
+<h1>Tools</h1>
+
+<h2>Tool Demos</h2>
+<table>
+<tr>
+<th>S.No</th>
+<th> Name of Entry </th>
+<th> What is missing</th>
+</tr>    
+{{ $count := 1 }}
+{{ range (where $pages "Type" "Tool Demo") }}
+  {{ $isimportant := "N" }}
+  {{ $whatismissing := ""}}
+
+  {{ if (not .Params.presentation) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, presentation" }}
+    {{ else }}
+      {{ $whatismissing = "presentation" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if (not .Params.conf_link) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, Conference Link" }}
+    {{ else }}
+      {{ $whatismissing = "Conference Link" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if (not .Params.video) }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, Video" }}
+    {{ else }}
+      {{ $whatismissing = "Video" }}
+    {{ end }}
+  {{ end }}
+
+  {{ if not .Params.source }}
+    {{ if $whatismissing }}
+      {{ $whatismissing = $whatismissing | printf "%s, Source Code" }}
+    {{ else }}
+      {{ $whatismissing = "Source Code" }}
+    {{ end }}
+    {{ $isimportant = "Y" }}
+  {{ end }}
+
+  {{ if eq $isimportant "Y" }}
+    <tr>
+    <td>{{ $count }}</td>
+    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>{{ $whatismissing }}</td>
+    </tr>
+    {{ $count = add $count 1 }}
+  {{ end }}
+{{ end }}
+</table>
+
+<h2>Tool Content</h2>
+<table>
+<tr>
+<th>S.No</th>
+<th> Name of Entry </th>
+<th> What is missing</th>
+</tr>
+{{ $count := 1 }}
+{{ with .Site.GetPage "section" "tool" }}
+  {{ range .Pages }}
+    {{ $isimportant := "N" }}
+    {{ $whatismissing := ""}}
+    
+    {{/* Check for empty content */}}
+    {{ $content := .Content | replaceRE "\\s+" "" }}
+    {{ if eq $content "" }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, Content" }}
+      {{ else }}
+        {{ $whatismissing = "Content" }}
+      {{ end }}
+      {{ $isimportant = "Y" }}
+    {{ end }}
+
+    {{/* Check for missing links */}}
+    {{ $has_links := false }}
+    {{ if .Params.github }}
+      {{ $has_links = true }}
+    {{ end }}
+    {{ if .Params.gitlab }}
+      {{ $has_links = true }}
+    {{ end }}
+    {{ if .Params.bitbucket }}
+      {{ $has_links = true }}
+    {{ end }}
+    {{ if .Params.download }}
+      {{ $has_links = true }}
+    {{ end }}
+    {{ if .Params.home }}
+      {{ $has_links = true }}
+    {{ end }}
+
+    {{ if not $has_links }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, Links (github/gitlab/bitbucket/download/home)" }}
+      {{ else }}
+        {{ $whatismissing = "Links (github/gitlab/bitbucket/download/home)" }}
+      {{ end }}
+      {{ $isimportant = "Y" }}
+    {{ end }}
+
+    {{ if eq $isimportant "Y" }}
+      <tr>
+      <td>{{ $count }}</td>
+      <td><a href="{{ .Permalink }}" target="_blank">{{ .Title }}</a></td>
+      <td>{{ $whatismissing }}</td>
+      </tr>
+      {{ $count = add $count 1 }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+</table>
+{{ end }}
