@@ -1,0 +1,49 @@
+{{ partial "header.html" . }}
+<div class="container">
+  {{ .Content }}
+  {{ $books := where .Site.RegularPages "Type" "book" }}
+
+  <div class="book-stats">
+    Total Books listed so far: <b>{{ len $books }}</b>
+  </div>
+
+  {{ $booksByYear := dict }}
+  {{ range $books }}
+    {{ $year := index (split .Params.published_on "-") 0 }}
+    {{ $yearBooks := slice }}
+    {{ if isset $booksByYear $year }}
+      {{ $yearBooks = index $booksByYear $year }}
+    {{ end }}
+    {{ $yearBooks = $yearBooks | append . }}
+    {{ $booksByYear = merge $booksByYear (dict $year $yearBooks) }}
+  {{ end }}
+
+  {{ $years := slice }}
+  {{ range $year, $_ := $booksByYear }}
+    {{ $years = $years | append $year }}
+  {{ end }}
+  {{ $years = sort $years "value" "desc" }}
+
+  {{ range $year := $years }}
+    {{ $books := index $booksByYear $year }}
+    <center class="year-key" id="{{ $year }}-key"><b>----  {{ $year }} ----</b></center>
+    <div class="book-grid">
+      {{ range $books }}
+        {{ $book_id := urlize .Params.print_isbn13 }}
+        {{ $img_loc := printf "%s.*" $book_id | printf "%s%s" "/book/" }}
+        <div class="book-card">
+          <a href="{{ .RelPermalink }}">
+            {{ with resources.GetMatch $img_loc }}
+              <img src='{{ (.Resize "x300 q100").RelPermalink }}' alt="{{ $.Title }}" />
+            {{ else }}
+              <div class="book-placeholder">No Image</div>
+            {{ end }}
+            <div class="book-title">{{ .Title | title }}</div>
+          </a>
+        </div>
+      {{ end }}
+    </div>
+  {{ end }}
+</div>
+
+{{ partial "footer.html" . }} 
