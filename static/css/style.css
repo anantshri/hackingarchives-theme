@@ -277,3 +277,37 @@ a sub {
   margin: 1rem 0;
   font-size: 1.1rem;
 }
+
+.book-authors {
+  font-size: 0.9em;
+  margin-top: 0.5rem;
+  color: #666;
+  text-align: center;
+}
+
+.book-authors a {
+  color: #2c5282;
+}
+
+.book-authors a:hover {
+  text-decoration: underline;
+}
+
+.indian-authors {
+  display: inline;
+}
+
+.indian-authors a {
+  color: #2c5282;
+  text-decoration: none;
+}
+
+.indian-authors a:hover {
+  text-decoration: underline;
+}
+
+.other-authors {
+  display: inline;
+  font-style: italic;
+  color: #718096;
+}

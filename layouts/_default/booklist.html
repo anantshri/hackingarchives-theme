@@ -1,11 +1,15 @@
 {{ partial "header.html" . }}
+{{ $show_titles := .Params.show_titles | default "no" }}
 <div class="container">
-  {{ .Content }}
   {{ $books := where .Site.RegularPages "Type" "book" }}
 
   <div class="book-stats">
     Total Books listed so far: <b>{{ len $books }}</b>
   </div>
+
+  {{ .Content }}
+
+  <hr />
 
   {{ $booksByYear := dict }}
   {{ range $books }}
@@ -38,7 +42,28 @@
             {{ else }}
               <div class="book-placeholder">No Image</div>
             {{ end }}
+            {{ if eq $show_titles "yes" }}
             <div class="book-title">{{ .Title | title }}</div>
+            {{ end }}
+            <div class="book-authors">
+              {{ $hasIndianAuthors := false }}
+              {{ $hasOtherAuthors := false }}
+              {{ with .Params.hacker }}
+                {{ $hasIndianAuthors = true }}
+                {{ $hackers := . }}
+                {{ range $index, $hacker := $hackers }}
+                  <a href="/hacker/{{ $hacker }}/">{{ replace ($hacker | humanize | title) " 1" " " }}</a>{{ if lt $index (sub (len $hackers) 1) }}, {{ end }}
+                {{ end }}
+              {{ end }}
+              {{ with .Params.morehackers }}
+                {{ $hasOtherAuthors = true }}
+                {{ if $hasIndianAuthors }}, {{ end }}
+                {{ $authors := . }}
+                {{ range $index, $author := $authors }}
+                  {{ $author | humanize | title }}{{ if lt $index (sub (len $authors) 1) }}, {{ end }}
+                {{ end }}
+              {{ end }}
+            </div>
           </a>
         </div>
       {{ end }}
