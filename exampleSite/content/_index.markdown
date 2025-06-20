@@ -2,6 +2,49 @@
 title: Home
 ---
 
+# Hacking Archives
+
+## _Documenting the Cybersecurity Community_
+
+**Hacking Archives** is a comprehensive Hugo theme designed to create living archives of cybersecurity communities. It provides specialized templates and features for documenting security researchers, conferences, tools, and publications.
+
+## What This Theme Does
+
+This theme creates a connected network of cybersecurity activities, showing:
+
+- **Individual Researchers**: Their profiles, activities, and collaborations
+- **Security Conferences**: Events, presentations, and participants
+- **Security Tools**: Software projects with GitHub/GitLab integration
+- **Publications**: Books and papers with metadata and purchase links
+- **Awards**: Recognition and achievements
+
+## Key Features
+
+- **Rich Metadata Support**: Social links, GitHub/GitLab integration, media links
+- **Dynamic Relationships**: Shows collaborations between researchers, tools they've created, conferences they've presented at
+- **Visual Elements**: Tag clouds, timeline views, profile photos, conference logos
+- **Responsive Design**: Works on mobile and desktop with dark mode support
+- **Performance Optimized**: Uses hugo-booster for enhanced performance
+
+## Sample Content
+
+This example site includes sample content for all content types:
+
+- **Books**: Sample book entry with metadata and purchase links
+- **Conferences**: Sample conference page with social media links
+- **Hackers**: Sample researcher profile with activity timeline
+- **Tools**: Sample tool page with GitHub integration
+
+## Getting Started
+
+1. Copy the `exampleSite` content structure to your Hugo site
+2. Replace sample content with your actual data
+3. Customize the configuration in `config.toml`
+4. Add your own images to the appropriate directories
+5. Run `hugo server` to preview your site
+
+See the [About](/about/) page for detailed information about this theme and its features.
+
 [<img src="https://simpleicons.org/icons/github.svg" style="max-width:15%;min-width:40px;float:right;" alt="Github repo" />](https://github.com/yihui/hugo-xmin)
 
 # HUGO XMIN

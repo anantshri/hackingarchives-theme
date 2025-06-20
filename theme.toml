@@ -1,12 +1,19 @@
-name = "XMin"
+name = "Hacking Archives"
 license = "MIT"
-licenselink = "https://github.com/yihui/hugo-xmin/blob/master/LICENSE.md"
-description = "eXtremely Minimal Hugo theme: about 150 lines of code in total, including HTML and CSS"
-homepage = "https://xmin.yihui.name"
-tags = ["minimal", "blog", "personal", "clean", "simple", "starter", "minimalist"]
-features = ["blog"]
-min_version = "0.18"
+licenselink = "https://github.com/anantshri/hackingarchives-theme/blob/main/LICENSE"
+description = "A comprehensive Hugo theme for creating cybersecurity community archives with specialized templates for hackers, conferences, tools, and publications"
+homepage = "https://github.com/anantshri/hackingarchives-theme"
+demosite = "https://github.com/anantshri/hackingarchives-theme/tree/main/exampleSite"
+tags = ["security", "community", "archive", "hackers", "conferences", "tools", "books", "responsive", "dark-mode"]
+features = ["hacker-profiles", "conference-pages", "tool-showcases", "book-listings", "award-pages", "responsive-design", "dark-mode", "github-integration", "social-media"]
+min_version = "0.80.0"
 canonifyURLs = "true"
+
 [author]
-  name = "Yihui Xie"
+  name = "Anant Shrivastava"
+  homepage = "https://github.com/anantshri"
+
+[original]
+  author = "Yihui Xie"
   homepage = "https://yihui.name"
+  repo = "https://github.com/yihui/hugo-xmin"

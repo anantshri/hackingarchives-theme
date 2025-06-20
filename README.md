@@ -1,34 +1,117 @@
-# Hacking Archives of India - Hugo Theme
+# Hacking Archives - Hugo Theme
 
+This theme is based on [hugo-xmin](https://github.com/yihui/hugo-xmin) as the base template with extensive modifications to create a comprehensive cybersecurity community archive.
 
-This theme used [hugo-xmin](https://github.com/yihui/hugo-xmin) as the base template and then massive modifications are done to fit it to our requirements
+[![Screenshot](https://raw.githubusercontent.com/anantshri/hackingarchives-theme/main/images/screenshot.png)](https://github.com/anantshri/hackingarchives-theme)
 
+## Notable Differences from hugo-xmin
 
-The theme has been customized to cater to website need and as such uses different templates for 
+This theme is a significant departure from the original hugo-xmin theme, with the following major enhancements:
 
-- hacker
-- conference
-- tool
-- tag
+- **Specialized Content Types**: Added dedicated templates for hackers, conferences, tools, books, and awards
+- **Advanced Metadata Support**: Extended front matter with social media links, GitHub/GitLab integration, and rich metadata
+- **Dynamic Relationships**: Automatic generation of collaboration networks and activity timelines
+- **Visual Enhancements**: Tag clouds, profile photos, conference logos, and FontAwesome icons
+- **Performance Optimizations**: Integration with hugo-booster for enhanced loading speeds
+- **Responsive Design**: Mobile-first approach with dark mode support
+- **Community Features**: Built specifically for documenting cybersecurity communities and their activities
 
+## Features
 
-We will update the details in some days.
+The theme has been customized to support different content types with specialized templates for:
 
-The website also leverages booster functions via [hugo-booster theme](https://github.com/anantshri/hugo_booster)
+- **Hacker Profiles** - Individual security researcher pages with activity timelines
+- **Conference Pages** - Event-specific pages with presentation listings
+- **Tool Pages** - Security tool showcases with GitHub/GitLab integration
+- **Book Pages** - Publication listings with purchase links
+- **Award Pages** - Recognition and achievement showcases
 
+## Content Organization
 
+### Hacker Profiles
+- Individual profile pages with professional information
+- Activity timelines showing conference presentations, tools created, and collaborations
+- Social media links and contact information
+- Automatic generation of collaboration networks
 
+### Conference Pages
+- Event information and social media links
+- Chronological listing of all presentations and participants
+- Categorization by presentation type (talk, workshop, etc.)
+- Integration with external media (videos, slides, papers)
 
+### Tool Pages
+- Tool descriptions and documentation links
+- GitHub/GitLab integration with automatic badges
+- Creator attribution and contributor information
+- Usage statistics and download links
 
-# OLD Details from XMIN BElow
+### Book Pages
+- Publication metadata (ISBN, publisher, length, etc.)
+- Author attribution and purchase links
+- Category classification and release information
 
+## Technical Features
 
-# HUGO XMIN
+- **Responsive Design** - Works on mobile and desktop devices
+- **Dark Mode Support** - Automatic theme switching based on user preference
+- **FontAwesome Integration** - Icons for different content types
+- **GitHub/GitLab Badges** - Automatic repository statistics
+- **Dynamic Video Playlists** - YouTube playlist generation
+- **Tag Cloud Visualization** - Visual representation of community activity
+- **Performance Optimized** - Built with Hugo Booster for fast loading
 
-## _Keep it simple, but not simpler_
+## Installation
 
-**XMin** is a Hugo theme written by [Yihui Xie](https://yihui.name) in about four hours: half an hour was spent on the Hugo templates, and 3.5 hours were spent on styling. The main motivation for writing this theme was to provide a really minimal example to beginners of Hugo templates. This XMin theme contains about 130 lines of code in total, including the code in HTML templates and CSS (also counting empty lines).
+1. Clone this repository to your Hugo themes directory
+2. Copy the `exampleSite` content structure to your Hugo site
+3. Update the configuration in `config.toml`
+4. Replace sample content with your actual data
+5. Run `hugo server` to preview your site
 
+## Content Structure
+
+```
+content/
+├── book/                    # Book publications
+├── conference/              # Security conferences
+│   └── conference_name/
+│       └── _index.md
+├── hacker/                  # Security researchers
+│   └── hacker_name/
+│       ├── _index.md        # Profile
+│       └── event_name.md    # Individual activities
+└── tool/                    # Security tools
+    └── tool_name/
+        └── _index.md
+```
+
+## Archetypes
+
+The theme provides archetype templates for easy content creation:
+
+- `archetypes/book.md` - Book entry template
+- `archetypes/conference.md` - Conference page template
+- `archetypes/hacker.md` - Hacker profile template
+- `archetypes/entry.md` - Event entry template
+- `archetypes/tool.md` - Tool page template
+
+## Customization
+
+- Modify CSS in `static/css/style.css`
+- Update templates in `layouts/` directory
+- Add custom FontAwesome icons in `static/fontawesome/`
+- Configure social media links and metadata
+
+## License
+
+This theme is licensed under the MIT License. See the LICENSE file for details.
+
+## Credits
+
+- Based on the [hugo-xmin](https://github.com/yihui/hugo-xmin) theme by Yihui Xie
+- Enhanced with [hugo-booster](https://github.com/anantshri/hugo_booster) for performance
+- FontAwesome icons for enhanced visual presentation
 
 ```bash
 find . -not -path '*/exampleSite/*' \( -name '*.html' -o -name '*.css' \) | xargs wc -l
@@ -47,7 +130,3 @@ find . -not -path '*/exampleSite/*' \( -name '*.html' -o -name '*.css' \) | xarg
        7 ./static/css/fonts.css
      137 total
 ```
-
-I can certainly further reduce the code, for example, by eliminating the CSS, but I believe a tiny bit of CSS can greatly improve readability. You cannot really find many CSS frameworks that only contain 50 lines of code.
-
-[![Screenshot](https://github.com/yihui/hugo-xmin/raw/master/images/screenshot.png)](https://xmin.yihui.name)
