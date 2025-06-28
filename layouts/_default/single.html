@@ -38,6 +38,15 @@
 {{ end }}
 
 </div>
+{{ if .Params.tag }}
+<hr />
+<center>
+{{ range .Params.tag }}
+	<a href="/tag/{{ . }}" target="_blank" rel="noreferrer noopener nofollow">{{ . }}</a>
+{{ end }}
+</center>
+{{ end }}
+
 {{ if .Params.tool }}
 <div class="talk_tools">
 	This <b>{{ .Params.type }}</b> covers following tools where the speaker has contributed or authored<br/>

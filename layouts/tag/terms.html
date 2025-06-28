@@ -11,22 +11,29 @@
     {{ $spread := sub $max $min }}
     {{ $fontStep := div $fontSpread $spread }}
 
-<div>
-	Total Tags so far: <b>{{ len $.Site.Taxonomies.tag }}</b>
+<div style="text-align: center;">
+    <h2>Experimental Tag Cloud</h2>
+</div>
+<div style="margin-bottom: 10px;">
+    We are experimenting with a new tag cloud.
+    <br />
+	Total Tags in the system so far : <b>{{ len $.Site.Taxonomies.tag }}</b>
+    <br />
+    <b>We are only showing tags that have been used at least 2 times.</b>
 </div>
 
-<h2>Tag Cloud</h2>
 <hr />
     <div id="tag-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
         {{ range $name, $taxonomy := $.Site.Taxonomies.tag.ByCount -}}
             {{- $currentTagCount := len $taxonomy.Pages -}}
-            {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentTagCount $min) $fontStep) ) -}}
-            {{- $count := len $taxonomy.Pages -}}
-            {{- $weigth := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
-            {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weigth) ) -}}
-            <!--Current font size: {{$currentFontSize}}-->
-            <!-- <a href="{{ "/tag/" | relLangURL }}{{ $taxonomy.Name | urlize }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ $taxonomy.Name | humanize | title }}{{ if gt ($count) 1 }}<sub>({{ $count }})</sub>{{end}}</a>&nbsp; -->
-            <a href="{{ "/tag/" | relLangURL }}{{ $taxonomy.Name | urlize }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ $taxonomy.Name | humanize | title }}</a>&nbsp;
+            {{- if ge $currentTagCount 2 -}}
+                {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentTagCount $min) $fontStep) ) -}}
+                {{- $count := len $taxonomy.Pages -}}
+                {{- $weigth := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
+                {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weigth) ) -}}
+                <!--Current font size: {{$currentFontSize}}-->
+                <a href="{{ "/tag/" | relLangURL }}{{ $taxonomy.Name | urlize }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ $taxonomy.Name | humanize | title }}{{ if gt ($count) 1 }}<sub>({{ $count }})</sub>{{end}}</a>&nbsp;
+            {{- end -}}
         {{- end }}
     </div>
 {{ end }}

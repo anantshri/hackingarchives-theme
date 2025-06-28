@@ -1,0 +1,90 @@
+{{ partial "header.html" . }}
+
+<div class="container">
+  <h1>{{ .Title | markdownify | humanize | title }}</h1>
+  
+  {{ .Content }}
+
+  <div class="focus-areas-grid">
+    {{ range $p := .Site.Pages }}
+      {{ if and (eq $p.Section "focusarea") (eq $p.Kind "section") (ne $p.File.Path "focusarea/_index.md") }}
+        {{ $focusArea := $p }}
+        {{ $relatedTags := $focusArea.Params.related_tags }}
+        
+        {{ if $relatedTags }}
+          {{ $matchingContent := where $.Site.RegularPages "Params.tags" "intersect" $relatedTags }}
+          {{ $contentCount := len $matchingContent }}
+          
+          {{ if gt $contentCount 0 }}
+            <div class="focus-area-card">
+              <h3><a href="{{ $focusArea.RelPermalink }}">{{ $focusArea.Title }}</a></h3>
+              <p class="content-count">{{ $contentCount }} content items</p>
+              <div class="tag-cloud">
+                {{ range $tag := $relatedTags }}
+                  {{ $tagContent := where $.Site.RegularPages "Params.tags" "intersect" (slice $tag) }}
+                  {{ $tagCount := len $tagContent }}
+                  {{ $fontSize := add 0.8 (mul 0.4 (div $tagCount 10.0)) }}
+                  <span class="tag" style="font-size: {{ $fontSize }}em;">
+                    {{ $tag }} ({{ $tagCount }})
+                  </span>
+                {{ end }}
+              </div>
+            </div>
+          {{ end }}
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  </div>
+</div>
+
+<style>
+.focus-areas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.focus-area-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #f9f9f9;
+}
+
+.focus-area-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.focus-area-card h3 a {
+  color: #333;
+  text-decoration: none;
+}
+
+.focus-area-card h3 a:hover {
+  color: #007bff;
+}
+
+.content-count {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 1rem;
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  background: #e9ecef;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8em;
+  color: #495057;
+}
+</style>
+
+{{ partial "footer.html" . }} 
