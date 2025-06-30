@@ -6,6 +6,7 @@
 {{- $categoryCounts := dict -}}
 {{- $tools := slice -}}
 {{- $collaborators := dict -}}
+{{- $focusAreaData := dict -}}
 
 <!-- Extracting Useful data -->
 {{- range .Pages -}}
@@ -25,7 +26,6 @@
   {{- end -}}
 
   <!-- Tools Section -->
-
   {{- $tool := .Params.tool -}}
   {{- if $tool -}}
     {{- if eq (printf "%T" $tool) "string" -}}
@@ -36,11 +36,31 @@
   {{- end -}}
 
   <!-- Collaborator Section -->
-
   {{- range .Params.hacker -}}
     {{- $collab := . | lower -}}
     {{- if and (ne $collab $hacker) (ne $collab "") -}}
       {{- $collaborators = merge $collaborators (dict $collab (add (index $collaborators $collab | default 0) 1)) -}}
+    {{- end -}}
+  {{- end -}}
+
+  <!-- Focus Area Timeline Data -->
+  {{- if .Params.tag -}}
+    {{- range .Params.tag -}}
+      {{- $tag := . | lower -}}
+      {{- $existingData := index $focusAreaData $tag -}}
+      {{- if not $existingData -}}
+        {{- $focusAreaData = merge $focusAreaData (dict $tag (dict "count" 1 "first_talk" $.Date "last_talk" $.Date)) -}}
+      {{- else -}}
+        {{- $firstTalk := $existingData.first_talk -}}
+        {{- $lastTalk := $existingData.last_talk -}}
+        {{- if $.Date.Before $firstTalk -}}
+          {{- $firstTalk = $.Date -}}
+        {{- end -}}
+        {{- if $.Date.After $lastTalk -}}
+          {{- $lastTalk = $.Date -}}
+        {{- end -}}
+        {{- $focusAreaData = merge $focusAreaData (dict $tag (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk)) -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 
@@ -67,14 +87,12 @@
       <h2><b>{{ .Title | markdownify | title }}</b></h2>
       <p>{{ partial "social.html" . }}</p>
 
-
       {{ if gt (len $videoParams) 0 }}
         <a href="https://www.youtube.com/watch_videos?video_ids={{ delimit $videoParams "," }}" target="_blank" rel="noreferrer noopener">Dynamic Video Playlist</a>
       {{ end }}
     </div>
   </div>
 </center>
-
 
 {{- if len $categoryCounts -}}
   <hr />
@@ -84,9 +102,7 @@
   {{ end }}</i>
 {{ end }}
 
-
 <!-- Deduplicate and Display Tools -->
-
 {{- $uniqueTools := slice -}}
 {{- range $tools -}}
   {{- if not (in $uniqueTools .) -}}
@@ -102,7 +118,6 @@
   {{ end }}
 {{ end }}
 
-
 <!-- Filter and display common collaborators with more than 2 contributions -->
 {{- $commonCollaborators := slice -}}
 {{- range $name, $count := $collaborators -}}
@@ -117,6 +132,78 @@
     {{ range $name, $count := (sort $commonCollaborators "count" "desc" ) }}
         <a href="/hacker/{{ .name }}"><b>{{ .name | humanize | title }}({{ .count }})</b></a>;
     {{ end }}
+{{ end }}
+
+<!-- Common Tags Section (tag count > 2 only) -->
+{{- $commonTags := slice -}}
+{{- range $tag, $data := $focusAreaData -}}
+  {{- if gt $data.count 2 -}}
+    {{- $commonTags = $commonTags | append (dict "tag" $tag "count" $data.count) -}}
+  {{- end -}}
+{{- end -}}
+
+{{ if gt (len $commonTags) 0 }}
+<hr />
+<b>Common Topics (3+ talks):</b>
+    {{ range (sort $commonTags "count" "desc") }}
+        <a href="/tag/{{ .tag | urlize }}/"><b>{{ .tag | humanize | title }}({{ .count }})</b></a>;
+    {{ end }}
+{{ end }}
+
+<!-- Focus Areas Section -->
+{{- $focusAreas := slice -}}
+{{- range $tag, $data := $focusAreaData -}}
+  {{- $focusAreas = $focusAreas | append (dict "tag" $tag "data" $data) -}}
+{{- end -}}
+
+{{ if gt (len $focusAreas) 0 }}
+<hr />
+<b>Focus Areas Timeline:</b>
+<div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
+  <h3>Focus Areas Overview</h3>
+  {{ range (sort $focusAreas "data.count" "desc") }}
+    {{ $tag := .tag }}
+    {{ $data := .data }}
+    <div style="margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px;">
+      <h4><a href="/tag/{{ $tag | urlize }}/">{{ $tag | humanize | title }}</a> ({{ $data.count }} talks)</h4>
+      <p><strong>Timeline:</strong> {{ $data.first_talk.Format "2006" }} - {{ $data.last_talk.Format "2006" }}</p>
+      <p><strong>Duration:</strong> {{ sub $data.last_talk.Year $data.first_talk.Year }} years</p>
+      
+      <!-- Simple Gantt Chart -->
+      <div style="margin: 10px 0;">
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+          <span style="min-width: 120px; font-size: 12px;">Timeline:</span>
+          <div style="flex: 1; height: 20px; background-color: #e9ecef; border-radius: 10px; position: relative; margin: 0 10px;">
+            {{ $totalYears := sub $data.last_talk.Year $data.first_talk.Year }}
+            {{ if eq $totalYears 0 }}
+              {{ $totalYears = 1 }}
+            {{ end }}
+            {{ $startOffset := 0 }}
+            {{ $width := mul (div (sub $data.last_talk.Year $data.first_talk.Year | float) $totalYears) 100 }}
+            <div style="position: absolute; left: {{ $startOffset }}%; width: {{ $width }}%; height: 100%; background-color: #007bff; border-radius: 10px;"></div>
+          </div>
+          <span style="font-size: 12px; color: #666;">{{ $data.first_talk.Format "2006" }} - {{ $data.last_talk.Format "2006" }}</span>
+        </div>
+      </div>
+      
+      <!-- List of talks in this focus area -->
+      <details style="margin-top: 10px;">
+        <summary style="cursor: pointer; color: #007bff;">Show {{ $data.count }} talks</summary>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+          {{ range where $.Pages "Params.tag" "intersect" (slice $tag) }}
+            <li style="margin: 2px 0;">
+              <span style="color: #666;">{{ .Date.Format "2006/01/02" }}</span> - 
+              <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+              {{ if .Params.conference }}
+                at <a href="/conference/{{ .Params.conference | urlize }}/">{{ .Params.conference | humanize | title }}</a>
+              {{ end }}
+            </li>
+          {{ end }}
+        </ul>
+      </details>
+    </div>
+  {{ end }}
+</div>
 {{ end }}
 
 <hr />  
