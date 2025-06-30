@@ -13,7 +13,7 @@
   {{ range .Pages }}
     <li>
     <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-    <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a> : 
+    <a href="/type/{{ .Params.type | urlize}}/" class="tagtypelink">{{ .Params.type | humanize | title }}</a> : 
     {{ if .Params.conference }}
     <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :	
     {{ end }}

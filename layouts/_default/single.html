@@ -42,11 +42,12 @@
 <hr />
 <center>
 {{ range .Params.tag }}
-	<a href="/tag/{{ . }}" target="_blank" rel="noreferrer noopener nofollow">{{ . }}</a>
+	<a href="/tag/{{ . }}" target="_blank" class="tag-link" rel="noreferrer noopener nofollow">{{ . }}</a>
 {{ end }}
 </center>
 {{ end }}
 
+<hr />
 {{ if .Params.tool }}
 <div class="talk_tools">
 	This <b>{{ .Params.type }}</b> covers following tools where the speaker has contributed or authored<br/>
@@ -98,7 +99,6 @@
 	{{ end }}
 {{ end }}
 {{ if or (eq $presentation_embedable 1) (eq $video_embedable 1) }}
-<hr >
 <h1> Presentation Material</h1>
 {{ end }}
 {{ if and (eq $presentation_embedable 1) (eq $video_embedable 1) }}

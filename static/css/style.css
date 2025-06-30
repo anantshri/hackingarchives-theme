@@ -311,3 +311,25 @@ a sub {
   font-style: italic;
   color: #718096;
 }
+
+.tag-link {
+display: inline-block;
+padding: 0.2em 0.6em;
+margin-right: 0.5em;
+border-radius: 3px;
+background-color: slategrey;
+color: white;
+text-decoration: none;
+}
+
+.tagtypelink {
+  display: inline-block;
+  padding: 0.1em 0.3em;
+  margin: 0.1em 0.1em 0.1em 0.1em;
+  font-size: 0.85em;
+  border-radius: 3px;
+  background-color: slategrey;
+  color: white;
+  text-decoration: none;
+  }
+
