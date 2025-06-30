@@ -8,6 +8,17 @@
 {{- $collaborators := dict -}}
 {{- $focusAreaData := dict -}}
 
+<!-- Get all focus areas and their related tags -->
+{{- $focusAreas := $.Site.GetPage "section" "focusarea" -}}
+{{- $focusAreaMapping := dict -}}
+{{- range $focusAreas.Pages -}}
+  {{ . }}
+  {{- if .Params.related_tags -}}
+    {{- $areaName := path.Base .File.Dir -}}
+    {{- $focusAreaMapping = merge $focusAreaMapping (dict $areaName .Params.related_tags) -}}
+  {{- end -}}
+{{- end -}}
+
 <!-- Extracting Useful data -->
 {{- range .Pages -}}
   <!-- Video playlist generation -->
@@ -47,19 +58,31 @@
   {{- if .Params.tag -}}
     {{- range .Params.tag -}}
       {{- $tag := . | lower -}}
-      {{- $existingData := index $focusAreaData $tag -}}
-      {{- if not $existingData -}}
-        {{- $focusAreaData = merge $focusAreaData (dict $tag (dict "count" 1 "first_talk" $.Date "last_talk" $.Date)) -}}
-      {{- else -}}
-        {{- $firstTalk := $existingData.first_talk -}}
-        {{- $lastTalk := $existingData.last_talk -}}
-        {{- if $.Date.Before $firstTalk -}}
-          {{- $firstTalk = $.Date -}}
+      {{- /* Find which focus area this tag belongs to */ -}}
+      {{- $matchingFocusArea := "" -}}
+      {{- range $focusAreaName, $relatedTags := $focusAreaMapping -}}
+        {{- if in $relatedTags $tag -}}
+          {{- $matchingFocusArea = $focusAreaName -}}
+          {{- break -}}
         {{- end -}}
-        {{- if $.Date.After $lastTalk -}}
-          {{- $lastTalk = $.Date -}}
+      {{- end -}}
+      
+      {{- if $matchingFocusArea -}}
+        {{- $existingData := index $focusAreaData $matchingFocusArea -}}
+        {{- if not $existingData -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $.Date "last_talk" $.Date)) -}}
+        {{- else -}}
+          {{- $currentDate := $.Date -}}
+          {{- $firstTalk := $existingData.first_talk -}}
+          {{- $lastTalk := $existingData.last_talk -}}
+          {{- if $currentDate.Before $firstTalk -}}
+            {{- $firstTalk = $currentDate -}}
+          {{- end -}}
+          {{- if $currentDate.After $lastTalk -}}
+            {{- $lastTalk = $currentDate -}}
+          {{- end -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk)) -}}
         {{- end -}}
-        {{- $focusAreaData = merge $focusAreaData (dict $tag (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk)) -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
