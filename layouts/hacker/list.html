@@ -12,7 +12,6 @@
 {{- $focusAreas := $.Site.GetPage "section" "focusarea" -}}
 {{- $focusAreaMapping := dict -}}
 {{- range $focusAreas.Pages -}}
-  {{ . }}
   {{- if .Params.related_tags -}}
     {{- $areaName := path.Base .File.Dir -}}
     {{- $focusAreaMapping = merge $focusAreaMapping (dict $areaName .Params.related_tags) -}}
@@ -56,6 +55,7 @@
 
   <!-- Focus Area Timeline Data -->
   {{- if .Params.tag -}}
+    {{- $currentPage := . -}}
     {{- range .Params.tag -}}
       {{- $tag := . | lower -}}
       {{- /* Find which focus area this tag belongs to */ -}}
@@ -69,19 +69,25 @@
       
       {{- if $matchingFocusArea -}}
         {{- $existingData := index $focusAreaData $matchingFocusArea -}}
+        {{- $talkDate := $currentPage.Date -}}
+        {{- if eq (printf "%T" $talkDate) "string" -}}
+          {{- $talkDate = time $talkDate -}}
+        {{- end -}}
         {{- if not $existingData -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $.Date "last_talk" $.Date)) -}}
-        {{- else -}}
-          {{- $currentDate := $.Date -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate)) -}}
+        {{- else if eq (printf "%T" $existingData) "map[string]interface {}" -}}
           {{- $firstTalk := $existingData.first_talk -}}
           {{- $lastTalk := $existingData.last_talk -}}
-          {{- if $currentDate.Before $firstTalk -}}
-            {{- $firstTalk = $currentDate -}}
+          {{- if $talkDate.Before $firstTalk -}}
+            {{- $firstTalk = $talkDate -}}
           {{- end -}}
-          {{- if $currentDate.After $lastTalk -}}
-            {{- $lastTalk = $currentDate -}}
+          {{- if $talkDate.After $lastTalk -}}
+            {{- $lastTalk = $talkDate -}}
           {{- end -}}
           {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk)) -}}
+        {{- else -}}
+          {{- /* Reset if existing data is not a dictionary */ -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate)) -}}
         {{- end -}}
       {{- end -}}
     {{- end -}}
@@ -160,7 +166,7 @@
 <!-- Common Tags Section (tag count > 2 only) -->
 {{- $commonTags := slice -}}
 {{- range $tag, $data := $focusAreaData -}}
-  {{- if gt $data.count 2 -}}
+  {{- if and (eq (printf "%T" $data) "map[string]interface {}") (gt $data.count 2) -}}
     {{- $commonTags = $commonTags | append (dict "tag" $tag "count" $data.count) -}}
   {{- end -}}
 {{- end -}}
@@ -176,15 +182,17 @@
 <!-- Focus Areas Section -->
 {{- $focusAreas := slice -}}
 {{- range $tag, $data := $focusAreaData -}}
-  {{- $focusAreas = $focusAreas | append (dict "tag" $tag "data" $data) -}}
+  {{- if eq (printf "%T" $data) "map[string]interface {}" -}}
+    {{- $focusAreas = $focusAreas | append (dict "tag" $tag "data" $data) -}}
+  {{- end -}}
 {{- end -}}
 
 {{ if gt (len $focusAreas) 0 }}
 <hr />
 <b>Focus Areas Timeline:</b>
 <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
-  <h3>Focus Areas Overview</h3>
-  {{ range (sort $focusAreas "data.count" "desc") }}
+  <h3>Focus Areas Overview (Top 5)</h3>
+  {{ range first 5 (sort $focusAreas "data.count" "desc") }}
     {{ $tag := .tag }}
     {{ $data := .data }}
     <div style="margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px;">
@@ -213,14 +221,26 @@
       <details style="margin-top: 10px;">
         <summary style="cursor: pointer; color: #007bff;">Show {{ $data.count }} talks</summary>
         <ul style="margin: 5px 0; padding-left: 20px;">
-          {{ range where $.Pages "Params.tag" "intersect" (slice $tag) }}
-            <li style="margin: 2px 0;">
-              <span style="color: #666;">{{ .Date.Format "2006/01/02" }}</span> - 
-              <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
-              {{ if .Params.conference }}
-                at <a href="/conference/{{ .Params.conference | urlize }}/">{{ .Params.conference | humanize | title }}</a>
+          {{ $relatedTags := index $focusAreaMapping $tag }}
+          {{ range $.Pages }}
+            {{ $talkTags := .Params.tag | default slice }}
+            {{ if and $talkTags $relatedTags }}
+              {{ $hasRelatedTag := false }}
+              {{ range $talkTags }}
+                {{ if in $relatedTags . }}
+                  {{ $hasRelatedTag = true }}
+                {{ end }}
               {{ end }}
-            </li>
+              {{ if $hasRelatedTag }}
+                <li style="margin: 2px 0;">
+                  <span style="color: #666;">{{ .Date.Format "2006/01/02" }}</span> - 
+                  <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+                  {{ if .Params.conference }}
+                    at <a href="/conference/{{ .Params.conference | urlize }}/">{{ .Params.conference | humanize | title }}</a>
+                  {{ end }}
+                </li>
+              {{ end }}
+            {{ end }}
           {{ end }}
         </ul>
       </details>
