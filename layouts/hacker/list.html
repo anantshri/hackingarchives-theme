@@ -2,6 +2,8 @@
 
 {{- $hacker := .Data.Term -}}
 
+
+
 <!-- Initialize data structures once -->
 {{- $videoParams := slice -}}
 {{- $categoryCounts := dict -}}
@@ -11,15 +13,8 @@
 {{- $hackerFirstTalk := now -}}
 {{- $hackerLastTalk := time "1970-01-01" -}}
 
-<!-- Cache focus area mapping to avoid repeated lookups -->
-{{- $focusAreas := $.Site.GetPage "section" "focusarea" -}}
-{{- $focusAreaMapping := dict -}}
-{{- range $focusAreas.Pages -}}
-  {{- if .Params.related_tags -}}
-    {{- $areaName := path.Base .File.Dir -}}
-    {{- $focusAreaMapping = merge $focusAreaMapping (dict $areaName .Params.related_tags) -}}
-  {{- end -}}
-{{- end -}}
+<!-- Load focus area data from JSON file -->
+{{- $focusAreaConfig := index $.Site.Data "focus-areas" -}}
 
 <!-- Single pass data extraction for better performance -->
 {{- range .Pages -}}
@@ -77,19 +72,21 @@
   {{- if .Params.tag -}}
     {{- range .Params.tag -}}
       {{- $tag := . | lower -}}
-      {{- /* Find which focus area this tag belongs to */ -}}
+      {{- /* Find which focus area this tag belongs to using data file */ -}}
       {{- $matchingFocusArea := "" -}}
-      {{- range $focusAreaName, $relatedTags := $focusAreaMapping -}}
-        {{- if in $relatedTags $tag -}}
-          {{- $matchingFocusArea = $focusAreaName -}}
-          {{- break -}}
+      {{- if $focusAreaConfig -}}
+        {{- range $areaKey, $areaData := $focusAreaConfig.focus_areas -}}
+          {{- if in $areaData.tags $tag -}}
+            {{- $matchingFocusArea = $areaKey -}}
+            {{- break -}}
+          {{- end -}}
         {{- end -}}
       {{- end -}}
       
       {{- if $matchingFocusArea -}}
         {{- $existingData := index $focusAreaData $matchingFocusArea -}}
         {{- if not $existingData -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate)) -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig.focus_areas $matchingFocusArea).name "color" (index $focusAreaConfig.focus_areas $matchingFocusArea).color)) -}}
         {{- else if eq (printf "%T" $existingData) "map[string]interface {}" -}}
           {{- $firstTalk := $existingData.first_talk -}}
           {{- $lastTalk := $existingData.last_talk -}}
@@ -99,10 +96,10 @@
           {{- if $talkDate.After $lastTalk -}}
             {{- $lastTalk = $talkDate -}}
           {{- end -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk)) -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk "name" $existingData.name "color" $existingData.color)) -}}
         {{- else -}}
           {{- /* Reset if existing data is not a dictionary */ -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate)) -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig.focus_areas $matchingFocusArea).name "color" (index $focusAreaConfig.focus_areas $matchingFocusArea).color)) -}}
         {{- end -}}
       {{- end -}}
     {{- end -}}
@@ -242,7 +239,6 @@
           </div>
           
           <!-- Focus area bars with titles on bars -->
-          {{- $colors := slice "#007bff" "#28a745" "#ffc107" "#dc3545" "#6f42c1" "#fd7e14" "#20c997" "#e83e8c" "#6c757d" "#17a2b8" "#ff6b6b" "#4ecdc4" "#45b7d1" "#96ceb4" "#feca57" -}}
           {{- range $i, $fa := $topFocusAreas -}}
             {{- $tag := $fa.tag -}}
             {{- $data := $fa.data -}}
@@ -255,9 +251,9 @@
             {{- $widthPct := sub $endPct $startPct -}}
             <div style="position: relative; height: 20px; margin-bottom: 8px;">
               <div style="position: absolute; left: 0; top: 4px; height: 12px; background: #e9ecef; border-radius: 6px; width: 100%;"></div>
-              <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; top: 4px; height: 12px; width: {{ printf "%.2f" $widthPct }}%; background: {{ index $colors $i }}; border-radius: 6px; position: relative;">
+              <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; top: 4px; height: 12px; width: {{ printf "%.2f" $widthPct }}%; background: {{ $data.color }}; border-radius: 6px; position: relative;">
                 <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); text-align: center; width: 100%;">
-                  <a href="/focusarea/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $fa.tag | humanize | title }}</a>
+                  <a href="/focusarea/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $data.name }}</a>
                 </div>
               </div>
             </div>
@@ -282,7 +278,7 @@
           <span class="date">{{ .Date.Format "2006/01/02" }}</span>
           <a href="/type/{{ .Params.type | urlize }}/">{{ .Params.type | humanize | title }}</a> :
           <a class="tagtypelink" href="/{{ cond .Params.award (printf "award/%s" .Params.award) (printf "conference/%s" .Params.conference) | lower | urlize }}">{{ cond .Params.award .Params.award .Params.conference | humanize | title }}</a>
-          : <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> -
+          : <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
           {{- $totalHackers := 0 -}}
           {{- if .Params.hacker -}}
             {{- $totalHackers = add $totalHackers (len .Params.hacker) -}}
@@ -292,6 +288,7 @@
           {{- end -}}
           
           {{- if gt $totalHackers 1 -}}
+           &nbsp;-&nbsp;
             {{- if .Params.hacker -}}
               {{- range .Params.hacker -}}
                   <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>&nbsp;
@@ -308,7 +305,7 @@
             {{- $type := . -}}
             {{- $val := index $paramValue $type -}}
             {{- with $val -}}
-              <a href="{{ . }}" target="_blank" rel="noreferrer noopener nofollow" aria-label="{{ $type | title }}">
+              <a class="fa-icon-set" href="{{ . }}" target="_blank" rel="noreferrer noopener nofollow" aria-label="{{ $type | title }}">
                 <img src="/fontawesome/{{ $type | lower }}.svg" style="width:15px; padding-left:2px;" alt="{{ $type | title }} icon">
               </a>
             {{- end -}}

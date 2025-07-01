@@ -1,0 +1,29 @@
+{{/* 
+  Focus Area Helper Functions
+  
+  Usage:
+  {{ partial "focus-area-helper.html" (dict "context" . "tag" "web-security") }}
+  
+  Returns:
+  - focus_area_key: The key of the matching focus area
+  - focus_area_name: The human-readable name
+  - focus_area_color: The color for visualization
+  - focus_area_icon: The icon name
+*/}}
+
+{{- $context := .context -}}
+{{- $tag := .tag -}}
+{{- $focusAreaConfig := $context.Site.Data.focus_areas -}}
+
+{{- $result := dict "found" false -}}
+
+{{- if $focusAreaConfig -}}
+  {{- range $areaKey, $areaData := $focusAreaConfig.focus_areas -}}
+    {{- if in $areaData.tags $tag -}}
+      {{- $result = merge $result (dict "found" true "key" $areaKey "name" $areaData.name "color" $areaData.color "icon" $areaData.icon) -}}
+      {{- break -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return $result -}} 

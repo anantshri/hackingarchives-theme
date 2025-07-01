@@ -10,8 +10,9 @@
 {{ $fontSpread := sub $largestFontSize $smallestFontSize }}
 
 {{ $focus_area_data := slice }}
-{{ range .Site.Sections.focusarea.Sections }}
-    {{ $related_tags := .Params.related_tags }}
+{{ $focus_areas := index .Site.Data "focus-areas" "focus_areas" }}
+{{ range $key, $focus_area := $focus_areas }}
+    {{ $related_tags := $focus_area.tags }}
     {{ $matching_pages := slice }}
     {{ if $related_tags }}
         {{ range $tag := $related_tags }}
@@ -21,9 +22,9 @@
         {{ end }}
         {{ $matching_pages = $matching_pages | uniq }}
         {{ $count := len $matching_pages }}
-        {{ $focus_area_data = $focus_area_data | append (dict "Name" .Name "Title" .Title "Count" $count "RelPermalink" .RelPermalink) }}
+        {{ $focus_area_data = $focus_area_data | append (dict "Key" $key "Name" $focus_area.name "Title" $focus_area.name "Count" $count "RelPermalink" (printf "/focusarea/%s/" $key)) }}
     {{ else }}
-        {{ $focus_area_data = $focus_area_data | append (dict "Name" .Name "Title" .Title "Count" 0 "RelPermalink" .RelPermalink) }}
+        {{ $focus_area_data = $focus_area_data | append (dict "Key" $key "Name" $focus_area.name "Title" $focus_area.name "Count" 0 "RelPermalink" (printf "/focusarea/%s/" $key)) }}
     {{ end }}
 {{ end }}
 

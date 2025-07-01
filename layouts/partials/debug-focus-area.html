@@ -1,0 +1,16 @@
+<!-- Debug Focus Area Data -->
+<div style="margin: 20px 0; padding: 15px; background-color: #ffe6e6; border-left: 4px solid #ff0000;">
+    <h3>DEBUG: Focus Area Data</h3>
+    <p><strong>Focus Area Key:</strong> {{ .focus_area_key }}</p>
+    <p><strong>Focus Areas Available:</strong> {{ len .focus_areas }}</p>
+    {{ if .current_focus_area }}
+        <p><strong>Current Focus Area Found:</strong> YES</p>
+        <p><strong>Name:</strong> {{ .current_focus_area.name }}</p>
+        <p><strong>Description:</strong> {{ .current_focus_area.description }}</p>
+        <p><strong>Tags Count:</strong> {{ len .current_focus_area.tags }}</p>
+        <p><strong>First 5 Tags:</strong> {{ range first 5 .current_focus_area.tags }}{{ . }}, {{ end }}</p>
+    {{ else }}
+        <p><strong>Current Focus Area Found:</strong> NO</p>
+    {{ end }}
+    <p><strong>Available Focus Area Keys:</strong> {{ range $k, $v := .focus_areas }}{{ $k }}, {{ end }}</p>
+</div> 

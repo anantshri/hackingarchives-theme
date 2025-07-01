@@ -10,26 +10,29 @@
         </p>
     </div>
 
-<h1>{{ .Title | markdownify | humanize | title }}</h1>
+{{/* Get the focus area key from the URL */}}
+{{ $focus_area_key := path.Base .RelPermalink | strings.TrimSuffix "/" }}
+{{ $focus_areas := index .Site.Data "focus-areas" "focus_areas" }}
+{{ $current_focus_area := index $focus_areas $focus_area_key }}
 
-{{ .Content }}
-
-{{/* Check if this is the main focus area index or a specific focus area */}}
-{{ if .Params.related_tags }}
+{{ if $current_focus_area }}
     {{/* This is a specific focus area page - show individual focus area content */}}
-    {{ if .Params.related_tags }}
+    <h1>{{ $current_focus_area.name | markdownify | humanize | title }}</h1>
+    <p>{{ $current_focus_area.description }}</p>
+
+    {{ if $current_focus_area.tags }}
     <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
         <h3>Related Tags</h3>
         <p>This focus area includes content tagged with: 
-        {{ range .Params.related_tags }}
-            <a href="/tag/{{ . | urlize }}/">{{ . | humanize | title }}</a>{{ if not (eq . (index $.Params.related_tags (sub (len $.Params.related_tags) 1))) }}, {{ end }}
+        {{ range $current_focus_area.tags }}
+            <a href="/tag/{{ . | urlize }}/">{{ . | humanize | title }}</a>{{ if not (eq . (index $current_focus_area.tags (sub (len $current_focus_area.tags) 1))) }}, {{ end }}
         {{ end }}
         </p>
     </div>
     {{ end }}
 
     {{/* Find all content that has any of the related tags */}}
-    {{ $related_tags := .Params.related_tags }}
+    {{ $related_tags := $current_focus_area.tags }}
     {{ $matching_pages := slice }}
     {{ if $related_tags }}
         {{ range $tag := $related_tags }}
@@ -141,22 +144,24 @@
     {{ else }}
     <div style="margin: 20px 0; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
         <h3>No Content Found</h3>
-        <p>No content has been tagged for this focus area yet.</p>
+        <p>No content has been tagged for this focus area yet so far.</p>
     </div>
     {{ end }}
 {{ else }}
     {{/* This is the main focus area index page - show overview */}}
-    {{ if gt (len .Pages) 0 }}
+    <h1>Focus Areas Overview</h1>
+    
+    {{ if $focus_areas }}
     <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
         <h3>Focus Areas Overview</h3>
         <ul>
-            <li><strong>Total Focus Areas:</strong> {{ len .Pages }}</li>
+            <li><strong>Total Focus Areas:</strong> {{ len $focus_areas }}</li>
             {{ $totalEntries := 0 }}
             {{ $totalTags := slice }}
-            {{ range .Pages }}
-                {{ if .Params.related_tags }}
-                    {{ $totalTags = $totalTags | append .Params.related_tags }}
-                    {{ $related_tags := .Params.related_tags }}
+            {{ range $key, $focus_area := $focus_areas }}
+                {{ if $focus_area.tags }}
+                    {{ $totalTags = $totalTags | append $focus_area.tags }}
+                    {{ $related_tags := $focus_area.tags }}
                     {{ $matching_pages := slice }}
                     {{ range $tag := $related_tags }}
                         {{ if isset $.Site.Taxonomies.tag $tag }}
@@ -172,7 +177,7 @@
     </div>
     {{ end }}
 
-    {{ if gt (len .Pages) 0 }}
+    {{ if $focus_areas }}
     <div class="container">
         <h2>Focus Areas Cloud (Listed by content count)</h2>
         <hr />
@@ -185,9 +190,9 @@
         {{/* Calculate max and min entry counts */}}
         {{ $max := 1 }}
         {{ $min := 999999 }}
-        {{ range .Pages }}
-            {{ if .Params.related_tags }}
-            {{ $related_tags := .Params.related_tags }}
+        {{ range $key, $focus_area := $focus_areas }}
+            {{ if $focus_area.tags }}
+            {{ $related_tags := $focus_area.tags }}
             {{ $matching_pages := slice }}
                 {{ range $tag := $related_tags }}
                     {{ if isset $.Site.Taxonomies.tag $tag }}
@@ -205,9 +210,9 @@
 
         <div id="focusarea-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
             {{ $focusAreasWithCounts := slice }}
-            {{ range .Pages }}
-                {{ if .Params.related_tags }}
-                    {{ $related_tags := .Params.related_tags }}
+            {{ range $key, $focus_area := $focus_areas }}
+                {{ if $focus_area.tags }}
+                    {{ $related_tags := $focus_area.tags }}
                     {{ $matching_pages := slice }}
                     {{ range $tag := $related_tags }}
                         {{ if isset $.Site.Taxonomies.tag $tag }}
@@ -215,7 +220,7 @@
                         {{ end }}
                     {{ end }}
                     {{ $count := len (uniq $matching_pages) }}
-                    {{ $focusAreasWithCounts = $focusAreasWithCounts | append (dict "Page" . "Count" $count) }}
+                    {{ $focusAreasWithCounts = $focusAreasWithCounts | append (dict "Key" $key "Name" $focus_area.name "Count" $count "RelPermalink" (printf "/focusarea/%s/" $key)) }}
                 {{ end }}
             {{ end }}
             {{ $sortedFocusAreas := sort $focusAreasWithCounts "Count" "desc" }}
@@ -224,7 +229,7 @@
                 {{ $currentFontSize := add $smallestFontSize (mul (sub $count $min) $fontStep) }}
                 {{ if eq $spread 0 }}{{ $currentFontSize = $largestFontSize }}{{ end }}
                 
-                <a href="{{ .Page.RelPermalink }}" style="font-size:{{ $currentFontSize }}{{ $fontUnit }}">{{ .Page.Title | humanize | title }}{{ if gt $count 0 }}<sub>({{ $count }})</sub>{{ end }}</a>
+                <a href="{{ .RelPermalink }}" style="font-size:{{ $currentFontSize }}{{ $fontUnit }}">{{ .Name | humanize | title }}{{ if gt $count 0 }}<sub>({{ $count }})</sub>{{ end }}</a>
             {{ end }}
         </div>
         </div>

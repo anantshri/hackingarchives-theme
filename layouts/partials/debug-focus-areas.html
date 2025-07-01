@@ -1,0 +1,20 @@
+{{/* Debug partial to check focus area data loading */}}
+{{- $focusAreaConfig := $.Site.Data.focus_areas -}}
+
+<div style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">
+  <h4>Debug: Focus Area Data</h4>
+  <p><strong>Data loaded:</strong> {{ if $focusAreaConfig }}YES{{ else }}NO{{ end }}</p>
+  <p><strong>Data type:</strong> {{ printf "%T" $focusAreaConfig }}</p>
+  
+  {{ if $focusAreaConfig }}
+    <p><strong>Focus areas count:</strong> {{ len $focusAreaConfig.focus_areas }}</p>
+    <p><strong>Available focus areas:</strong></p>
+    <ul>
+      {{- range $key, $value := $focusAreaConfig.focus_areas -}}
+        <li>{{ $key }}: {{ $value.name }} ({{ len $value.tags }} tags)</li>
+      {{- end -}}
+    </ul>
+  {{ else }}
+    <p><strong>No focus area data found!</strong></p>
+  {{ end }}
+</div> 

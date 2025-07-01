@@ -1,0 +1,36 @@
+{{/* Debug partial to show all available site data */}}
+
+<div style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">
+  <h4>Debug: All Site Data</h4>
+  
+  <p><strong>Site.Data type:</strong> {{ printf "%T" $.Site.Data }}</p>
+  
+  {{ if $.Site.Data }}
+    <p><strong>Available data keys:</strong></p>
+    <ul>
+      {{- range $key, $value := $.Site.Data -}}
+        <li>{{ $key }}: {{ printf "%T" $value }}</li>
+      {{- end -}}
+    </ul>
+    
+    <p><strong>Focus areas data:</strong></p>
+    {{- $focusAreaConfig := $.Site.Data.focus_areas -}}
+    <p>Data loaded: {{ if $focusAreaConfig }}YES{{ else }}NO{{ end }}</p>
+    <p>Data type: {{ printf "%T" $focusAreaConfig }}</p>
+    
+    {{ if $focusAreaConfig }}
+      <p>Focus areas count: {{ len $focusAreaConfig.focus_areas }}</p>
+      <p>Sample focus area: {{ index $focusAreaConfig.focus_areas "application-security" "name" }}</p>
+    {{ end }}
+    
+    <p><strong>Direct access test:</strong></p>
+    {{- $directAccess := index $.Site.Data "focus-areas" -}}
+    <p>Direct access: {{ if $directAccess }}YES{{ else }}NO{{ end }}</p>
+    {{ if $directAccess }}
+      <p>Direct access type: {{ printf "%T" $directAccess }}</p>
+      <p>Direct focus areas count: {{ len $directAccess.focus_areas }}</p>
+    {{ end }}
+  {{ else }}
+    <p><strong>No site data found!</strong></p>
+  {{ end }}
+</div> 
