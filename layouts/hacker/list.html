@@ -178,7 +178,7 @@
 {{ if gt (len $commonCollaborators) 0 }}
   <hr />
   <section aria-labelledby="collaborators-heading">
-    <b id="collaborators-heading">Common Collaborators</b>
+    <b id="collaborators-heading">Common Collaborators:</b>&nbsp;
       {{- range (sort $commonCollaborators "count" "desc") -}}
         <a href="/hacker/{{ .name }}"><strong>{{ .name | humanize | title }}({{ .count }})</strong></a>;
       {{- end -}}
@@ -195,7 +195,7 @@
 {{- end -}}
 {{- $topFocusAreas := first 10 (sort $focusAreas "data.count" "desc") -}}
 
-{{ if gt (len $topFocusAreas) 0 }}
+{{ if and (gt (len $topFocusAreas) 0) (gt $timelineYears 3) }}
   <hr />
   <details style="margin: 20px 0;">
     <summary style="cursor: pointer; font-weight: bold; color: #007bff; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
