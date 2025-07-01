@@ -39,12 +39,22 @@
 
 </div>
 {{ if .Params.tag }}
-<hr />
-<center>
-{{ range .Params.tag }}
-	<a href="/tag/{{ . }}" target="_blank" class="tag-link" rel="noreferrer noopener nofollow">{{ . }}</a>
-{{ end }}
+	{{ $hasValidTags := false }}
+	{{ range .Params.tag }}
+		{{ if and . (ne . "") }}
+			{{ $hasValidTags = true }}
+		{{ end }}
+	{{ end }}
+{{ if $hasValidTags }}
+	<hr />
+	<center>
+	{{ range .Params.tag }}
+		{{ if and . (ne . "") }}
+			<a href="/tag/{{ . }}" target="_blank" class="tag-link" rel="noreferrer noopener nofollow">{{ . }}</a>
+		{{ end }}
+	{{ end }}
 </center>
+	{{ end }}
 {{ end }}
 
 <hr />
