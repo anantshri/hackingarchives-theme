@@ -212,12 +212,24 @@
 <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
   <h3>Timeline</h3>
   <div style="margin-bottom: 16px;">
-    <!-- Year labels -->
-    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #333; margin-bottom: 8px;">
-      <span>{{ $hackerFirstTalk.Format "2006" }}</span>
-      <span>{{ $hackerLastTalk.Format "2006" }}</span>
+    <!-- Year markers and 25% intervals -->
+    <div style="position: relative; height: 20px; margin-bottom: 8px;">
+      {{- $startYear := $hackerFirstTalk.Year -}}
+      {{- $endYear := $hackerLastTalk.Year -}}
+      {{- range $year := seq $startYear $endYear -}}
+        {{- $yearPct := mul (div (sub $year $startYear | float) $timelineYears) 100.0 -}}
+        <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 0; font-size: 10px; color: #666; transform: translateX(-50%);">
+          {{ $year }}
+        </div>
+        <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 12px; width: 1px; height: 8px; background: #ccc;"></div>
+      {{- end -}}
+      <!-- 25% interval markers -->
+      {{- range $i := seq 1 3 -}}
+        {{- $pct := mul $i 25.0 -}}
+        <div style="position: absolute; left: {{ printf "%.2f" $pct }}%; top: 12px; width: 1px; height: 4px; background: #999;"></div>
+      {{- end -}}
     </div>
-    <!-- Focus area bars -->
+    <!-- Focus area bars with titles on bars -->
     {{- $colors := slice "#007bff" "#28a745" "#ffc107" "#dc3545" "#6f42c1" -}}
     {{- range $i, $fa := $topFocusAreas -}}
       {{- $tag := $fa.tag -}}
@@ -229,12 +241,12 @@
       {{- $startPct := mul (div (sub $faFirst.Year $hackerFirstTalk.Year | float) $timelineYears) 100.0 -}}
       {{- $endPct := mul (div (add (sub $faLast.Year $hackerFirstTalk.Year) 1 | float) $timelineYears) 100.0 -}}
       {{- $widthPct := sub $endPct $startPct -}}
-      <div style="display: flex; align-items: center; margin-bottom: 6px;">
-        <div style="min-width: 120px; font-size: 12px; color: #333; text-align: right; padding-right: 8px;">
-          <a href="/tag/{{ $fa.tag | urlize }}/">{{ $fa.tag | humanize | title }}</a>
-        </div>
-        <div style="flex: 1; height: 12px; background: #e9ecef; border-radius: 6px; position: relative;">
-          <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; height: 100%; width: {{ printf "%.2f" $widthPct }}%; background: {{ index $colors $i }}; border-radius: 6px;"></div>
+      <div style="position: relative; height: 20px; margin-bottom: 8px;">
+        <div style="position: absolute; left: 0; top: 4px; height: 12px; background: #e9ecef; border-radius: 6px; width: 100%;"></div>
+        <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; top: 4px; height: 12px; width: {{ printf "%.2f" $widthPct }}%; background: {{ index $colors $i }}; border-radius: 6px; position: relative;">
+          <div style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">
+            <a href="/tag/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $fa.tag | humanize | title }}</a>
+          </div>
         </div>
       </div>
     {{- end -}}
