@@ -179,73 +179,67 @@
     {{ end }}
 {{ end }}
 
-<!-- Focus Areas Section -->
+<!-- Calculate hacker's overall first and last talk dates -->
+{{- $hackerFirstTalk := now -}}
+{{- $hackerLastTalk := time "1970-01-01" -}}
+{{- range .Pages -}}
+  {{- $talkDate := .Date -}}
+  {{- if eq (printf "%T" $talkDate) "string" -}}
+    {{- $talkDate = time $talkDate -}}
+  {{- end -}}
+  {{- if $talkDate.Before $hackerFirstTalk -}}
+    {{- $hackerFirstTalk = $talkDate -}}
+  {{- end -}}
+  {{- if $talkDate.After $hackerLastTalk -}}
+    {{- $hackerLastTalk = $talkDate -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $timelineYears := add (sub $hackerLastTalk.Year $hackerFirstTalk.Year) 1 -}}
+
+<!-- Focus Areas Section: Top 5 only -->
 {{- $focusAreas := slice -}}
 {{- range $tag, $data := $focusAreaData -}}
   {{- if eq (printf "%T" $data) "map[string]interface {}" -}}
     {{- $focusAreas = $focusAreas | append (dict "tag" $tag "data" $data) -}}
   {{- end -}}
 {{- end -}}
+{{- $topFocusAreas := first 5 (sort $focusAreas "data.count" "desc") -}}
 
-{{ if gt (len $focusAreas) 0 }}
+{{ if gt (len $topFocusAreas) 0 }}
 <hr />
-<b>Focus Areas Timeline:</b>
+<b>Focus Areas Overview (Top 5):</b>
 <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
-  <h3>Focus Areas Overview (Top 5)</h3>
-  {{ range first 5 (sort $focusAreas "data.count" "desc") }}
-    {{ $tag := .tag }}
-    {{ $data := .data }}
-    <div style="margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px;">
-      <h4><a href="/tag/{{ $tag | urlize }}/">{{ $tag | humanize | title }}</a> ({{ $data.count }} talks)</h4>
-      <p><strong>Timeline:</strong> {{ $data.first_talk.Format "2006" }} - {{ $data.last_talk.Format "2006" }}</p>
-      <p><strong>Duration:</strong> {{ sub $data.last_talk.Year $data.first_talk.Year }} years</p>
-      
-      <!-- Simple Gantt Chart -->
-      <div style="margin: 10px 0;">
-        <div style="display: flex; align-items: center; margin-bottom: 5px;">
-          <span style="min-width: 120px; font-size: 12px;">Timeline:</span>
-          <div style="flex: 1; height: 20px; background-color: #e9ecef; border-radius: 10px; position: relative; margin: 0 10px;">
-            {{ $totalYears := sub $data.last_talk.Year $data.first_talk.Year }}
-            {{ if eq $totalYears 0 }}
-              {{ $totalYears = 1 }}
-            {{ end }}
-            {{ $startOffset := 0 }}
-            {{ $width := mul (div (sub $data.last_talk.Year $data.first_talk.Year | float) $totalYears) 100 }}
-            <div style="position: absolute; left: {{ $startOffset }}%; width: {{ $width }}%; height: 100%; background-color: #007bff; border-radius: 10px;"></div>
-          </div>
-          <span style="font-size: 12px; color: #666;">{{ $data.first_talk.Format "2006" }} - {{ $data.last_talk.Format "2006" }}</span>
+  <h3>Timeline</h3>
+  <div style="margin-bottom: 16px;">
+    <!-- Year labels -->
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #333; margin-bottom: 8px;">
+      <span>{{ $hackerFirstTalk.Format "2006" }}</span>
+      <span>{{ $hackerLastTalk.Format "2006" }}</span>
+    </div>
+    <!-- Focus area bars -->
+    {{- $colors := slice "#007bff" "#28a745" "#ffc107" "#dc3545" "#6f42c1" -}}
+    {{- range $i, $fa := $topFocusAreas -}}
+      {{- $tag := $fa.tag -}}
+      {{- $data := $fa.data -}}
+      {{- $faFirst := $data.first_talk -}}
+      {{- $faLast := $data.last_talk -}}
+      {{- if eq (printf "%T" $faFirst) "string" }}{{ $faFirst = time $faFirst }}{{ end -}}
+      {{- if eq (printf "%T" $faLast) "string" }}{{ $faLast = time $faLast }}{{ end -}}
+      {{- $startPct := mul (div (sub $faFirst.Year $hackerFirstTalk.Year | float) $timelineYears) 100.0 -}}
+      {{- $endPct := mul (div (add (sub $faLast.Year $hackerFirstTalk.Year) 1 | float) $timelineYears) 100.0 -}}
+      {{- $widthPct := sub $endPct $startPct -}}
+      <div style="display: flex; align-items: center; margin-bottom: 6px;">
+        <div style="min-width: 120px; font-size: 12px; color: #333; text-align: right; padding-right: 8px;">
+          <a href="/tag/{{ $fa.tag | urlize }}/">{{ $fa.tag | humanize | title }}</a>
+        </div>
+        <div style="flex: 1; height: 12px; background: #e9ecef; border-radius: 6px; position: relative;">
+          <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; height: 100%; width: {{ printf "%.2f" $widthPct }}%; background: {{ index $colors $i }}; border-radius: 6px;"></div>
         </div>
       </div>
-      
-      <!-- List of talks in this focus area -->
-      <details style="margin-top: 10px;">
-        <summary style="cursor: pointer; color: #007bff;">Show {{ $data.count }} talks</summary>
-        <ul style="margin: 5px 0; padding-left: 20px;">
-          {{ $relatedTags := index $focusAreaMapping $tag }}
-          {{ range $.Pages }}
-            {{ $talkTags := .Params.tag | default slice }}
-            {{ if and $talkTags $relatedTags }}
-              {{ $hasRelatedTag := false }}
-              {{ range $talkTags }}
-                {{ if in $relatedTags . }}
-                  {{ $hasRelatedTag = true }}
-                {{ end }}
-              {{ end }}
-              {{ if $hasRelatedTag }}
-                <li style="margin: 2px 0;">
-                  <span style="color: #666;">{{ .Date.Format "2006/01/02" }}</span> - 
-                  <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
-                  {{ if .Params.conference }}
-                    at <a href="/conference/{{ .Params.conference | urlize }}/">{{ .Params.conference | humanize | title }}</a>
-                  {{ end }}
-                </li>
-              {{ end }}
-            {{ end }}
-          {{ end }}
-        </ul>
-      </details>
-    </div>
-  {{ end }}
+    {{- end -}}
+  </div>
+
 </div>
 {{ end }}
 
