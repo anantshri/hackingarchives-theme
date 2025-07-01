@@ -173,6 +173,11 @@
 
 {{ if gt (len $commonTags) 0 }}
 <hr />
+<details style="margin: 20px 0;">
+  <summary style="cursor: pointer; font-weight: bold; color: #007bff; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+    Experimental Timeline
+  </summary>
+
 <b>Common Topics (3+ talks):</b>
     {{ range (sort $commonTags "count" "desc") }}
         <a href="/tag/{{ .tag | urlize }}/"><b>{{ .tag | humanize | title }}({{ .count }})</b></a>;
@@ -207,11 +212,8 @@
 {{- $topFocusAreas := first 5 (sort $focusAreas "data.count" "desc") -}}
 
 {{ if gt (len $topFocusAreas) 0 }}
-<hr />
-<b>Focus Areas Overview (Top 5):</b>
-<div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
-  <h3>Timeline</h3>
-  <div style="margin-bottom: 16px;">
+  <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
+    <div style="margin-bottom: 16px;">
     <!-- Year markers and 25% intervals -->
     <div style="position: relative; height: 20px; margin-bottom: 8px;">
       {{- $startYear := $hackerFirstTalk.Year -}}
@@ -244,17 +246,16 @@
       <div style="position: relative; height: 20px; margin-bottom: 8px;">
         <div style="position: absolute; left: 0; top: 4px; height: 12px; background: #e9ecef; border-radius: 6px; width: 100%;"></div>
         <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; top: 4px; height: 12px; width: {{ printf "%.2f" $widthPct }}%; background: {{ index $colors $i }}; border-radius: 6px; position: relative;">
-          <div style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">
-            <a href="/tag/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $fa.tag | humanize | title }}</a>
+          <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); text-align: center; width: 100%;">
+            <a href="/focusarea/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $fa.tag | humanize | title }}</a>
           </div>
         </div>
       </div>
     {{- end -}}
   </div>
-
 </div>
 {{ end }}
-
+</details>
 <hr />  
 <h1>Hacktivity</h1>
 <hr />
