@@ -9,31 +9,36 @@
     </p>
 </div>
 
-{{if not .IsHome }}
-<h1>{{ .Title | markdownify | humanize | title }}</h1>
-{{ end }}
 
 {{ .Content  }}
 
-{{/* Build hacker count dictionary */}}
-{{ $hackerCount := dict }}
-{{ $pages := .Pages }}
-{{ range $pages }}
-  {{ range .Params.hacker }}
-    {{ $hacker := . }}
-    {{ if not (isset $hackerCount $hacker) }}
-      {{ $hackerCount = merge $hackerCount (dict $hacker 1) }}
-    {{ else }}
-      {{ $currentCount := index $hackerCount $hacker }}
-      {{ $hackerCount = merge $hackerCount (dict $hacker (add $currentCount 1)) }}
+{{/* Get all hackers with this education */}}
+{{ $hackersWithEdu := .Pages }}
+
+{{/* Build hacker session count dictionary */}}
+{{ $hackerSessionCount := dict }}
+{{ range $hackersWithEdu }}
+  {{ $hackerDir := .File.Dir | replaceRE "^hacker/" "" | replaceRE "/$" "" }}
+  {{ $sessionCount := 0 }}
+  
+  {{/* Count sessions for this hacker across all content */}}
+  {{ range $.Site.RegularPages }}
+    {{ if .Params.hacker }}
+      {{ range .Params.hacker }}
+        {{ if eq . $hackerDir }}
+          {{ $sessionCount = add $sessionCount 1 }}
+        {{ end }}
+      {{ end }}
     {{ end }}
   {{ end }}
+  
+  {{ $hackerSessionCount = merge $hackerSessionCount (dict $hackerDir (dict "Name" .Title "Count" $sessionCount)) }}
 {{ end }}
 
 {{/* Build sorted slice for cloud */}}
 {{ $hackerPairs := slice }}
-{{ range $k, $v := $hackerCount }}
-  {{ $hackerPairs = $hackerPairs | append (dict "Key" $k "Value" $v) }}
+{{ range $k, $v := $hackerSessionCount }}
+  {{ $hackerPairs = $hackerPairs | append (dict "Key" $k "Name" $v.Name "Value" $v.Count) }}
 {{ end }}
 {{ $hackerCountSorted := sort $hackerPairs "Value" "desc" }}
 
@@ -52,25 +57,16 @@
 {{ $fontStep := cond (ne $spread 0) (div $fontSpread $spread) 0.1 }}
 
 {{ if gt (len $hackerCountSorted) 0 }}
-<div style="text-align: center; margin-bottom: 20px;">
-    <h3>Hacker Cloud (by talk count)</h3>
-    <div id="hacker-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
-        {{ range $h := $hackerCountSorted }}
-            {{ $count := $h.Value }}
-            {{ $currentFontSize := add $smallestFontSize (mul (sub $count $min) $fontStep) }}
-            <a href="/hacker/{{ $h.Key | urlize }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ $h.Key | humanize | title }} <sub>({{ $count }})</sub></a>&nbsp;
-        {{ end }}
-    </div>
+<h2>Hackers from {{ .Title | humanize | title }}</h2>
+
+<div id="hacker-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+    {{ range $hackerCountSorted }}
+        {{ $currentFontSize := add $smallestFontSize (mul (sub .Value $min) $fontStep) }}
+        <a href="/hacker/{{ .Key }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ .Name }}{{ if gt .Value 0 }}<sub>({{ .Value }})</sub>{{ end }}</a>&nbsp;
+    {{ end }}
 </div>
 {{ end }}
 
-<ul>
-  {{ range (where $pages "Section" "!=" "") }}
-  <li>
-    <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
-  </li>
-  {{ end }}
-</ul>
+
 
 {{ partial "footer.html" . }} 

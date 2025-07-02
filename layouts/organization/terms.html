@@ -17,23 +17,21 @@
 <div style="margin-bottom: 10px;">
     We are experimenting with a new organization cloud.
     <br />
-	Total Organizations in the system so far : <b>{{ len $.Site.Taxonomies.organization }}</b>
+	Total unique organizations in the system so far : <b>{{ len $.Site.Taxonomies.organization }}</b>
     <br />
-    <b>We are only showing organizations that have been used at least 2 times.</b>
+    <b>Showing all organizations in the system.</b>
 </div>
 
 <hr />
     <div id="organization-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
         {{ range $name, $taxonomy := $.Site.Taxonomies.organization.ByCount -}}
             {{- $currentOrgCount := len $taxonomy.Pages -}}
-            {{- if ge $currentOrgCount 2 -}}
-                {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentOrgCount $min) $fontStep) ) -}}
-                {{- $count := len $taxonomy.Pages -}}
-                {{- $weigth := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
-                {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weigth) ) -}}
-                <!--Current font size: {{$currentFontSize}}-->
-                <a href="{{ "/organization/" | relLangURL }}{{ $taxonomy.Name | urlize }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ $taxonomy.Name | humanize | title }}{{ if gt ($count) 1 }}<sub>({{ $count }})</sub>{{end}}</a>&nbsp;
-            {{- end -}}
+            {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentOrgCount $min) $fontStep) ) -}}
+            {{- $count := len $taxonomy.Pages -}}
+            {{- $weigth := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
+            {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weigth) ) -}}
+            <!--Current font size: {{$currentFontSize}}-->
+            <a href="{{ "/organization/" | relLangURL }}{{ $taxonomy.Name | urlize }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ $taxonomy.Name | humanize | title }}{{ if gt ($count) 1 }}<sub>({{ $count }})</sub>{{end}}</a>&nbsp;
         {{- end }}
     </div>
 {{ end }}
