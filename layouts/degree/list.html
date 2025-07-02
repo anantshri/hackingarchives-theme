@@ -8,10 +8,6 @@
     </p>
 </div>
 
-{{if not .IsHome }}
-<h1>{{ .Title | markdownify | humanize | title }}</h1>
-{{ end }}
-
 {{ .Content  }}
 
 {{/* Get all hackers with this degree */}}
@@ -61,31 +57,15 @@
 {{ $fontStep := cond (ne $spread 0) (div $fontSpread $spread) 0.1 }}
 
 {{ if gt (len $hackerCountSorted) 0 }}
-<h2>Hackers with {{ .Title | humanize | title }} Degree - Session Contributions</h2>
-<div style="margin-bottom: 10px;">
-    Total hackers with this degree: <b>{{ len $hackersWithDegree }}</b>
-    <br />
-    Hackers with active sessions: <b>{{ len $hackerCountSorted }}</b>
-</div>
+<h2>Hackers with {{ .Title | humanize | title }} Degree</h2>
 
 <div id="hacker-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
     {{ range $hackerCountSorted }}
         {{ $currentFontSize := add $smallestFontSize (mul (sub .Value $min) $fontStep) }}
-        <a href="/hacker/{{ .Key }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">
-            {{ .Name }}
-            {{ if gt .Value 1 }}<sub>({{ .Value }})</sub>{{ end }}
-        </a>&nbsp;
+        <a href="/hacker/{{ .Key }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ .Name }}{{ if gt .Value 1 }}<sub>({{ .Value }})</sub>{{ end }}</a>&nbsp;
     {{ end }}
 </div>
 {{ end }}
 
-<h3>Hacker Profiles with {{ .Title | humanize | title }} Degree</h3>
-<ul>
-  {{ range .Pages }}
-  <li>
-    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
-  </li>
-  {{ end }}
-</ul>
 
 {{ partial "footer.html" . }} 
