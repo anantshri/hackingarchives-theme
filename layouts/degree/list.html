@@ -1,0 +1,121 @@
+{{ partial "header.html" . }}
+<div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+    <h4 style="margin: 0; color: #856404;">
+        <strong>🧪 Experimental Feature</strong>
+    </h4>
+    <p style="margin: 10px 0 0 0; color: #856404;">
+        Degree-based content organization is an experimental feature. This page and its functionality may change as we refine the degree taxonomy.
+    </p>
+</div>
+
+{{if not .IsHome }}
+<h1>{{ .Title | markdownify | humanize | title }}</h1>
+{{ end }}
+
+{{ .Content  }}
+
+{{/* Get all hackers with this degree */}}
+{{ $hackersWithDegree := .Pages }}
+
+{{/* Debug info */}}
+<div style="background: #f0f0f0; padding: 10px; margin: 10px 0;">
+    <strong>Debug Info:</strong><br>
+    Degree: {{ .Title }}<br>
+    Number of hackers with this degree: {{ len $hackersWithDegree }}<br>
+    {{ range $hackersWithDegree }}
+        - {{ .Title }} ({{ .File.Dir }})<br>
+    {{ end }}
+</div>
+
+{{/* Build hacker session count dictionary */}}
+{{ $hackerSessionCount := dict }}
+{{ range $hackersWithDegree }}
+  {{ $hackerDir := .File.Dir | replaceRE "^hacker/" "" | replaceRE "/$" "" }}
+  {{ $sessionCount := 0 }}
+  
+  {{/* Debug individual hacker */}}
+  <div style="background: #f8f8f8; padding: 5px; margin: 2px 0; font-size: 12px;">
+    Checking {{ .Title }} ({{ $hackerDir }})
+  </div>
+  
+  {{/* Count sessions for this hacker across all content */}}
+  {{ range $.Site.RegularPages }}
+    {{ if .Params.hacker }}
+      {{ range .Params.hacker }}
+        {{ if eq . $hackerDir }}
+          {{ $sessionCount = add $sessionCount 1 }}
+          <div style="background: #e8f8e8; padding: 2px; margin: 1px 0; font-size: 10px;">
+            Found session: {{ $.Title }} ({{ . }})
+          </div>
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  
+  {{ if gt $sessionCount 0 }}
+    {{ $hackerSessionCount = merge $hackerSessionCount (dict $hackerDir (dict "Name" .Title "Count" $sessionCount)) }}
+  {{ end }}
+{{ end }}
+
+{{/* Debug session counts */}}
+<div style="background: #e0f0e0; padding: 10px; margin: 10px 0;">
+    <strong>Session Counts:</strong><br>
+    {{ range $k, $v := $hackerSessionCount }}
+        {{ $k }}: {{ $v.Count }} sessions<br>
+    {{ end }}
+</div>
+
+{{/* Build sorted slice for cloud */}}
+{{ $hackerPairs := slice }}
+{{ range $k, $v := $hackerSessionCount }}
+  {{ $hackerPairs = $hackerPairs | append (dict "Key" $k "Name" $v.Name "Value" $v.Count) }}
+{{ end }}
+{{ $hackerCountSorted := sort $hackerPairs "Value" "desc" }}
+
+{{/* Font size logic */}}
+{{ $fontUnit := "rem" }}
+{{ $largestFontSize := 2.7 }}
+{{ $smallestFontSize := 1.5 }}
+{{ $fontSpread := sub $largestFontSize $smallestFontSize }}
+{{ $max := 2 }}
+{{ $min := 1 }}
+{{ if gt (len $hackerCountSorted) 0 }}
+  {{ $max = add (index $hackerCountSorted 0).Value 1 }}
+  {{ $min = (index $hackerCountSorted (sub (len $hackerCountSorted) 1)).Value }}
+{{ end }}
+{{ $spread := sub $max $min }}
+{{ $fontStep := cond (ne $spread 0) (div $fontSpread $spread) 0.1 }}
+
+{{ if gt (len $hackerCountSorted) 0 }}
+<h2>Hackers with {{ .Title | humanize | title }} Degree - Session Contributions</h2>
+<div style="margin-bottom: 10px;">
+    Total hackers with this degree: <b>{{ len $hackersWithDegree }}</b>
+    <br />
+    Hackers with active sessions: <b>{{ len $hackerCountSorted }}</b>
+</div>
+
+<div id="hacker-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+    {{ range $hackerCountSorted }}
+        {{ $currentFontSize := add $smallestFontSize (mul (sub .Value $min) $fontStep) }}
+        <a href="/hacker/{{ .Key }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">
+            {{ .Name }}
+            {{ if gt .Value 1 }}<sub>({{ .Value }})</sub>{{ end }}
+        </a>&nbsp;
+    {{ end }}
+</div>
+{{ else }}
+<div style="background: #ffe0e0; padding: 10px; margin: 10px 0;">
+    <strong>No sessions found for hackers with this degree.</strong>
+</div>
+{{ end }}
+
+<h3>Hacker Profiles with {{ .Title | humanize | title }} Degree</h3>
+<ul>
+  {{ range .Pages }}
+  <li>
+    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+  </li>
+  {{ end }}
+</ul>
+
+{{ partial "footer.html" . }} 

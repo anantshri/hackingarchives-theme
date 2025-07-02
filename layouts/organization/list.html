@@ -1,0 +1,76 @@
+{{ partial "header.html" . }}
+
+<div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+    <h4 style="margin: 0; color: #856404;">
+        <strong>🧪 Experimental Feature</strong>
+    </h4>
+    <p style="margin: 10px 0 0 0; color: #856404;">
+        Organization-based content organization is an experimental feature. This page and its functionality may change as we refine the organization taxonomy.
+    </p>
+</div>
+
+{{if not .IsHome }}
+<h1>{{ .Title | markdownify | humanize | title }}</h1>
+{{ end }}
+
+{{ .Content  }}
+
+{{/* Build hacker count dictionary */}}
+{{ $hackerCount := dict }}
+{{ $pages := .Pages }}
+{{ range $pages }}
+  {{ range .Params.hacker }}
+    {{ $hacker := . }}
+    {{ if not (isset $hackerCount $hacker) }}
+      {{ $hackerCount = merge $hackerCount (dict $hacker 1) }}
+    {{ else }}
+      {{ $currentCount := index $hackerCount $hacker }}
+      {{ $hackerCount = merge $hackerCount (dict $hacker (add $currentCount 1)) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* Build sorted slice for cloud */}}
+{{ $hackerPairs := slice }}
+{{ range $k, $v := $hackerCount }}
+  {{ $hackerPairs = $hackerPairs | append (dict "Key" $k "Value" $v) }}
+{{ end }}
+{{ $hackerCountSorted := sort $hackerPairs "Value" "desc" }}
+
+{{/* Font size logic */}}
+{{ $fontUnit := "rem" }}
+{{ $largestFontSize := 2.7 }}
+{{ $smallestFontSize := 1.5 }}
+{{ $fontSpread := sub $largestFontSize $smallestFontSize }}
+{{ $max := 2 }}
+{{ $min := 1 }}
+{{ if gt (len $hackerCountSorted) 0 }}
+  {{ $max = add (index $hackerCountSorted 0).Value 1 }}
+  {{ $min = (index $hackerCountSorted (sub (len $hackerCountSorted) 1)).Value }}
+{{ end }}
+{{ $spread := sub $max $min }}
+{{ $fontStep := cond (ne $spread 0) (div $fontSpread $spread) 0.1 }}
+
+{{ if gt (len $hackerCountSorted) 0 }}
+<div style="text-align: center; margin-bottom: 20px;">
+    <h3>Hacker Cloud (by talk count)</h3>
+    <div id="hacker-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+        {{ range $h := $hackerCountSorted }}
+            {{ $count := $h.Value }}
+            {{ $currentFontSize := add $smallestFontSize (mul (sub $count $min) $fontStep) }}
+            <a href="/hacker/{{ $h.Key | urlize }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ $h.Key | humanize | title }} <sub>({{ $count }})</sub></a>&nbsp;
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+<ul>
+  {{ range (where $pages "Section" "!=" "") }}
+  <li>
+    <span class="date">{{ .Date.Format "2006/01/02" }}</span>
+    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+  </li>
+  {{ end }}
+</ul>
+
+{{ partial "footer.html" . }} 
