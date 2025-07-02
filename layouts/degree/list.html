@@ -17,26 +17,11 @@
 {{/* Get all hackers with this degree */}}
 {{ $hackersWithDegree := .Pages }}
 
-{{/* Debug info */}}
-<div style="background: #f0f0f0; padding: 10px; margin: 10px 0;">
-    <strong>Debug Info:</strong><br>
-    Degree: {{ .Title }}<br>
-    Number of hackers with this degree: {{ len $hackersWithDegree }}<br>
-    {{ range $hackersWithDegree }}
-        - {{ .Title }} ({{ .File.Dir }})<br>
-    {{ end }}
-</div>
-
 {{/* Build hacker session count dictionary */}}
 {{ $hackerSessionCount := dict }}
 {{ range $hackersWithDegree }}
   {{ $hackerDir := .File.Dir | replaceRE "^hacker/" "" | replaceRE "/$" "" }}
   {{ $sessionCount := 0 }}
-  
-  {{/* Debug individual hacker */}}
-  <div style="background: #f8f8f8; padding: 5px; margin: 2px 0; font-size: 12px;">
-    Checking {{ .Title }} ({{ $hackerDir }})
-  </div>
   
   {{/* Count sessions for this hacker across all content */}}
   {{ range $.Site.RegularPages }}
@@ -44,9 +29,6 @@
       {{ range .Params.hacker }}
         {{ if eq . $hackerDir }}
           {{ $sessionCount = add $sessionCount 1 }}
-          <div style="background: #e8f8e8; padding: 2px; margin: 1px 0; font-size: 10px;">
-            Found session: {{ $.Title }} ({{ . }})
-          </div>
         {{ end }}
       {{ end }}
     {{ end }}
@@ -56,14 +38,6 @@
     {{ $hackerSessionCount = merge $hackerSessionCount (dict $hackerDir (dict "Name" .Title "Count" $sessionCount)) }}
   {{ end }}
 {{ end }}
-
-{{/* Debug session counts */}}
-<div style="background: #e0f0e0; padding: 10px; margin: 10px 0;">
-    <strong>Session Counts:</strong><br>
-    {{ range $k, $v := $hackerSessionCount }}
-        {{ $k }}: {{ $v.Count }} sessions<br>
-    {{ end }}
-</div>
 
 {{/* Build sorted slice for cloud */}}
 {{ $hackerPairs := slice }}
@@ -102,10 +76,6 @@
             {{ if gt .Value 1 }}<sub>({{ .Value }})</sub>{{ end }}
         </a>&nbsp;
     {{ end }}
-</div>
-{{ else }}
-<div style="background: #ffe0e0; padding: 10px; margin: 10px 0;">
-    <strong>No sessions found for hackers with this degree.</strong>
 </div>
 {{ end }}
 
