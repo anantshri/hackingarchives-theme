@@ -1,57 +1,59 @@
-{{ partial "header.html" . }}
+{{ if $.Site.Params.experimental_mode }}
+    {{ partial "header.html" . }}
 
-<div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
-    <h4 style="margin: 0; color: #856404;">
-        <strong>🧪 Experimental Feature</strong>
-    </h4>
-    <p style="margin: 10px 0 0 0; color: #856404;">
-        Tag-based content organization is an experimental feature. This page and its functionality may change as we refine the tagging system.
-    </p>
-</div>
+    <div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+        <h4 style="margin: 0; color: #856404;">
+            <strong>🧪 Experimental Feature</strong>
+        </h4>
+        <p style="margin: 10px 0 0 0; color: #856404;">
+            Tag-based content organization is an experimental feature. This page and its functionality may change as we refine the tagging system.
+        </p>
+    </div>
 
-{{if not .IsHome }}
-<h1>{{ .Title | markdownify | humanize | title }}</h1>
+    {{if not .IsHome }}
+    <h1>{{ .Title | markdownify | humanize | title }}</h1>
+    {{ end }}
+
+    {{ .Content  }}
+
+      {{ $pages := .Pages }}
+      {{ if .IsHome }}{{ $pages = .Site.RegularPages }}{{ end }}
+
+    <hr>
+    {{ range $pages.GroupByParam "type" }}
+    "{{ .Key }}"
+    {{ end }}
+    <hr>
+
+    <ul>
+
+      {{ range (where $pages "Section" "!=" "") }}
+      <li>
+        <span class="date">{{ .Date.Format "2006/01/02" }}</span>
+        <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a> : <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
+        {{ range .Params.hacker }}
+            <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+          {{ end }} 
+        {{ range .Params.morehackers }}
+         <u>{{ . | humanize | title }}</u>
+        {{ end }}
+        {{if .Params.presentation }}
+        <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" style="width:15px;padding-left:2px;"></a>
+        {{ end }}
+        {{if .Params.whitepaper }}
+        <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" style="width:15px;padding-left:2px;"></a>
+        {{ end }}
+        {{if .Params.Source }}
+        <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" style="width:15px;padding-left:2px;"></a>
+        {{ end }}
+        {{if .Params.video }}
+        <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" style="width:15px;padding-left:2px;"></a>
+        {{ end }}
+      </li>
+      {{ end }}
+    </ul>
+
+
+
+    {{ partial "footer.html" . }}
 {{ end }}
-
-{{ .Content  }}
-
-  {{ $pages := .Pages }}
-  {{ if .IsHome }}{{ $pages = .Site.RegularPages }}{{ end }}
-
-<hr>
-{{ range $pages.GroupByParam "type" }}
-"{{ .Key }}"
-{{ end }}
-<hr>
-
-<ul>
-
-  {{ range (where $pages "Section" "!=" "") }}
-  <li>
-    <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-    <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a> : <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
-    {{ range .Params.hacker }}
-        <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
-      {{ end }} 
-    {{ range .Params.morehackers }}
-     <u>{{ . | humanize | title }}</u>
-    {{ end }}
-    {{if .Params.presentation }}
-    <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" style="width:15px;padding-left:2px;"></a>
-    {{ end }}
-    {{if .Params.whitepaper }}
-    <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" style="width:15px;padding-left:2px;"></a>
-    {{ end }}
-    {{if .Params.Source }}
-    <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" style="width:15px;padding-left:2px;"></a>
-    {{ end }}
-    {{if .Params.video }}
-    <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" style="width:15px;padding-left:2px;"></a>
-    {{ end }}
-  </li>
-  {{ end }}
-</ul>
-
-
-
-{{ partial "footer.html" . }}

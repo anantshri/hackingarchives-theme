@@ -192,78 +192,80 @@
 {{- end -}}
 {{- $topFocusAreas := first 10 (sort $focusAreas "data.count" "desc") -}}
 
-{{ if and (gt (len $topFocusAreas) 0) (gt $timelineYears 3) }}
-  <hr />
-  <details style="margin: 20px 0;">
-    <summary style="cursor: pointer; font-weight: bold; color: #007bff; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
-      Experimental Timeline
-    </summary>
+{{ if $.Site.Params.experimental_mode }}
 
-    <!-- Common Topics -->
-    {{- $commonTags := slice -}}
-    {{- range $tag, $data := $focusAreaData -}}
-      {{- if and (eq (printf "%T" $data) "map[string]interface {}") (gt $data.count 2) -}}
-        {{- $commonTags = $commonTags | append (dict "tag" $tag "count" $data.count) -}}
+  {{ if and (gt (len $topFocusAreas) 0) (gt $timelineYears 3) }}
+    <hr />
+    <details style="margin: 20px 0;">
+      <summary style="cursor: pointer; font-weight: bold; color: #007bff; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+        Experimental Timeline
+      </summary>
+
+      <!-- Common Topics -->
+      {{- $commonTags := slice -}}
+      {{- range $tag, $data := $focusAreaData -}}
+        {{- if and (eq (printf "%T" $data) "map[string]interface {}") (gt $data.count 2) -}}
+          {{- $commonTags = $commonTags | append (dict "tag" $tag "count" $data.count) -}}
+        {{- end -}}
       {{- end -}}
-    {{- end -}}
 
-    {{ if gt (len $commonTags) 0 }}
-      <section aria-labelledby="topics-heading">
-        <b id="topics-heading">Common Topics (3+ talks): </b>
-          {{- range (sort $commonTags "count" "desc") -}}
-            <a href="/tag/{{ .tag | urlize }}/"><strong>{{ .tag | humanize | title }}({{ .count }})</strong></a>;
-          {{- end -}}
-      </section>
-    {{ end }}
+      {{ if gt (len $commonTags) 0 }}
+        <section aria-labelledby="topics-heading">
+          <b id="topics-heading">Common Topics (3+ talks): </b>
+            {{- range (sort $commonTags "count" "desc") -}}
+              <a href="/tag/{{ .tag | urlize }}/"><strong>{{ .tag | humanize | title }}({{ .count }})</strong></a>;
+            {{- end -}}
+        </section>
+      {{ end }}
 
-    <!-- Timeline Visualization -->
-    {{ if gt (len $topFocusAreas) 0 }}
-      <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
-        <div style="margin-bottom: 16px;">
-          <!-- Year markers and 25% intervals -->
-          <div style="position: relative; height: 20px; margin-bottom: 8px;">
-            {{- $startYear := $hackerFirstTalk.Year -}}
-            {{- $endYear := $hackerLastTalk.Year -}}
-            {{- range $year := seq $startYear $endYear -}}
-              {{- $yearPct := mul (div (sub $year $startYear | float) $timelineYears) 100.0 -}}
-              <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 0; font-size: 10px; color: #666; transform: translateX(-50%);">
-                {{ $year }}
-              </div>
-              <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 12px; width: 1px; height: 8px; background: #ccc;"></div>
-            {{- end -}}
-            <!-- 25% interval markers -->
-            {{- range $i := seq 1 3 -}}
-              {{- $pct := mul $i 25.0 -}}
-              <div style="position: absolute; left: {{ printf "%.2f" $pct }}%; top: 12px; width: 1px; height: 4px; background: #999;"></div>
-            {{- end -}}
-          </div>
-          
-          <!-- Focus area bars with titles on bars -->
-          {{- range $i, $fa := $topFocusAreas -}}
-            {{- $tag := $fa.tag -}}
-            {{- $data := $fa.data -}}
-            {{- $faFirst := $data.first_talk -}}
-            {{- $faLast := $data.last_talk -}}
-            {{- if eq (printf "%T" $faFirst) "string" }}{{ $faFirst = time $faFirst }}{{ end -}}
-            {{- if eq (printf "%T" $faLast) "string" }}{{ $faLast = time $faLast }}{{ end -}}
-            {{- $startPct := mul (div (sub $faFirst.Year $hackerFirstTalk.Year | float) $timelineYears) 100.0 -}}
-            {{- $endPct := mul (div (add (sub $faLast.Year $hackerFirstTalk.Year) 1 | float) $timelineYears) 100.0 -}}
-            {{- $widthPct := sub $endPct $startPct -}}
+      <!-- Timeline Visualization -->
+      {{ if gt (len $topFocusAreas) 0 }}
+        <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
+          <div style="margin-bottom: 16px;">
+            <!-- Year markers and 25% intervals -->
             <div style="position: relative; height: 20px; margin-bottom: 8px;">
-              <div style="position: absolute; left: 0; top: 4px; height: 12px; background: #e9ecef; border-radius: 6px; width: 100%;"></div>
-              <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; top: 4px; height: 12px; width: {{ printf "%.2f" $widthPct }}%; background: {{ $data.color }}; border-radius: 6px; position: relative;">
-                <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); text-align: center; width: 100%;">
-                  <a href="/focusarea/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $data.name }}</a>
+              {{- $startYear := $hackerFirstTalk.Year -}}
+              {{- $endYear := $hackerLastTalk.Year -}}
+              {{- range $year := seq $startYear $endYear -}}
+                {{- $yearPct := mul (div (sub $year $startYear | float) $timelineYears) 100.0 -}}
+                <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 0; font-size: 10px; color: #666; transform: translateX(-50%);">
+                  {{ $year }}
+                </div>
+                <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 12px; width: 1px; height: 8px; background: #ccc;"></div>
+              {{- end -}}
+              <!-- 25% interval markers -->
+              {{- range $i := seq 1 3 -}}
+                {{- $pct := mul $i 25.0 -}}
+                <div style="position: absolute; left: {{ printf "%.2f" $pct }}%; top: 12px; width: 1px; height: 4px; background: #999;"></div>
+              {{- end -}}
+            </div>
+            
+            <!-- Focus area bars with titles on bars -->
+            {{- range $i, $fa := $topFocusAreas -}}
+              {{- $tag := $fa.tag -}}
+              {{- $data := $fa.data -}}
+              {{- $faFirst := $data.first_talk -}}
+              {{- $faLast := $data.last_talk -}}
+              {{- if eq (printf "%T" $faFirst) "string" }}{{ $faFirst = time $faFirst }}{{ end -}}
+              {{- if eq (printf "%T" $faLast) "string" }}{{ $faLast = time $faLast }}{{ end -}}
+              {{- $startPct := mul (div (sub $faFirst.Year $hackerFirstTalk.Year | float) $timelineYears) 100.0 -}}
+              {{- $endPct := mul (div (add (sub $faLast.Year $hackerFirstTalk.Year) 1 | float) $timelineYears) 100.0 -}}
+              {{- $widthPct := sub $endPct $startPct -}}
+              <div style="position: relative; height: 20px; margin-bottom: 8px;">
+                <div style="position: absolute; left: 0; top: 4px; height: 12px; background: #e9ecef; border-radius: 6px; width: 100%;"></div>
+                <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; top: 4px; height: 12px; width: {{ printf "%.2f" $widthPct }}%; background: {{ $data.color }}; border-radius: 6px; position: relative;">
+                  <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); text-align: center; width: 100%;">
+                    <a href="/focusarea/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $data.name }}</a>
+                  </div>
                 </div>
               </div>
-            </div>
-          {{- end -}}
+            {{- end -}}
+          </div>
         </div>
-      </div>
-    {{ end }}
-  </details>
+      {{ end }}
+    </details>
+  {{ end }}
 {{ end }}
-
 <!-- Hacktivity Timeline -->
 <hr />  
 <h1>Hacktivity</h1>

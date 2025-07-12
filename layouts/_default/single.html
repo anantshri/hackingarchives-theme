@@ -38,22 +38,24 @@
 {{ end }}
 
 </div>
-{{ if .Params.tag }}
-	{{ $hasValidTags := false }}
-	{{ range .Params.tag }}
-		{{ if and . (ne . "") }}
-			{{ $hasValidTags = true }}
+{{ if $.Site.Params.experimental_mode }}
+	{{ if .Params.tag }}
+		{{ $hasValidTags := false }}
+		{{ range .Params.tag }}
+			{{ if and . (ne . "") }}
+				{{ $hasValidTags = true }}
+			{{ end }}
 		{{ end }}
-	{{ end }}
-{{ if $hasValidTags }}
-	<hr />
-	<center>
-	{{ range .Params.tag }}
-		{{ if and . (ne . "") }}
-			<a href="/tag/{{ . }}" target="_blank" class="tag-link" rel="noreferrer noopener nofollow">{{ . }}</a>
+	{{ if $hasValidTags }}
+		<hr />
+		<center>
+		{{ range .Params.tag }}
+			{{ if and . (ne . "") }}
+				<a href="/tag/{{ . }}" target="_blank" class="tag-link" rel="noreferrer noopener nofollow">{{ . }}</a>
+			{{ end }}
 		{{ end }}
-	{{ end }}
-</center>
+	</center>
+		{{ end }}
 	{{ end }}
 {{ end }}
 

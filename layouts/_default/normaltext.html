@@ -1,0 +1,12 @@
+{{ partial "header.html" . }}
+
+<main>
+
+{{ with .Content }}
+<div class="clear"></div>
+  {{- . -}}
+{{ end }}
+
+</main>
+
+{{ partial "footer.html" . }}
