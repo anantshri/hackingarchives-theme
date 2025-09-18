@@ -279,7 +279,7 @@
         <li>
           <span class="date">{{ .Date.Format "2006/01/02" }}</span>
           <a href="/type/{{ .Params.type | urlize }}/">{{ .Params.type | humanize | title }}</a> :
-          <a class="tagtypelink" href="/{{ cond .Params.award (printf "award/%s" .Params.award) (printf "conference/%s" .Params.conference) | lower | urlize }}">{{ cond .Params.award .Params.award .Params.conference | humanize | title }}</a>
+          <a class="tagtypelink" href="/{{ cond .Params.award (printf "award/%s" .Params.award) (cond .Params.publisher (printf "publisher/%s" .Params.publisher) (printf "conference/%s" .Params.conference)) | lower | urlize }}">{{ cond .Params.award .Params.award (cond .Params.publisher .Params.publisher .Params.conference) | humanize | title }}</a>{{ partial "subconference.html" . }}
           : <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
           {{- $totalHackers := 0 -}}
           {{- if .Params.hacker -}}
