@@ -1,0 +1,56 @@
+<!-- Initial Code from a hugo forum https://discourse.gohugo.io/t/solved-conditional-logic-for-data-driven-content-that-returns-no-result/13085/3 and https://bofh.org.uk/2020/05/12/oembed-for-hugo/ -->
+{{ $url := .url }}
+{{ $out := "" }}
+{{ $size := "&maxwidth=450&maxheight=250" }}
+{{ $frame_prop := "iframe loading='lazy' style='position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;'" }}
+{{ $embedURL := urls.Parse $url }}
+{{ $matched := 0 }}
+{{ $data := dict }}
+{{- range .context.Site.Data.oembed }}
+  {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
+    {{ $matched = 1 }}
+    <!-- these below two variables to defined here otherwise cant access them inside with context -->
+    {{ $nowrapper := .nowrapper | default false }}
+    {{ $autoheight := .autoheight | default false }}
+    {{- $jsonUrl := printf "%s?format=json&url=%s" .endpoint $url }}
+    {{ with try (resources.GetRemote $jsonUrl) }}
+      {{ with .Err }}
+        {{ warnf "Error on %q : %s " $jsonUrl . }}
+        <br /><b>URL : </b>
+        <a href="{{ $url }}" target="_blank" rel="noreferrer noopener nofollow">{{ $url }}</a>
+      {{ else }}
+        {{ with try ( .Value | transform.Unmarshal) }}
+          {{ with .Err }}
+            {{ warnf " Errorize %s " . }}
+          {{ else }}
+            {{ $data = .Value }}
+          {{ end }}
+        {{ end }}
+      {{ end }}
+    {{ else }}
+      {{ warnf "Unable to get remote resource %q" $jsonUrl }}
+        <br /><b>URL : </b>
+        <a href="{{ $url }}" target="_blank" rel="noreferrer noopener nofollow">{{ $url }}</a>
+    {{ end }}
+    {{- with $data }}
+      {{ $frame := printf "title='%s' " .title | printf "%s%s" $frame_prop }}
+      {{ $out := replace .html "iframe " $frame | safeHTML }}
+      {{if $nowrapper }}
+        {{ $out }}
+      {{else}}
+        {{ if $autoheight }}
+          <div style="position: relative; padding-bottom: {{ .height }}px; height: 0; overflow: hidden;">
+        {{ else }}
+          <div style="position: relative; padding-bottom: 55.25%; height: 0; overflow: hidden;">
+        {{ end }}
+      {{ $out }}
+      </div>
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ if eq $matched 0 }}
+  <br /><b>URL : </b>
+  <a href="{{ $url }}" target="_blank" rel="noreferrer noopener nofollow">{{ $url }}</a>
+{{ end }}
