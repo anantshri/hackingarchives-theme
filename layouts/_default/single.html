@@ -1,4 +1,20 @@
 {{ partial "header.html" . }}
+{{ if .Draft }}
+<div class="notice warning" style="margin: 20px 0;">
+    <p class="notice-title">
+        <span class="icon-notice baseline">
+            {{ "static/warning.svg" | readFile | safeHTML }}
+        </span>
+        Draft Entry
+    </p>
+	{{ if .Params.reason }}
+	<p><strong>This page is Draft because:</strong> {{ .Params.reason | markdownify }}</p>
+	{{ else }}
+	<p><strong>This page is Draft</strong></p>
+	{{ end }}
+</div>
+{{ end }}
+
 <div class="article-meta">
 
 <h1><span class="title">{{ .Title | markdownify }}</span></h1>
@@ -38,6 +54,7 @@
 {{ end }}
 
 </div>
+
 {{ if $.Site.Params.experimental_mode }}
 	{{ if .Params.tag }}
 		{{ $hasValidTags := false }}

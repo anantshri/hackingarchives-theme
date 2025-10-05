@@ -1,6 +1,18 @@
 {{ partial "header.html" . }}
 
 {{if not .IsHome }}
+{{ if and .Draft .Params.reason }}
+<div class="notice warning" style="margin: 20px 0;">
+    <p class="notice-title">
+        <span class="icon-notice baseline">
+            {{ "static/warning.svg" | readFile | safeHTML }}
+        </span>
+        Draft Entry
+    </p>
+    <p><strong>This page is Draft because:</strong> {{ .Params.reason | markdownify }}</p>
+</div>
+{{ end }}
+
 <center>
   <div class="card">
   {{ $imgpath := path.Join "static" "conference" .Data.Term }}
@@ -35,7 +47,7 @@
 {{ .Content  }}
 </div>
 <div class="listing">
-  <h2>List of Conferences</h2>
+  <h2>List of Sessions</h2>
   <hr/>
   {{ range .Pages.GroupByDate "2006" }}
     <center class="year-key"><b>----  {{ .Key }} ----</b></center>

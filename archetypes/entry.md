@@ -3,6 +3,7 @@ title: "{{ replace .Name "-" " " | title }}"
 date: {{ .Date }}
 conference: 
 draft: false
+reason: ""
 type: talk
 hacker: 
     - 
