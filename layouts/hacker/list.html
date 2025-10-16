@@ -108,46 +108,36 @@
 {{- end -}}
 
 <!-- Profile Header Section -->
-<center>
-  <div class="card">
-    {{- $imgBasePath := path.Join "static" "hacker" $hacker -}}
-    {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
-    {{- $photopath := "" -}}
-    
-    {{- range $ext := $extensions -}}
-      {{- if (fileExists (print $imgBasePath $ext)) -}}
-        {{- $photopath = print "/hacker/" $hacker $ext -}}
-        {{- break -}}
-      {{- end -}}
+<div class="profile-header">
+  {{- $imgBasePath := path.Join "static" "hacker" $hacker -}}
+  {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
+  {{- $photopath := "" -}}
+  
+  {{- range $ext := $extensions -}}
+    {{- if (fileExists (print $imgBasePath $ext)) -}}
+      {{- $photopath = print "/hacker/" $hacker $ext -}}
+      {{- break -}}
     {{- end -}}
+  {{- end -}}
 
-    {{- if $photopath }}
-      <img class="profilephoto" src="{{ $photopath }}" alt="Profile photo of {{ .Title | title }}">
-    {{ end }}
+  {{- if $photopath }}
+    <img class="profile-image" src="{{ $photopath }}" alt="Profile photo of {{ .Title | title }}">
+  {{ end }}
 
-    <div class="container">
-      <h2><b>{{ .Title | markdownify | title }}</b></h2>
-      <p>{{ partial "social.html" . }}</p>
-
-      {{ if gt (len $videoParams) 0 }}
-        <a href="https://www.youtube.com/watch_videos?video_ids={{ delimit $videoParams "," }}" target="_blank" rel="noreferrer noopener">Dynamic Video Playlist</a>
-      {{ end }}
+  <div class="profile-info">
+    <h1>{{ .Title | markdownify | title }}</h1>
+    <div class="profile-links">
+      {{ partial "social.html" . }}
     </div>
+    {{ if gt (len $videoParams) 0 }}
+      <div class="mt-3">
+        <a href="https://www.youtube.com/watch_videos?video_ids={{ delimit $videoParams "," }}" target="_blank" rel="noreferrer noopener">📹 Dynamic Video Playlist</a>
+      </div>
+    {{ end }}
   </div>
-</center>
+</div>
 
-<!-- Activities Summary -->
-{{- if len $categoryCounts -}}
-  <hr />
-  <section aria-labelledby="activities-heading">
-    <b>Activities:</b> 
-      {{- range $category, $count := $categoryCounts -}}
-        {{ $category | humanize | title }} - {{ $count }};
-      {{- end -}}
-  </section>
-{{ end }}
-
-<!-- Tools Section -->
+<!-- Prepare unique tools list -->
 {{- $uniqueTools := slice -}}
 {{- range $tools -}}
   {{- if not (in $uniqueTools .) -}}
@@ -155,17 +145,7 @@
   {{- end -}}
 {{- end -}}
 
-{{ if len $uniqueTools }}
-  <hr />
-  <section aria-labelledby="tools-heading">
-    <b id="tools-heading">Tools Contributed or Authored: </b>
-      {{- range $uniqueTools -}}
-        <strong><a href="/tool/{{ . | urlize }}">{{ . }}</a></strong>&nbsp;
-      {{- end -}}
-  </section>
-{{ end }}
-
-<!-- Collaborators Section -->
+<!-- Prepare collaborators list -->
 {{- $commonCollaborators := slice -}}
 {{- range $name, $count := $collaborators -}}
   {{- if gt $count 1 -}}
@@ -173,14 +153,33 @@
   {{- end -}}
 {{- end -}}
 
-{{ if gt (len $commonCollaborators) 0 }}
-  <hr />
-  <section aria-labelledby="collaborators-heading">
-    <b id="collaborators-heading">Common Collaborators:</b>&nbsp;
-      {{- range (sort $commonCollaborators "count" "desc") -}}
-        <a href="/hacker/{{ .name }}"><strong>{{ .name | humanize | title }}({{ .count }})</strong></a>;
-      {{- end -}}
-  </section>
+<!-- Activities Summary -->
+{{- if or (len $categoryCounts) (len $uniqueTools) (gt (len $commonCollaborators) 0) -}}
+  <div class="info-box">
+    {{- if len $categoryCounts -}}
+      <p><strong>Activities:</strong> 
+        {{- range $category, $count := $categoryCounts -}}
+          {{ $category | humanize | title }} - {{ $count }};
+        {{- end -}}
+      </p>
+    {{ end }}
+    
+    {{ if len $uniqueTools }}
+      <p><strong>Tools Contributed or Authored:</strong>
+        {{- range $uniqueTools -}}
+          <a href="/tool/{{ . | urlize }}">{{ . }}</a>&nbsp;
+        {{- end -}}
+      </p>
+    {{ end }}
+    
+    {{ if gt (len $commonCollaborators) 0 }}
+      <p><strong>Common Collaborators:</strong>
+        {{- range (sort $commonCollaborators "count" "desc") -}}
+          <a href="/hacker/{{ .name }}">{{ .name | humanize | title }}({{ .count }})</a>&nbsp;
+        {{- end -}}
+      </p>
+    {{ end }}
+  </div>
 {{ end }}
 
 <!-- Timeline Section -->
@@ -197,8 +196,8 @@
 
   {{ if and (gt (len $topFocusAreas) 0) (gt $timelineYears 3) }}
     <hr />
-    <details style="margin: 20px 0;">
-      <summary style="cursor: pointer; font-weight: bold; color: #007bff; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+    <details class="experimental-timeline">
+      <summary>
         Experimental Timeline
       </summary>
 
@@ -221,23 +220,23 @@
 
       <!-- Timeline Visualization -->
       {{ if gt (len $topFocusAreas) 0 }}
-        <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
-          <div style="margin-bottom: 16px;">
+        <div class="timeline-container">
+          <div>
             <!-- Year markers and 25% intervals -->
-            <div style="position: relative; height: 20px; margin-bottom: 8px;">
+            <div class="timeline-year-markers">
               {{- $startYear := $hackerFirstTalk.Year -}}
               {{- $endYear := $hackerLastTalk.Year -}}
               {{- range $year := seq $startYear $endYear -}}
                 {{- $yearPct := mul (div (sub $year $startYear | float) $timelineYears) 100.0 -}}
-                <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 0; font-size: 10px; color: #666; transform: translateX(-50%);">
+                <div class="timeline-year-label" style="left: {{ printf "%.2f" $yearPct }}%;">
                   {{ $year }}
                 </div>
-                <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 12px; width: 1px; height: 8px; background: #ccc;"></div>
+                <div class="timeline-year-tick" style="left: {{ printf "%.2f" $yearPct }}%;"></div>
               {{- end -}}
               <!-- 25% interval markers -->
               {{- range $i := seq 1 3 -}}
                 {{- $pct := mul $i 25.0 -}}
-                <div style="position: absolute; left: {{ printf "%.2f" $pct }}%; top: 12px; width: 1px; height: 4px; background: #999;"></div>
+                <div class="timeline-interval-tick" style="left: {{ printf "%.2f" $pct }}%;"></div>
               {{- end -}}
             </div>
             
@@ -252,11 +251,11 @@
               {{- $startPct := mul (div (sub $faFirst.Year $hackerFirstTalk.Year | float) $timelineYears) 100.0 -}}
               {{- $endPct := mul (div (add (sub $faLast.Year $hackerFirstTalk.Year) 1 | float) $timelineYears) 100.0 -}}
               {{- $widthPct := sub $endPct $startPct -}}
-              <div style="position: relative; height: 20px; margin-bottom: 8px;">
-                <div style="position: absolute; left: 0; top: 4px; height: 12px; background: #e9ecef; border-radius: 6px; width: 100%;"></div>
-                <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; top: 4px; height: 12px; width: {{ printf "%.2f" $widthPct }}%; background: {{ $data.color }}; border-radius: 6px; position: relative;">
-                  <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); text-align: center; width: 100%;">
-                    <a href="/focusarea/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $data.name }}</a>
+              <div class="timeline-focus-area">
+                <div class="timeline-focus-background"></div>
+                <div class="timeline-focus-bar" style="left: {{ printf "%.2f" $startPct }}%; width: {{ printf "%.2f" $widthPct }}%; background: {{ $data.color }};">
+                  <div class="timeline-focus-label">
+                    <a href="/focusarea/{{ $fa.tag | urlize }}/">{{ $data.name }}</a>
                   </div>
                 </div>
               </div>
@@ -268,55 +267,55 @@
   {{ end }}
 {{ end }}
 <!-- Hacktivity Timeline -->
-<hr />  
-<h1>Hacktivity</h1>
-<hr />
-
-{{ range .Pages.GroupByDate "2006" }}
-  <section aria-labelledby="year-{{ .Key }}-heading">
-    <h4 id="year-{{ .Key }}-heading" class="year-key" style="text-align: center;"><strong>---- {{ .Key }} ----</strong></h4>
-    <ul>
+<section>
+  <h2>Hacktivity</h2>
+  
+  <div class="timeline">
+    {{ range .Pages.GroupByDate "2006" }}
+      <div class="timeline-year">---- {{ .Key }} ----</div>
       {{ range .Pages }}
-        <li>
-          <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-          <a href="/type/{{ .Params.type | urlize }}/">{{ .Params.type | humanize | title }}</a> :
-          <a class="tagtypelink" href="/{{ cond .Params.award (printf "award/%s" .Params.award) (cond .Params.publisher (printf "publisher/%s" .Params.publisher) (printf "conference/%s" .Params.conference)) | lower | urlize }}">{{ cond .Params.award .Params.award (cond .Params.publisher .Params.publisher .Params.conference) | humanize | title }}</a>{{ partial "subconference.html" . }}
-          : <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
-          {{- $totalHackers := 0 -}}
-          {{- if .Params.hacker -}}
-            {{- $totalHackers = add $totalHackers (len .Params.hacker) -}}
-          {{- end -}}
-          {{- if .Params.morehackers -}}
-            {{- $totalHackers = add $totalHackers (len .Params.morehackers) -}}
-          {{- end -}}
-          
-          {{- if gt $totalHackers 1 -}}
-           &nbsp;-&nbsp;
+        <div class="timeline-item">
+          <div class="timeline-date">{{ .Date.Format "2006/01/02" }}</div>
+          <div class="timeline-content">
+            <span class="badge{{ if or (eq .Params.type "Keynote") (eq .Params.type "Book") }} badge-secondary{{ end }}">{{ .Params.type | humanize | title }}</span>
+            <a href="/{{ cond .Params.award (printf "award/%s" .Params.award) (cond .Params.publisher (printf "publisher/%s" .Params.publisher) (printf "conference/%s" .Params.conference)) | lower | urlize }}">{{ cond .Params.award .Params.award (cond .Params.publisher .Params.publisher .Params.conference) | humanize | title }}</a>{{ partial "subconference.html" . }}:
+            <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+            {{- $totalHackers := 0 -}}
             {{- if .Params.hacker -}}
-              {{- range .Params.hacker -}}
-                  <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>&nbsp;
-              {{- end -}}
+              {{- $totalHackers = add $totalHackers (len .Params.hacker) -}}
             {{- end -}}
             {{- if .Params.morehackers -}}
-              {{- range .Params.morehackers -}}
-                <u>{{- . | humanize | title -}}</u>&nbsp;
+              {{- $totalHackers = add $totalHackers (len .Params.morehackers) -}}
+            {{- end -}}
+            
+            {{- if gt $totalHackers 1 -}}
+             - 
+              {{- if .Params.hacker -}}
+                {{- range .Params.hacker -}}
+                    <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>,
+                {{- end -}}
+              {{- end -}}
+              {{- if .Params.morehackers -}}
+                {{- range .Params.morehackers -}}
+                  <u>{{ . | humanize | title }}</u>,
+                {{- end -}}
               {{- end -}}
             {{- end -}}
-          {{- end -}}
-          {{- $paramValue := .Params -}}
-          {{- range (slice "presentation" "whitepaper" "Source" "video") -}}
-            {{- $type := . -}}
-            {{- $val := index $paramValue $type -}}
-            {{- with $val -}}
-              <a class="fa-icon-set" href="{{ . }}" target="_blank" rel="noreferrer noopener nofollow" aria-label="{{ $type | title }}">
-                <img src="/fontawesome/{{ $type | lower }}.svg" style="width:15px; padding-left:2px;" alt="{{ $type | title }} icon">
-              </a>
+            {{- $paramValue := .Params -}}
+            {{- range (slice "presentation" "whitepaper" "Source" "video") -}}
+              {{- $type := . -}}
+              {{- $val := index $paramValue $type -}}
+              {{- with $val -}}
+                <a href="{{ . }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="{{ $type | title }}">
+                  {{ if eq $type "presentation" }}📊{{ else if eq $type "whitepaper" }}📄{{ else if eq $type "Source" }}💾{{ else if eq $type "video" }}📹{{ end }}
+                </a>
+              {{- end -}}
             {{- end -}}
-          {{- end -}}
-        </li>
+          </div>
+        </div>
       {{ end }}
-    </ul>
-  </section>
-{{ end }}
+    {{ end }}
+  </div>
+</section>
 
 {{ partial "footer.html" . }}

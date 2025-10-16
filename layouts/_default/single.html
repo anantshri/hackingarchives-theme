@@ -1,157 +1,180 @@
 {{ partial "header.html" . }}
 
-
-<div class="article-meta">
-
-<h1><span class="title">{{ .Title | markdownify }}</span></h1>
-{{ if .Params.hacker }}
-	<h2 class="author">By
-	{{ range .Params.hacker }}
-			&nbsp;<a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>&nbsp;
-	{{ end }}
-	{{ range .Params.morehackers }}
-		{{ $nm := trim . " " }}
-		{{ if (not (eq $nm "" )) }}
-			,&nbsp;<u>{{ . | humanize | title }}</u>&nbsp;
-		{{ end }}
-	{{ end }}
-	{{ if (gt .Params.date 0) }} on {{ .Date.Format "02 Jan 2006" }}{{ end }}
-
-	{{ if .Params.conference }} @ <a href="/conference/{{ .Params.conference | urlize }}">{{ .Params.conference | humanize | title }}</a>{{ end }} 
-	{{ partial "subconference.html" . }}
-	</h2>
-
-{{ end }}
-
-{{if .Params.presentation }}
-<a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" class="icons_talks"></a>
-{{ end }}
-{{if .Params.whitepaper }}
-<a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" class="icons_talks"></a>
-{{ end }}
-{{if .Params.Source }}
-<a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" class="icons_talks" ></a>
-{{ end }}
-{{if .Params.video }}
-<a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" class="icons_talks"></a>
-{{ end }}
-{{if .Params.conf_link }}
-<a href="{{ .Params.conf_link }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/link.svg" class="icons_talks"></a>
-{{ end }}
-
-</div>
-
-{{ if $.Site.Params.experimental_mode }}
-	{{ if .Params.tag }}
-		{{ $hasValidTags := false }}
-		{{ range .Params.tag }}
-			{{ if and . (ne . "") }}
-				{{ $hasValidTags = true }}
-			{{ end }}
-		{{ end }}
-	{{ if $hasValidTags }}
-		<hr />
-		<center>
-		{{ range .Params.tag }}
-			{{ if and . (ne . "") }}
-				<a href="/tag/{{ . }}" target="_blank" class="tag-link" rel="noreferrer noopener nofollow">{{ . }}</a>
-			{{ end }}
-		{{ end }}
-	</center>
-		{{ end }}
-	{{ end }}
-{{ end }}
-
-<hr />
-{{ if .Params.tool }}
-<div class="talk_tools">
-	This <b>{{ .Params.type }}</b> covers following tools where the speaker has contributed or authored<br/>
-	{{ $tools := .Params.tool }}
-	{{ $type := (printf "%T" $tools) }}
-	{{ if eq $type "string" }}
-		<b><a href="/tool/{{ urlize $tools }}">{{ upper $tools }}</a></b>
-	{{ else }} 
-		{{ range $tools  }}
-			<b><a href="/tool/{{ urlize . }}">{{ upper . }}</a></b>
-		{{ end }}
-	{{ end }}
-</div>
-{{ end }}
-
-{{ if .Params.technique }}
-<div class="talk_tools">
-	This <b>{{ .Params.type }}</b> covers technique(s) listed below<br/>
-	{{ $tools := .Params.technique }}
-	{{ $type := (printf "%T" $tools) }}
-	{{ if eq $type "string" }}
-		<b><a href="/technique/{{ urlize $tools }}">{{ upper $tools }}</a></b>
-	{{ else }} 
-		{{ range $tools  }}
-			<b><a href="/technique/{{ urlize . }}">{{ upper . }}</a></b>
-		{{ end }}
-	{{ end }}
-</div>
-{{ end }}
-
-<main>
-
-{{ $presentation_embedable := 0 }}
-{{ $video_embedable := 0 }}
-{{if .Params.presentation}}
-	{{ $embedURL := urls.Parse .Params.presentation }}
-	{{- range $.Site.Data.oembed }}
-	  {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
-	    {{ $presentation_embedable = 1 }}
-	  {{ end }}
+<div class="container-narrow">
+  <!-- Entry Header -->
+  <div class="entry-header">
+    <h1>{{ .Title | markdownify }}</h1>
+    
+    {{ if .Params.hacker }}
+    <div class="entry-meta">
+      By 
+      {{ range $index, $author := .Params.hacker }}
+        {{- if gt $index 0 }}, {{ end -}}
+        <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+      {{ end }}
+      {{ range .Params.morehackers }}
+        {{ $nm := trim . " " }}
+        {{ if (not (eq $nm "" )) }}
+          , <span>{{ . | humanize | title }}</span>
+        {{ end }}
+      {{ end }}
+      {{ if (gt .Params.date 0) }} on {{ .Date.Format "02 Jan 2006" }}{{ end }}
+      {{ if .Params.conference }} @ <a href="/conference/{{ .Params.conference | urlize }}">{{ .Params.conference | humanize | title }}</a>{{ end }} 
+      {{ partial "subconference.html" . }}
+    </div>
     {{ end }}
-{{ end }}
-{{if .Params.video}}
-	{{ $embedURL := urls.Parse .Params.video }}
-	{{- range $.Site.Data.oembed }}
-	  {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
-	    {{ $video_embedable = 1 }}
-	  {{ end }}
-	{{ end }}
-{{ end }}
-{{ if or (eq $presentation_embedable 1) (eq $video_embedable 1) }}
-<h1> Presentation Material</h1>
-{{ end }}
-{{ if and (eq $presentation_embedable 1) (eq $video_embedable 1) }}
-	<div style="width:45%;float:left;display:box;padding-left:2%;padding-right:3%">
-		<h2><center>Presentation</center></h2>
-		{{ partial "oembed.html" (dict "context" . "url" .Params.presentation) }}
-	</div>
+    
+    <!-- Resource Links -->
+    {{ if or .Params.presentation .Params.whitepaper .Params.Source .Params.video .Params.conf_link }}
+    <div class="entry-resources">
+      {{if .Params.presentation }}
+      <a href="{{ .Params.presentation }}" class="resource-link" target="_blank" rel="noreferrer noopener nofollow">
+        <span>📊</span> Presentation
+      </a>
+      {{ end }}
+      {{if .Params.whitepaper }}
+      <a href="{{ .Params.whitepaper }}" class="resource-link" target="_blank" rel="noreferrer noopener nofollow">
+        <span>📄</span> Whitepaper
+      </a>
+      {{ end }}
+      {{if .Params.Source }}
+      <a href="{{ .Params.Source }}" class="resource-link" target="_blank" rel="noreferrer noopener nofollow">
+        <span>💻</span> Source Code
+      </a>
+      {{ end }}
+      {{if .Params.video }}
+      <a href="{{ .Params.video }}" class="resource-link" target="_blank" rel="noreferrer noopener nofollow">
+        <span>📹</span> Video
+      </a>
+      {{ end }}
+      {{if .Params.conf_link }}
+      <a href="{{ .Params.conf_link }}" class="resource-link" target="_blank" rel="noreferrer noopener nofollow">
+        <span>🔗</span> Link
+      </a>
+      {{ end }}
+    </div>
+    {{ end }}
+  </div>
 
-	<div style="width:45%;float:left;display:box;padding-left: 3%;padding-right:2%">
-		<h2><center>Video</center></h2>
-		{{ partial "oembed.html" (dict "context" . "url" .Params.video) }}
-	</div>
-	<div>
-		<br />&nbsp;<br />
-	</div>
-{{ else if eq $presentation_embedable 1 }}
-	{{ partial "oembed.html" (dict "context" . "url" .Params.presentation) }}
-{{ else if eq $video_embedable 1 }}
-	{{ partial "oembed.html" (dict "context" . "url" .Params.video) }}
-{{ end }}
+  <!-- Tags (Experimental) -->
+  {{ if $.Site.Params.experimental_mode }}
+    {{ if .Params.tag }}
+      {{ $hasValidTags := false }}
+      {{ range .Params.tag }}
+        {{ if and . (ne . "") }}
+          {{ $hasValidTags = true }}
+        {{ end }}
+      {{ end }}
+      {{ if $hasValidTags }}
+      <div class="entry-tags">
+        {{ range .Params.tag }}
+          {{ if and . (ne . "") }}
+            <a href="/tag/{{ . }}" class="tag-link" target="_blank" rel="noreferrer noopener nofollow">{{ . }}</a>
+          {{ end }}
+        {{ end }}
+      </div>
+      {{ end }}
+    {{ end }}
+  {{ end }}
 
+  <!-- Tools Section -->
+  {{ if .Params.tool }}
+  <div class="talk_tools">
+    This <b>{{ .Params.type }}</b> covers following tools where the speaker has contributed or authored<br/>
+    {{ $tools := .Params.tool }}
+    {{ $type := (printf "%T" $tools) }}
+    {{ if eq $type "string" }}
+      <b><a href="/tool/{{ urlize $tools }}">{{ upper $tools }}</a></b>
+    {{ else }} 
+      {{ range $tools  }}
+        <b><a href="/tool/{{ urlize . }}">{{ upper . }}</a></b>
+      {{ end }}
+    {{ end }}
+  </div>
+  {{ end }}
 
-{{ with .Content }}
-<div class="clear"></div>
-<h1>Abstract</h1>
-{{ if $.Params.award }}Recognized as <a href="{{ $.Params.conf_link }}">{{ $.Params.award | humanize | title }} in the year {{ dateFormat "2006" $.Params.Date }}</a>{{ end }}
+  <!-- Techniques Section -->
+  {{ if .Params.technique }}
+  <div class="talk_tools">
+    This <b>{{ .Params.type }}</b> covers technique(s) listed below<br/>
+    {{ $tools := .Params.technique }}
+    {{ $type := (printf "%T" $tools) }}
+    {{ if eq $type "string" }}
+      <b><a href="/technique/{{ urlize $tools }}">{{ upper $tools }}</a></b>
+    {{ else }} 
+      {{ range $tools  }}
+        <b><a href="/technique/{{ urlize . }}">{{ upper . }}</a></b>
+      {{ end }}
+    {{ end }}
+  </div>
+  {{ end }}
 
-  {{- . -}}
-{{ end }}
+  <!-- Presentation Material -->
+  {{ $presentation_embedable := 0 }}
+  {{ $video_embedable := 0 }}
+  {{if .Params.presentation}}
+    {{ $embedURL := urls.Parse .Params.presentation }}
+    {{- range $.Site.Data.oembed }}
+      {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
+        {{ $presentation_embedable = 1 }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{if .Params.video}}
+    {{ $embedURL := urls.Parse .Params.video }}
+    {{- range $.Site.Data.oembed }}
+      {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
+        {{ $video_embedable = 1 }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  
+  {{ if or (eq $presentation_embedable 1) (eq $video_embedable 1) }}
+  <section class="entry-section">
+    <h2>Presentation Material</h2>
+    {{ if and (eq $presentation_embedable 1) (eq $video_embedable 1) }}
+      <div class="presentation-container">
+        <div class="presentation-half">
+          <h3 class="text-center">Presentation</h3>
+          {{ partial "oembed.html" (dict "context" . "url" .Params.presentation) }}
+        </div>
 
-{{ $path := .Path }}
-{{ $pathParts := split $path "/" }}
-{{ $newPath := delimit (slice (index $pathParts 2) (index $pathParts 3)) "_" }}
-{{ $file_path := printf ".md.txt.txt" | printf "%s%s" $newPath | printf "%s%s" "transcribe/summary_transcribe_" | printf "%s"}}
-{{ if fileExists $file_path }}
-<h1> AI Generated Summary<sup><a href="/ai_experiements/">may contain errors</a></sup></h1>
-{{ readFile $file_path | markdownify }}
-{{ end }}
-</main>
+        <div class="presentation-half">
+          <h3 class="text-center">Video</h3>
+          {{ partial "oembed.html" (dict "context" . "url" .Params.video) }}
+        </div>
+      </div>
+    {{ else if eq $presentation_embedable 1 }}
+      {{ partial "oembed.html" (dict "context" . "url" .Params.presentation) }}
+    {{ else if eq $video_embedable 1 }}
+      {{ partial "oembed.html" (dict "context" . "url" .Params.video) }}
+    {{ end }}
+  </section>
+  {{ end }}
+
+  <!-- Abstract -->
+  {{ with .Content }}
+  <section class="entry-abstract">
+    <h2>Abstract</h2>
+    {{ if $.Params.award }}
+    <p><strong>Recognized as <a href="{{ $.Params.conf_link }}">{{ $.Params.award | humanize | title }} in the year {{ dateFormat "2006" $.Params.Date }}</a></strong></p>
+    {{ end }}
+    {{- . -}}
+  </section>
+  {{ end }}
+
+  <!-- AI Generated Summary -->
+  {{ $path := .Path }}
+  {{ $pathParts := split $path "/" }}
+  {{ $newPath := delimit (slice (index $pathParts 2) (index $pathParts 3)) "_" }}
+  {{ $file_path := printf ".md.txt.txt" | printf "%s%s" $newPath | printf "%s%s" "transcribe/summary_transcribe_" | printf "%s"}}
+  {{ if fileExists $file_path }}
+  <section class="info-box">
+    <h3>AI Generated Summary <small><a href="/ai_experiements/">(may contain errors)</a></small></h3>
+    {{ readFile $file_path | markdownify }}
+  </section>
+  {{ end }}
+
+</div>
 
 {{ partial "footer.html" . }}

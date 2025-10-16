@@ -10,79 +10,83 @@
 
 {{ $img_link := slice }}
 
-
 {{if not .IsHome }}
-<center>
-  <div class="card">
+<!-- Book Detail Layout -->
+<div class="book-detail">
+  <div>
     {{ $img_loc := printf "%s.*" $book_id | printf "%s%s" "/book/" }}
     {{ with try ( resources.GetMatch $img_loc ) }}
       {{ with .Err }}
-        <br />
-        {{ .Params.Name }}
+        <div class="book-placeholder">No Cover Available</div>
       {{ else }}
         {{ $img_link = .Value }}
+        <img src='{{ ($img_link.Resize "x400 q100").RelPermalink }}' alt="{{ $.Title }}" class="book-cover" />
       {{ end }}
     {{ end }}
-    <div class="container">
-      <br />
-      <h2><b>{{ .Title | markdownify | title }}</b></h2>
-      <br />
-        <img src='{{ ($img_link.Resize "x300 q100").RelPermalink }}' />
-      <p>
-        {{ range .Params.hacker }}
-           <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
-        {{ end }}
-        {{ range .Params.morehackers }}
-           <u>{{ . | humanize | title }}</u>
-        {{ end }}
-        <br />
-        {{ partial "book.html" . }}
-      </p>
-    </div>
   </div>
-</center>
-
-
-<div class="book-details-card card">
-  <div class="details-grid">
-    <div class="detail-item">
-      <div class="detail-text">
-        <span class="detail-label">Published</span>
-        <div class="detail-icon">📅</div>
-        <span class="detail-value">{{ .Params.published_on }}</span>
-      </div>
+  
+  <div class="book-info">
+    <h1>{{ .Title | markdownify }}</h1>
+    
+    <div class="book-authors">
+      {{ $indianHackers := slice }}
+      {{ $otherAuthors := slice }}
+      
+      {{ range .Params.hacker }}
+        {{ $indianHackers = $indianHackers | append (dict "name" . "isHacker" true) }}
+      {{ end }}
+      
+      {{ range .Params.morehackers }}
+        {{ $otherAuthors = $otherAuthors | append . }}
+      {{ end }}
+      
+      {{ range $index, $author := $indianHackers }}
+        {{ if gt $index 0 }}, {{ end }}
+        <a href="/hacker/{{ $author.name }}/">{{ replace ($author.name | humanize | title) " 1" " " }}</a>
+      {{ end }}
+      
+      {{ if and (gt (len $indianHackers) 0) (gt (len $otherAuthors) 0) }}, {{ end }}
+      
+      {{ range $index, $author := $otherAuthors }}
+        {{ if gt $index 0 }}, {{ end }}
+        <span>{{ $author | humanize | title }}</span>
+      {{ end }}
     </div>
-    <div class="detail-item">
-      <div class="detail-text">
-        <span class="detail-label">ISBN-13</span>
-        <div class="detail-icon">📘</div>
-        <span class="detail-value">{{ .Params.print_isbn13 }}</span>
+    
+    {{ partial "book.html" . }}
+    
+    <div class="book-metadata">
+      <div class="metadata-item">
+        <div class="metadata-label">📅 Published</div>
+        <div class="metadata-value">{{ .Params.published_on }}</div>
       </div>
-    </div>
-    <div class="detail-item">
-      <div class="detail-text">
-          <span class="detail-label">Publisher</span>
-          <div class="detail-icon">🏢</div>
-          <span class="detail-value">{{ .Params.publisher }}</span>
+      <div class="metadata-item">
+        <div class="metadata-label">📘 ISBN-13</div>
+        <div class="metadata-value">{{ .Params.print_isbn13 }}</div>
       </div>
-    </div>
-    <div class="detail-item">
-      <div class="detail-text">
-        <span class="detail-label">Length</span>
-        <div class="detail-icon">📏</div>
-        <span class="detail-value">{{ .Params.length }} pages</span>
+      <div class="metadata-item">
+        <div class="metadata-label">🏢 Publisher</div>
+        <div class="metadata-value">{{ .Params.publisher }}</div>
+      </div>
+      <div class="metadata-item">
+        <div class="metadata-label">📏 Length</div>
+        <div class="metadata-value">{{ .Params.length }} pages</div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Book Description -->
+<section class="book-description">
+  {{ if .Content }}
+    <h2>About This Book</h2>
+    {{ .Content }}
+  {{ end }}
+  
+  <div class="info-box">
+    <p><small>* Book purchase links might be affiliate links and could result in some passive earning to the site maintainer</small></p>
+  </div>
+</section>
 {{ end }}
-
-<div class="bookcontent">
-  {{ .Content }}
-</div>
-
-<note>
-  * Book purchase links might be affiliate links and could result in some passive earning to the site maintainer
-</note>
 
 {{ partial "footer.html" . }} 

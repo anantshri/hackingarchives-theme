@@ -11,7 +11,7 @@
         <p>{{ $current_focus_area.description }}</p>
 
         {{ if $current_focus_area.tags }}
-        <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
+        <div class="notice info">
             <h3>Related Tags</h3>
             <p>This focus area includes content tagged with: 
             {{ range $current_focus_area.tags }}
@@ -35,7 +35,7 @@
         {{ end }}
 
         {{ if gt (len $matching_pages) 0 }}
-        <div style="margin: 20px 0; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745;">
+        <div class="notice success">
             <h3>Statistics</h3>
             <ul>
                 <li><strong>Total Entries:</strong> {{ len $matching_pages }}</li>
@@ -71,7 +71,7 @@
         </div>
 
         {{ if gt (len $hackerCount) 0 }}
-        <div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
+        <div class="notice warning">
             <h3>Top Contributors</h3>
             {{ $hackerPairs := slice }}
             {{ range $k, $v := $hackerCount }}

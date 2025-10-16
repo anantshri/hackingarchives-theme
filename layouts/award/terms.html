@@ -23,7 +23,7 @@
 </div>
 
 <hr />
-    <div id="award-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+    <div id="award-cloud">
         {{ range $name, $taxonomy := $.Site.Taxonomies.award.ByCount -}}
             {{- $currentAwardCount := len $taxonomy.Pages -}}
             {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentAwardCount $min) $fontStep) ) -}}

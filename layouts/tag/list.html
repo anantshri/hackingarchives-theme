@@ -1,11 +1,11 @@
 {{ if $.Site.Params.experimental_mode }}
     {{ partial "header.html" . }}
 
-    <div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
-        <h4 style="margin: 0; color: #856404;">
+    <div class="notice warning">
+        <h4 class="notice-title">
             <strong>🧪 Experimental Feature</strong>
         </h4>
-        <p style="margin: 10px 0 0 0; color: #856404;">
+        <p>
             Tag-based content organization is an experimental feature. This page and its functionality may change as we refine the tagging system.
         </p>
     </div>
@@ -38,16 +38,16 @@
          <u>{{ . | humanize | title }}</u>
         {{ end }}
         {{if .Params.presentation }}
-        <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" style="width:15px;padding-left:2px;"></a>
+        <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" class="icon-inline" alt="Presentation"></a>
         {{ end }}
         {{if .Params.whitepaper }}
-        <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" style="width:15px;padding-left:2px;"></a>
+        <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" class="icon-inline" alt="Whitepaper"></a>
         {{ end }}
         {{if .Params.Source }}
-        <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" style="width:15px;padding-left:2px;"></a>
+        <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" class="icon-inline" alt="Source Code"></a>
         {{ end }}
         {{if .Params.video }}
-        <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" style="width:15px;padding-left:2px;"></a>
+        <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" class="icon-inline" alt="Video"></a>
         {{ end }}
       </li>
       {{ end }}

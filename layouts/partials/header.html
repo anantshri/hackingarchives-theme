@@ -20,18 +20,21 @@
       Layout: {{ debug.Dump .Layout }}
       Section: {{ debug.Dump .Section }}
     </pre> -->
-    <a href="{{ .Site.BaseURL }}"><h1>{{ .Site.Title }}</h1></a>
-    <nav>
-    <ul class="menu">
-      {{ range .Site.Menus.main }}
-      &nbsp;<li><a href="{{ .URL | relURL }}">&nbsp;&nbsp;{{ .Name }}&nbsp;&nbsp;</a></li>&nbsp;
-      {{ end }}
-    </ul>
-    <hr/>
-    </nav>
+    <header class="site-header">
+      <div class="header-container">
+        <a href="{{ .Site.BaseURL }}" class="site-title">{{ .Site.Title }}</a>
+        <nav class="site-nav">
+          <ul class="menu">
+            {{ range .Site.Menus.main }}
+            <li><a href="{{ .URL | relURL }}">{{ .Name }}</a></li>
+            {{ end }}
+          </ul>
+        </nav>
+      </div>
+    </header>
 
     {{ if .Draft }}
-    <div class="notice warning" style="margin: 20px 0;">
+    <div class="notice warning">
         <p class="notice-title">
             <span class="icon-notice baseline">
                 {{ "static/warning.svg" | readFile | safeHTML }}

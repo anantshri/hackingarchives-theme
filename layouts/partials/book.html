@@ -1,34 +1,49 @@
 {{- $socialLinks := dict
-  "amazon" "/fontawesome/amazon.svg"
-  "flipkart" "/fontawesome/flipkart.svg"
-  "packtpub" "/fontawesome/packt.svg"
-    "github" "/fontawesome/github.svg"
-
+  "amazon" (dict "icon" "/fontawesome/amazon.svg" "label" "Buy on Amazon")
+  "flipkart" (dict "icon" "/fontawesome/flipkart.svg" "label" "Buy on Flipkart")
+  "packtpub" (dict "icon" "/fontawesome/packt.svg" "label" "Buy on PacktPub")
+  "github" (dict "icon" "/fontawesome/github.svg" "label" "View on GitHub")
 -}}
 
 {{- $protocols := slice "http://" "https://" -}}
 
-
+{{- /* Check if we have purchase links to render */ -}}
+{{- $hasPurchaseLinks := false -}}
 {{- range $key, $value := $socialLinks -}}
-  {{- with index $.Params $key -}}
-    {{- $url := . -}}
-    {{- $hasProtocol := false -}}
-    {{- range $protocols -}}
-      {{- if strings.HasPrefix $url . -}}
-        {{- $hasProtocol = true -}}
-        {{- break -}}
-      {{- end -}}
-    {{- end -}}
-    {{- if not $hasProtocol -}}
-      {{- $url = print "https://" $url -}}
-    {{- end -}}
-    <a href="{{ $url }}" target="_blank" rel="noreferrer noopener"><img src="{{ $value }}" class="icons"></a>
+  {{- if index $.Params $key -}}
+    {{- $hasPurchaseLinks = true -}}
   {{- end -}}
 {{- end -}}
 
-{{- /* Handle PacktPub URL from book_link */ -}}
-{{- with $.Params.book_link -}}
-  {{- if strings.HasPrefix . "https://www.packtpub.com" -}}
-    <a href="{{ . }}" target="_blank" rel="noreferrer noopener"><img src="{{ index $socialLinks "packtpub" }}" class="icons"></a>
+{{- if $hasPurchaseLinks -}}
+<div class="book-purchase-links">
+  {{- range $key, $linkData := $socialLinks -}}
+    {{- with index $.Params $key -}}
+      {{- $url := . -}}
+      {{- $hasProtocol := false -}}
+      {{- range $protocols -}}
+        {{- if strings.HasPrefix $url . -}}
+          {{- $hasProtocol = true -}}
+          {{- break -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if not $hasProtocol -}}
+        {{- $url = print "https://" $url -}}
+      {{- end -}}
+      <a href="{{ $url }}" class="purchase-link" target="_blank" rel="noreferrer noopener">
+        <img src="{{ $linkData.icon }}" class="purchase-icon" alt="{{ $linkData.label }}"> {{ $linkData.label }}
+      </a>
+    {{- end -}}
   {{- end -}}
+  
+  {{- /* Handle PacktPub URL from book_link */ -}}
+  {{- with $.Params.book_link -}}
+    {{- if strings.HasPrefix . "https://www.packtpub.com" -}}
+      {{- $packtData := index $socialLinks "packtpub" -}}
+      <a href="{{ . }}" class="purchase-link" target="_blank" rel="noreferrer noopener">
+        <img src="{{ $packtData.icon }}" class="purchase-icon" alt="{{ $packtData.label }}"> {{ $packtData.label }}
+      </a>
+    {{- end -}}
+  {{- end -}}
+</div>
 {{- end -}}

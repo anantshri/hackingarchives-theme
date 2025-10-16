@@ -2,11 +2,11 @@
     {{ partial "header.html" . }}
 
     <div class="container">
-        <div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
-            <h4 style="margin: 0; color: #856404;">
+        <div class="notice warning">
+            <h4 class="notice-title">
                 <strong>🧪 Experimental Feature</strong>
             </h4>
-            <p style="margin: 10px 0 0 0; color: #856404;">
+            <p>
                 Focus Areas are an experimental feature that groups related content by tags. This page and its functionality may change as we refine the categorization system.
             </p>
         </div>
@@ -22,7 +22,7 @@
         <p>{{ $current_focus_area.description }}</p>
 
         {{ if $current_focus_area.tags }}
-        <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
+        <div class="notice info">
             <h3>Related Tags</h3>
             <p>This focus area includes content tagged with: 
             {{ range $current_focus_area.tags }}
@@ -46,7 +46,7 @@
         {{ end }}
 
         {{ if gt (len $matching_pages) 0 }}
-        <div style="margin: 20px 0; padding: 15px; background-color: #e8f5e8; border-left: 4px solid #28a745;">
+        <div class="notice success">
             <h3>Statistics</h3>
             <ul>
                 <li><strong>Total Entries:</strong> {{ len $matching_pages }}</li>
@@ -209,7 +209,7 @@
             {{ $spread := sub $max $min }}
             {{ $fontStep := div $fontSpread $spread }}
 
-            <div id="focusarea-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+            <div id="focusarea-cloud">
                 {{ $focusAreasWithCounts := slice }}
                 {{ range $key, $focus_area := $focus_areas }}
                     {{ if $focus_area.tags }}

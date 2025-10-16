@@ -24,7 +24,7 @@
     </div>
 
     <hr />
-        <div id="organization-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+        <div id="organization-cloud">
             {{ range $name, $taxonomy := $.Site.Taxonomies.organization.ByCount -}}
                 {{- $currentOrgCount := len $taxonomy.Pages -}}
                 {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentOrgCount $min) $fontStep) ) -}}
