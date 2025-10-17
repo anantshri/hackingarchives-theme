@@ -53,7 +53,6 @@
       {{ end }}
     </div>
     
-    {{ partial "book.html" . }}
     
     <div class="book-metadata">
       <div class="metadata-item">
@@ -73,6 +72,8 @@
         <div class="metadata-value">{{ .Params.length }} pages</div>
       </div>
     </div>
+    {{ partial "book.html" . }}
+
   </div>
 </div>
 

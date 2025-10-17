@@ -1,20 +1,24 @@
-{{/* Debug partial to check focus area data loading */}}
-{{- $focusAreaConfig := $.Site.Data.focus_areas -}}
+{{/* Debug partial to check focus area data from content files */}}
+{{- $focusAreaPages := where $.Site.Pages "Section" "focus" -}}
+{{- $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil -}}
 
 <div style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">
-  <h4>Debug: Focus Area Data</h4>
-  <p><strong>Data loaded:</strong> {{ if $focusAreaConfig }}YES{{ else }}NO{{ end }}</p>
-  <p><strong>Data type:</strong> {{ printf "%T" $focusAreaConfig }}</p>
+  <h4>Debug: Focus Area Data (from content)</h4>
+  <p><strong>Data loaded:</strong> {{ if $focusAreaPages }}YES{{ else }}NO{{ end }}</p>
+  <p><strong>Focus areas count:</strong> {{ len $focusAreaPages }}</p>
   
-  {{ if $focusAreaConfig }}
-    <p><strong>Focus areas count:</strong> {{ len $focusAreaConfig.focus_areas }}</p>
+  {{ if $focusAreaPages }}
     <p><strong>Available focus areas:</strong></p>
     <ul>
-      {{- range $key, $value := $focusAreaConfig.focus_areas -}}
-        <li>{{ $key }}: {{ $value.name }} ({{ len $value.tags }} tags)</li>
+      {{- range $focusAreaPages -}}
+        <li>
+          <strong>{{ .Title }}</strong> ({{ .Params.focus_key }})
+          <br><small>Color: {{ .Params.color }}, Icon: {{ .Params.icon }}</small>
+          <br><small>Tags: {{ len .Params.related_tags }} - {{ delimit .Params.related_tags ", " }}</small>
+        </li>
       {{- end -}}
     </ul>
   {{ else }}
-    <p><strong>No focus area data found!</strong></p>
+    <p><strong>No focus area pages found!</strong></p>
   {{ end }}
 </div> 

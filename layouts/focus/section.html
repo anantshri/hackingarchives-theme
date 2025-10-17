@@ -1,0 +1,224 @@
+{{ if $.Site.Params.experimental_mode }}
+    {{ partial "header.html" . }}
+
+    <div class="container">
+        <div class="notice warning">
+            <h4 class="notice-title">
+                <strong>🧪 Experimental Feature</strong>
+            </h4>
+            <p>
+                Focus Areas are an experimental feature that groups related content by tags. This page and its functionality may change as we refine the categorization system.
+            </p>
+        </div>
+
+    {{ if and .File .Params.focus_key }}
+        {{/* This is a specific focus area page - show individual focus area content */}}
+        <div class="focus-detail-header">
+            <h1>
+                <span class="focus-detail-icon">
+                    <i class="fas fa-{{ .Params.icon }}"></i>
+                </span>
+                {{ .Title }}
+            </h1>
+            <p>{{ .Params.description }}</p>
+        </div>
+
+        {{/* Find all content that has any of the related tags */}}
+        {{ $related_tags := .Params.related_tags }}
+        {{ $matching_pages := slice }}
+        {{ if $related_tags }}
+            {{ range $tag := $related_tags }}
+                {{ if isset $.Site.Taxonomies.tag $tag }}
+                    {{ $matching_pages = $matching_pages | append ($.Site.Taxonomies.tag.Get $tag).Pages }}
+                {{ end }}
+            {{ end }}
+            {{/* Remove duplicates and sort by date */}}
+            {{ $matching_pages = sort (uniq $matching_pages) "Date" "desc" }}
+        {{ end }}
+
+        {{ if gt (len $matching_pages) 0 }}
+        {{/* Calculate statistics */}}
+        {{ $hackerCount := dict }}
+        {{ range $matching_pages }}
+            {{ range .Params.hacker }}
+                {{ $hacker := . }}
+                {{ if not (isset $hackerCount $hacker) }}
+                    {{ $hackerCount = merge $hackerCount (dict $hacker 1) }}
+                {{ else }}
+                    {{ $currentCount := index $hackerCount $hacker }}
+                    {{ $hackerCount = merge $hackerCount (dict $hacker (add $currentCount 1)) }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+        
+        {{ $tagCount := dict }}
+        {{ range $matching_pages }}
+            {{ if .Params.tag }}
+                {{ range .Params.tag }}
+                    {{ $tag := . }}
+                    {{ if and $tag (ne $tag "") }}
+                        {{ if not (isset $tagCount $tag) }}
+                            {{ $tagCount = merge $tagCount (dict $tag 1) }}
+                        {{ else }}
+                            {{ $currentCount := index $tagCount $tag }}
+                            {{ $tagCount = merge $tagCount (dict $tag (add $currentCount 1)) }}
+                        {{ end }}
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+
+        {{/* Statistics Cards */}}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-number">{{ len $matching_pages }}</div>
+                <div class="stat-card-label">Total Entries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-number">{{ len $hackerCount }}</div>
+                <div class="stat-card-label">Contributors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-number">{{ len $tagCount }}</div>
+                <div class="stat-card-label">Unique Tags</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-number">{{ len $related_tags }}</div>
+                <div class="stat-card-label">Related Tags</div>
+            </div>
+        </div>
+
+        {{/* Top 10 Most Common Tags */}}
+        {{ if gt (len $tagCount) 0 }}
+        <div class="tag-cloud">
+            <h3>Top 10 Most Common Tags</h3>
+            {{ $tagPairs := slice }}
+            {{ range $k, $v := $tagCount }}
+                {{ $tagPairs = $tagPairs | append (dict "Key" $k "Value" $v) }}
+            {{ end }}
+            {{ $tagCountSorted := sort $tagPairs "Value" "desc" }}
+            {{ range first 10 $tagCountSorted }}
+                <a href="/tag/{{ .Key | urlize }}/">{{ .Key | humanize | title }}<sub>({{ .Value }})</sub></a>
+            {{ end }}
+        </div>
+        {{ end }}
+
+        {{/* Top Contributors - Tag Cloud Style */}}
+        {{ if gt (len $hackerCount) 0 }}
+        <div class="tag-cloud">
+            <h3>Top Contributors</h3>
+            {{ $hackerPairs := slice }}
+            {{ range $k, $v := $hackerCount }}
+                {{ $hackerPairs = $hackerPairs | append (dict "Key" $k "Value" $v) }}
+            {{ end }}
+            {{ $hackerCountSorted := sort $hackerPairs "Value" "desc" }}
+            {{ range first 15 $hackerCountSorted }}
+                <a href="/hacker/{{ .Key | urlize }}/">{{ .Key | humanize | title }}<sub>({{ .Value }})</sub></a>
+            {{ end }}
+        </div>
+        {{ end }}
+
+        {{/* All Related Tags - Collapsed, sorted by count, only if in use */}}
+        {{ if $related_tags }}
+            {{/* Build list of related tags with counts */}}
+            {{ $relatedTagsWithCounts := slice }}
+            {{ range $related_tags }}
+                {{ $tag := . }}
+                {{ if isset $tagCount $tag }}
+                    {{ $count := index $tagCount $tag }}
+                    {{ $relatedTagsWithCounts = $relatedTagsWithCounts | append (dict "Tag" $tag "Count" $count) }}
+                {{ end }}
+            {{ end }}
+            
+            {{ if gt (len $relatedTagsWithCounts) 0 }}
+            <details class="tag-cloud">
+                <summary><h3 style="display: inline; cursor: pointer;">All Related Tags ({{ len $relatedTagsWithCounts }})</h3></summary>
+                <div style="margin-top: 1rem;">
+                    {{ $sortedRelatedTags := sort $relatedTagsWithCounts "Count" "desc" }}
+                    {{ range $sortedRelatedTags }}
+                        <a href="/tag/{{ .Tag | urlize }}/">{{ .Tag | humanize | title }}<sub>({{ .Count }})</sub></a>
+                    {{ end }}
+                </div>
+            </details>
+            {{ end }}
+        {{ end }}
+
+        <hr>
+        <h2>All Entries <span class="subtitle">({{ len $matching_pages }} total, sorted by date)</span></h2>
+
+        <ul class="entry-list">
+          {{ range $matching_pages }}
+            {{ partial "entry-item.html" . }}
+          {{ end }}
+        </ul>
+        {{ else }}
+        <div class="notice error">
+            <h3>No Content Found</h3>
+            <p>No content has been tagged for this focus area yet so far.</p>
+        </div>
+        {{ end }}
+    {{ else }}
+        {{/* This is the main focus area index page - show as tag cloud like homepage */}}
+        <h1>Focus Areas</h1>
+        
+        {{ $focusAreaPages := where .Site.Pages "Section" "focus" }}
+        {{ $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil }}
+        
+        {{ if gt (len $focusAreaPages) 0 }}
+            {{/* Calculate min and max for cloud sizing */}}
+            {{ $fontUnit := "rem" }}
+            {{ $largestFontSize := 2.7 }}
+            {{ $smallestFontSize := 1.5 }}
+            {{ $fontSpread := sub $largestFontSize $smallestFontSize }}
+            
+            {{/* Build array with counts */}}
+            {{ $focusAreasWithCounts := slice }}
+            {{ range $focusAreaPages }}
+                {{ $related_tags := .Params.related_tags }}
+                {{ if $related_tags }}
+                    {{ $matching_pages := slice }}
+                    {{ range $tag := $related_tags }}
+                        {{ if isset $.Site.Taxonomies.tag $tag }}
+                            {{ $matching_pages = $matching_pages | append ($.Site.Taxonomies.tag.Get $tag).Pages }}
+                        {{ end }}
+                    {{ end }}
+                    {{ $count := len (uniq $matching_pages) }}
+                    {{ $focusAreasWithCounts = $focusAreasWithCounts | append (dict "Page" . "Count" $count) }}
+                {{ end }}
+            {{ end }}
+            
+            {{/* Calculate min and max counts */}}
+            {{ $sortedByCount := sort $focusAreasWithCounts "Count" "desc" }}
+            {{ $max := add (index $sortedByCount 0).Count 1 }}
+            {{ $min := (index $sortedByCount (sub (len $sortedByCount) 1)).Count }}
+            {{ if lt $min 1 }}{{ $min = 1 }}{{ end }}
+            
+            <div style="margin-bottom: 20px;">
+                <p>Browse content organized by cybersecurity focus areas. Each area represents a major domain in cybersecurity.</p>
+                <p><strong>Total Focus Areas:</strong> {{ len $focusAreaPages }}</p>
+            </div>
+            
+            <hr />
+            
+            <div id="focusarea-cloud">
+                {{ range $sortedByCount }}
+                    {{ $page := .Page }}
+                    {{ $count := .Count }}
+                    {{- $weight := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
+                    {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weight)) -}}
+                    <a href="{{ $page.RelPermalink }}" style="font-size:{{ $currentFontSize }}{{ $fontUnit }};">
+                        {{- $page.Title -}}
+                        {{- if gt $count 0 -}}<sub>({{ $count }})</sub>{{- end -}}
+                    </a>&nbsp;
+                {{ end }}
+            </div>
+        {{ else }}
+        <div class="notice error">
+            <h3>No Focus Areas Found</h3>
+            <p>No focus areas have been created yet.</p>
+        </div>
+        {{ end }}
+    {{ end }}
+
+    {{ partial "footer.html" . }} 
+{{ end }}

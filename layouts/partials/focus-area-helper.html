@@ -5,24 +5,24 @@
   {{ partial "focus-area-helper.html" (dict "context" . "tag" "web-security") }}
   
   Returns:
-  - focus_area_key: The key of the matching focus area
-  - focus_area_name: The human-readable name
-  - focus_area_color: The color for visualization
-  - focus_area_icon: The icon name
+  - found: true/false
+  - key: The focus_key of the matching focus area
+  - name: The human-readable name (title)
+  - color: The color for visualization
+  - icon: The icon name
 */}}
 
 {{- $context := .context -}}
-{{- $tag := .tag -}}
-{{- $focusAreaConfig := $context.Site.Data.focus_areas -}}
+{{- $tag := .tag | lower -}}
+{{- $focusAreaPages := where $context.Site.Pages "Section" "focus" -}}
+{{- $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil -}}
 
 {{- $result := dict "found" false -}}
 
-{{- if $focusAreaConfig -}}
-  {{- range $areaKey, $areaData := $focusAreaConfig.focus_areas -}}
-    {{- if in $areaData.tags $tag -}}
-      {{- $result = merge $result (dict "found" true "key" $areaKey "name" $areaData.name "color" $areaData.color "icon" $areaData.icon) -}}
-      {{- break -}}
-    {{- end -}}
+{{- range $focusAreaPages -}}
+  {{- if in .Params.related_tags $tag -}}
+    {{- $result = merge $result (dict "found" true "key" .Params.focus_key "name" .Title "color" .Params.color "icon" .Params.icon) -}}
+    {{- break -}}
   {{- end -}}
 {{- end -}}
 

@@ -11,9 +11,7 @@
 <div>
     As of Now I have  details from : 
 <br />
-<b>Conferences</b>: {{ range $name, $taxonomy := $.Site.Taxonomies.conference.ByCount }}
-    <a href="/conference/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
-{{- end }}.<br />
+<b>Conferences</b>: <a href="/conference/">View all {{ len $.Site.Taxonomies.conference }} conferences</a> with {{ len (where .Site.RegularPages "Section" "eq" "hacker") }} talks tracked.<br />
 <b>Awards</b>: {{ range $name, $taxonomy := $.Site.Taxonomies.award.ByCount }}
     <a href="/award/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
 {{- end }}<br /><br />

@@ -1,8 +1,7 @@
 {{ partial "header.html" . }}
 
-<div class="container-narrow">
-  <!-- Entry Header -->
-  <div class="entry-header">
+<!-- Entry Header -->
+<div class="entry-header">
     <h1>{{ .Title | markdownify }}</h1>
     
     {{ if .Params.hacker }}
@@ -55,7 +54,9 @@
     </div>
     {{ end }}
   </div>
+</div>
 
+<div class="entry-content">
   <!-- Tags (Experimental) -->
   {{ if $.Site.Params.experimental_mode }}
     {{ if .Params.tag }}
@@ -71,6 +72,41 @@
           {{ if and . (ne . "") }}
             <a href="/tag/{{ . }}" class="tag-link" target="_blank" rel="noreferrer noopener nofollow">{{ . }}</a>
           {{ end }}
+        {{ end }}
+      </div>
+      {{ end }}
+    {{ end }}
+    
+    <!-- Focus Areas Section -->
+    {{ if .Params.tag }}
+      {{/* Load all focus area pages */}}
+      {{ $focusAreaPages := where $.Site.Pages "Section" "focus" }}
+      {{ $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil }}
+      
+      {{/* Find matching focus areas */}}
+      {{ $matchingFocusAreas := slice }}
+      {{ range $focusAreaPages }}
+        {{ $focusArea := . }}
+        {{ $hasMatch := false }}
+        {{ range $focusArea.Params.related_tags }}
+          {{ $relatedTag := . }}
+          {{ if in $.Params.tag $relatedTag }}
+            {{ $hasMatch = true }}
+          {{ end }}
+        {{ end }}
+        {{ if $hasMatch }}
+          {{ $matchingFocusAreas = $matchingFocusAreas | append $focusArea }}
+        {{ end }}
+      {{ end }}
+      
+      {{ if gt (len $matchingFocusAreas) 0 }}
+      <div class="entry-focus-areas">
+        <strong>Focus Areas:</strong>
+        {{ range $index, $fa := $matchingFocusAreas }}
+          {{- if gt $index 0 }}, {{ end -}}
+          <a href="{{ $fa.RelPermalink }}">
+            <i class="fas fa-{{ $fa.Params.icon }}"></i> {{ $fa.Title }}
+          </a>
         {{ end }}
       </div>
       {{ end }}
@@ -174,7 +210,6 @@
     {{ readFile $file_path | markdownify }}
   </section>
   {{ end }}
-
 </div>
 
 {{ partial "footer.html" . }}

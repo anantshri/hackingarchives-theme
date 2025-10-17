@@ -6,6 +6,7 @@
 {{ $show_presentation_details := "Yes" }}
 {{ $show_book_details := "Yes" }}
 {{ $show_tool_content := "Yes" }}
+{{ $show_talks_without_tags := "Yes" }}
 
 {{/* Define pages variable for use in multiple sections */}}
 {{ $pages := .Site.RegularPages }}
@@ -23,6 +24,9 @@
   {{ end }}
   {{ if eq $show_tool_content "Yes" }}
     <a href="#tools">Tools</a>
+  {{ end }}
+  {{ if eq $show_talks_without_tags "Yes" }}
+    <a href="#talks-without-tags">Talks Without Tags</a>
   {{ end }}
 </div>
 
@@ -404,6 +408,42 @@
       </tr>
       {{ $count = add $count 1 }}
     {{ end }}
+  {{ end }}
+{{ end }}
+</table>
+{{ end }}
+
+{{ if eq $show_talks_without_tags "Yes" }}
+<h1 id="talks-without-tags">Talks Without Tags</h1>
+<table>
+<tr>
+<th>S.No</th>
+<th> Name of Entry </th>
+<th> Conference </th>
+<th> Year </th>
+</tr>
+{{ $count := 1 }}
+{{ range (where $pages "Type" "talk") }}
+  {{ $hasTags := false }}
+  
+  {{/* Check if tags field exists and has content */}}
+  {{ if .Params.tag }}
+    {{ range .Params.tag }}
+      {{ if . }}
+        {{ $hasTags = true }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  
+  {{/* Only show if no tags or empty tags */}}
+  {{ if not $hasTags }}
+    <tr>
+    <td>{{ $count }}</td>
+    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>{{ .Params.conference | humanize | title  }}</td>
+    <td>{{ .Params.year }}</td>
+    </tr>
+    {{ $count = add $count 1 }}
   {{ end }}
 {{ end }}
 </table>

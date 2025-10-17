@@ -6,31 +6,10 @@
 
 {{ .Content  }}
 
-<ul>
+<ul class="entry-list">
   {{ $pages := .Site.RegularPages.ByDate }}
-  {{ range (where (where $pages "Section" "!=" "") "Section" "!=" "focusarea") }}
-  <li class="timeline-item">
-    <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-    <a href="/type/{{ .Params.type | urlize}}/" class="tagtypelink">{{ .Params.type | humanize | title }}</a> : <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> {{ partial "subconference.html" . }} :	<a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
-    {{ range .Params.hacker }}
-    	<a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
-   	{{ end }}
-    {{ range .Params.morehackers }}
-     <u>{{ . | humanize | title }}</u>
-    {{ end }}
-    {{if .Params.presentation }}
-    <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" class="icon-inline" alt="Presentation"></a>
-    {{ end }}
-    {{if .Params.whitepaper }}
-    <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" class="icon-inline" alt="Whitepaper"></a>
-    {{ end }}
-    {{if .Params.Source }}
-    <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" class="icon-inline" alt="Source Code"></a>
-    {{ end }}
-    {{if .Params.video }}
-    <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" class="icon-inline" alt="Video"></a>
-    {{ end }}
-  </li>
+  {{ range (where (where $pages "Section" "!=" "") "Section" "!=" "focus") }}
+    {{ partial "entry-item.html" . }}
   {{ end }}
 </ul>
 

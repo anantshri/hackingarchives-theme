@@ -14,8 +14,13 @@
 {{- $hackerFirstTalk := now -}}
 {{- $hackerLastTalk := time "1970-01-01" -}}
 
-<!-- Load focus area data from JSON file -->
-{{- $focusAreaConfig := index $.Site.Data "focus-areas" -}}
+<!-- Load focus area data from content files -->
+{{- $focusAreaPages := where $.Site.Pages "Section" "focus" -}}
+{{- $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil -}}
+{{- $focusAreaConfig := dict -}}
+{{- range $focusAreaPages -}}
+  {{- $focusAreaConfig = merge $focusAreaConfig (dict .Params.focus_key (dict "name" .Title "color" .Params.color "icon" .Params.icon "tags" .Params.related_tags)) -}}
+{{- end -}}
 
 <!-- Single pass data extraction for better performance -->
 {{- range .Pages -}}
@@ -73,10 +78,10 @@
   {{- if .Params.tag -}}
     {{- range .Params.tag -}}
       {{- $tag := . | lower -}}
-      {{- /* Find which focus area this tag belongs to using data file */ -}}
+      {{- /* Find which focus area this tag belongs to using content files */ -}}
       {{- $matchingFocusArea := "" -}}
       {{- if $focusAreaConfig -}}
-        {{- range $areaKey, $areaData := $focusAreaConfig.focus_areas -}}
+        {{- range $areaKey, $areaData := $focusAreaConfig -}}
           {{- if in $areaData.tags $tag -}}
             {{- $matchingFocusArea = $areaKey -}}
             {{- break -}}
@@ -87,7 +92,7 @@
       {{- if $matchingFocusArea -}}
         {{- $existingData := index $focusAreaData $matchingFocusArea -}}
         {{- if not $existingData -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig.focus_areas $matchingFocusArea).name "color" (index $focusAreaConfig.focus_areas $matchingFocusArea).color)) -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig $matchingFocusArea).name "color" (index $focusAreaConfig $matchingFocusArea).color)) -}}
         {{- else if eq (printf "%T" $existingData) "map[string]interface {}" -}}
           {{- $firstTalk := $existingData.first_talk -}}
           {{- $lastTalk := $existingData.last_talk -}}
@@ -100,7 +105,7 @@
           {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk "name" $existingData.name "color" $existingData.color)) -}}
         {{- else -}}
           {{- /* Reset if existing data is not a dictionary */ -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig.focus_areas $matchingFocusArea).name "color" (index $focusAreaConfig.focus_areas $matchingFocusArea).color)) -}}
+          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig $matchingFocusArea).name "color" (index $focusAreaConfig $matchingFocusArea).color)) -}}
         {{- end -}}
       {{- end -}}
     {{- end -}}
@@ -255,7 +260,7 @@
                 <div class="timeline-focus-background"></div>
                 <div class="timeline-focus-bar" style="left: {{ printf "%.2f" $startPct }}%; width: {{ printf "%.2f" $widthPct }}%; background: {{ $data.color }};">
                   <div class="timeline-focus-label">
-                    <a href="/focusarea/{{ $fa.tag | urlize }}/">{{ $data.name }}</a>
+                    <a href="/focus/{{ $fa.tag | urlize }}/">{{ $data.name }}</a>
                   </div>
                 </div>
               </div>
