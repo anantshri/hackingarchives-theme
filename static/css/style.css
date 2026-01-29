@@ -32,8 +32,8 @@
   --color-type-key-border: #a09585;
   
   /* Typography */
-  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
+  --font-primary: 'Fira Code', monospace;
+  --font-mono: 'Fira Code', monospace;
   
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -149,6 +149,8 @@ body {
   background-color: var(--color-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Enable Fira Code ligatures */
+  font-feature-settings: "liga" 1, "calt" 1;
 }
 
 /* ========================================
@@ -522,7 +524,7 @@ thead, tfoot, tr:nth-child(even) {
 #hacker-cloud {
   display: flex;
   flex-wrap: wrap;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  /* padding: var(--spacing-sm) var(--spacing-lg); */
   line-height: 1.5;
   word-spacing: var(--spacing-xs);
   gap: var(--spacing-sm);
