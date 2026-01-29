@@ -274,53 +274,7 @@
 <!-- Hacktivity Timeline -->
 <section>
   <h2>Hacktivity</h2>
-  
-  <div class="timeline">
-    {{ range .Pages.GroupByDate "2006" }}
-      <div class="timeline-year">---- {{ .Key }} ----</div>
-      {{ range .Pages }}
-        <div class="timeline-item">
-          <div class="timeline-date">{{ .Date.Format "2006/01/02" }}</div>
-          <div class="timeline-content">
-            <span class="badge{{ if or (eq .Params.type "Keynote") (eq .Params.type "Book") }} badge-secondary{{ end }}">{{ .Params.type | humanize | title }}</span>
-            <a href="/{{ cond .Params.award (printf "award/%s" .Params.award) (cond .Params.publisher (printf "publisher/%s" .Params.publisher) (printf "conference/%s" .Params.conference)) | lower | urlize }}">{{ cond .Params.award .Params.award (cond .Params.publisher .Params.publisher .Params.conference) | humanize | title }}</a>{{ partial "subconference.html" . }}:
-            <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
-            {{- $totalHackers := 0 -}}
-            {{- if .Params.hacker -}}
-              {{- $totalHackers = add $totalHackers (len .Params.hacker) -}}
-            {{- end -}}
-            {{- if .Params.morehackers -}}
-              {{- $totalHackers = add $totalHackers (len .Params.morehackers) -}}
-            {{- end -}}
-            
-            {{- if gt $totalHackers 1 -}}
-             - 
-              {{- if .Params.hacker -}}
-                {{- range .Params.hacker -}}
-                    <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>,
-                {{- end -}}
-              {{- end -}}
-              {{- if .Params.morehackers -}}
-                {{- range .Params.morehackers -}}
-                  <u>{{ . | humanize | title }}</u>,
-                {{- end -}}
-              {{- end -}}
-            {{- end -}}
-            {{- $paramValue := .Params -}}
-            {{- range (slice "presentation" "whitepaper" "Source" "video") -}}
-              {{- $type := . -}}
-              {{- $val := index $paramValue $type -}}
-              {{- with $val -}}
-                <a href="{{ . }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="{{ $type | title }}">
-                  {{ if eq $type "presentation" }}📊{{ else if eq $type "whitepaper" }}📄{{ else if eq $type "Source" }}💾{{ else if eq $type "video" }}📹{{ end }}
-                </a>
-              {{- end -}}
-            {{- end -}}
-          </div>
-        </div>
-      {{ end }}
-    {{ end }}
-  </div>
+  {{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "visual" "ShowConference" true "ShowHackers" true "ShowType" true "CurrentHacker" $hacker) }}
 </section>
 
 {{ partial "footer.html" . }}

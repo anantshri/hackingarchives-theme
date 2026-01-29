@@ -1,0 +1,183 @@
+{{ partial "header.html" . }}
+
+<div class="page-header">
+    <h1>{{ .Title }}</h1>
+    <p class="page-description">Compare different timeline styles to find the best fit for the archive</p>
+</div>
+
+<div class="page-content">
+    {{ .Content }}
+    
+    {{/* Get sample pages for demonstration */}}
+    {{ $samplePages := first 15 (where .Site.RegularPages "Section" "hacker") }}
+    
+    <hr>
+    
+    <!-- Style 1: Current Unified Timeline (Visual with left border) -->
+    <section class="timeline-demo">
+        <h2>Style 1: Visual Timeline (Current Unified Style)</h2>
+        <p class="style-description">Left border with dots, grouped by year. Used on hacker profile pages.</p>
+        
+        <div class="timeline">
+            {{ range $samplePages.GroupByDate "2006" }}
+                <div class="timeline-year">---- {{ .Key }} ----</div>
+                {{ range .Pages }}
+                    <div class="timeline-item">
+                        <div class="timeline-date">{{ .Date.Format "2006/01/02" }}</div>
+                        <div class="timeline-content">
+                            <span class="badge">{{ .Params.type | humanize | title }}</span>
+                            <a href="/conference/{{ lower .Params.conference | urlize }}">{{ .Params.conference | humanize | title }}</a>:
+                            <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+                            {{ range .Params.hacker }}
+                                - <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+                            {{ end }}
+                        </div>
+                    </div>
+                {{ end }}
+            {{ end }}
+        </div>
+    </section>
+    
+    <hr>
+    
+    <!-- Style 2: Simple List -->
+    <section class="timeline-demo">
+        <h2>Style 2: Simple List</h2>
+        <p class="style-description">Clean list format without decorative elements. Compact and scannable.</p>
+        
+        <div class="timeline-simple">
+            {{ range $samplePages.GroupByDate "2006" }}
+                <div class="timeline-simple-year">{{ .Key }}</div>
+                <ul class="timeline-simple-list">
+                    {{ range .Pages }}
+                        <li>
+                            <span class="timeline-simple-date">{{ .Date.Format "Jan 02" }}</span>
+                            <span class="timeline-simple-type">{{ .Params.type | humanize }}</span>
+                            <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+                            <span class="timeline-simple-meta">
+                                @ {{ .Params.conference | humanize | title }}
+                            </span>
+                        </li>
+                    {{ end }}
+                </ul>
+            {{ end }}
+        </div>
+    </section>
+    
+    <hr>
+    
+    <!-- Style 3: Card Grid -->
+    <section class="timeline-demo">
+        <h2>Style 3: Card Grid</h2>
+        <p class="style-description">Each entry as a card. More visual but takes more space.</p>
+        
+        {{ range $samplePages.GroupByDate "2006" }}
+            <div class="timeline-cards-year">{{ .Key }}</div>
+            <div class="timeline-cards-grid">
+                {{ range .Pages }}
+                    <div class="timeline-card">
+                        <div class="timeline-card-header">
+                            <span class="timeline-card-type">{{ .Params.type | humanize | title }}</span>
+                            <span class="timeline-card-date">{{ .Date.Format "Jan 2006" }}</span>
+                        </div>
+                        <h3 class="timeline-card-title">
+                            <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+                        </h3>
+                        <div class="timeline-card-meta">
+                            {{ .Params.conference | humanize | title }}
+                        </div>
+                        <div class="timeline-card-hackers">
+                            {{ range .Params.hacker }}
+                                <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+                            {{ end }}
+                        </div>
+                    </div>
+                {{ end }}
+            </div>
+        {{ end }}
+    </section>
+    
+    <hr>
+    
+    <!-- Style 4: Compact Table -->
+    <section class="timeline-demo">
+        <h2>Style 4: Compact Table</h2>
+        <p class="style-description">Tabular format. Best for data-heavy views and sorting.</p>
+        
+        <div class="timeline-table-wrapper">
+            <table class="timeline-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th>Conference</th>
+                        <th>Speaker(s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $samplePages }}
+                        <tr>
+                            <td>{{ .Date.Format "2006-01-02" }}</td>
+                            <td><span class="badge badge-sm">{{ .Params.type | humanize }}</span></td>
+                            <td><a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a></td>
+                            <td>{{ .Params.conference | humanize | title }}</td>
+                            <td>
+                                {{ range $i, $h := .Params.hacker }}{{ if $i }}, {{ end }}{{ $h | humanize | title }}{{ end }}
+                            </td>
+                        </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    
+    <hr>
+    
+    <!-- Style 5: Horizontal Timeline -->
+    <section class="timeline-demo">
+        <h2>Style 5: Horizontal Timeline</h2>
+        <p class="style-description">Scrollable horizontal layout. Good for showing progression over time.</p>
+        
+        <div class="timeline-horizontal-wrapper">
+            <div class="timeline-horizontal">
+                {{ range first 10 $samplePages }}
+                    <div class="timeline-horizontal-item">
+                        <div class="timeline-horizontal-marker"></div>
+                        <div class="timeline-horizontal-date">{{ .Date.Format "Jan '06" }}</div>
+                        <div class="timeline-horizontal-content">
+                            <div class="timeline-horizontal-type">{{ .Params.type | humanize }}</div>
+                            <a href="{{ .RelPermalink }}" class="timeline-horizontal-title">{{ .Title | markdownify | truncate 50 }}</a>
+                        </div>
+                    </div>
+                {{ end }}
+            </div>
+        </div>
+    </section>
+    
+    <hr>
+    
+    <!-- Style 6: Minimal Dashed -->
+    <section class="timeline-demo">
+        <h2>Style 6: Minimal Dashed (Archive/Retro Feel)</h2>
+        <p class="style-description">Dashed separators, monospace dates. Terminal/archive aesthetic.</p>
+        
+        <div class="timeline-minimal">
+            {{ range $samplePages.GroupByDate "2006" }}
+                <div class="timeline-minimal-year">[ {{ .Key }} ]</div>
+                {{ range .Pages }}
+                    <div class="timeline-minimal-item">
+                        <code class="timeline-minimal-date">{{ .Date.Format "01/02" }}</code>
+                        <span class="timeline-minimal-separator">---</span>
+                        <span class="timeline-minimal-type">[{{ .Params.type | upper | truncate 4 "" }}]</span>
+                        <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+                        <span class="timeline-minimal-conf">// {{ .Params.conference | upper }}</span>
+                    </div>
+                {{ end }}
+            {{ end }}
+        </div>
+    </section>
+    
+</div>
+
+{{ partial "footer.html" . }}

@@ -146,11 +146,7 @@
         <hr>
         <h2>All Entries <span class="subtitle">({{ len $matching_pages }} total, sorted by date)</span></h2>
 
-        <ul class="entry-list">
-          {{ range $matching_pages }}
-            {{ partial "entry-item.html" . }}
-          {{ end }}
-        </ul>
+        {{ partial "timeline-view.html" (dict "Pages" $matching_pages "Context" . "Style" "simple" "ShowConference" true "ShowHackers" true "ShowType" true) }}
         {{ else }}
         <div class="notice error">
             <h3>No Content Found</h3>

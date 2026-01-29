@@ -6,11 +6,8 @@
 
 {{ .Content  }}
 
-<ul class="entry-list">
-  {{ $pages := .Site.RegularPages.ByDate }}
-  {{ range (where (where $pages "Section" "!=" "") "Section" "!=" "focus") }}
-    {{ partial "entry-item.html" . }}
-  {{ end }}
-</ul>
+{{ $pages := .Site.RegularPages.ByDate }}
+{{ $filteredPages := where (where $pages "Section" "!=" "") "Section" "!=" "focus" }}
+{{ partial "timeline-view.html" (dict "Pages" $filteredPages "Context" . "Style" "simple" "ShowConference" true "ShowHackers" true "ShowType" true) }}
 
 {{ partial "footer.html" . }}

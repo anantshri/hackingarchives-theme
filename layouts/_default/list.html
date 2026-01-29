@@ -7,41 +7,6 @@
 {{ .Content  }}
 
 
-{{ range .Pages.GroupByDate "2006" }}
-<center class="year-key"><b>----  {{ .Key }} ----</b></center>
-<ul>
-  {{ range .Pages }}
-    <li>
-    <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-    <a href="/type/{{ .Params.type | urlize}}/" class="tagtypelink">{{ .Params.type | humanize | title }}</a> : 
-    {{ if .Params.conference }}
-    <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :	
-    {{ end }}
-    {{ if .Params.Publisher }}
-    {{ .Params.Publisher | humanize | title }} :	
-    {{ end }}
-    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
-    {{ range .Params.hacker }}
-    	<a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
-	  {{ end }} 
-    {{ range .Params.morehackers }}
-     <u>{{ . | humanize | title }}</u>
-    {{ end }}
-    {{if .Params.presentation }}
-    <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" class="icon-inline" alt="Presentation"></a>
-    {{ end }}
-    {{if .Params.whitepaper }}
-    <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" class="icon-inline" alt="Whitepaper"></a>
-    {{ end }}
-    {{if .Params.Source }}
-    <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" class="icon-inline" alt="Source Code"></a>
-    {{ end }}
-    {{if .Params.video }}
-    <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" class="icon-inline" alt="Video"></a>
-    {{ end }}
-    </li>
-  {{ end }}
-</ul>
-{{ end }}
+{{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "simple" "ShowConference" true "ShowHackers" true "ShowType" true) }}
 
 {{ partial "footer.html" . }}

@@ -14,12 +14,9 @@
   </head>
 
   <body>
-<!--     <pre>
-      BundleType: {{ debug.Dump .BundleType }}
-      Kind: {{ debug.Dump .Kind }}
-      Layout: {{ debug.Dump .Layout }}
-      Section: {{ debug.Dump .Section }}
-    </pre> -->
+    <!-- Theme Toggle (CSS-only, no JavaScript) -->
+    <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox" aria-label="Toggle dark mode">
+
     <header class="site-header">
       <div class="header-container">
         <a href="{{ .Site.BaseURL }}" class="site-title">{{ .Site.Title }}</a>
@@ -29,6 +26,11 @@
             <li><a href="{{ .URL | relURL }}">{{ .Name }}</a></li>
             {{ end }}
           </ul>
+          <!-- Theme Toggle Label -->
+          <label for="theme-toggle" class="theme-toggle-label" title="Toggle dark/light mode">
+            <span class="theme-icon-light">☀️</span>
+            <span class="theme-icon-dark">🌙</span>
+          </label>
         </nav>
       </div>
     </header>

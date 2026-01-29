@@ -1,0 +1,369 @@
+{{/*
+    Partial: timeline-view.html
+    Purpose: Unified timeline view for displaying entries consistently across the site
+    
+    Usage:
+    {{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "simple") }}
+    
+    Parameters:
+    - Pages: The collection of pages to display
+    - Context: The current context (usually .)
+    - Style: Timeline style - "simple" (default), "visual", "cards", "table", "minimal"
+    - GroupByType: If true, groups by type first, then by year (default: false)
+    - ShowConference: If true, shows conference link (default: true)
+    - ShowHackers: If true, shows hacker links (default: true)
+    - ShowType: If true, shows type badge (default: true)
+    - CurrentHacker: If set, hide authors when only this hacker; show all if multiple authors
+*/}}
+
+{{- $pages := .Pages -}}
+{{- $context := .Context -}}
+{{- $style := .Style | default "simple" -}}
+{{- $groupByType := .GroupByType | default false -}}
+{{- $showConference := .ShowConference | default true -}}
+{{- $showHackers := .ShowHackers | default true -}}
+{{- $showType := .ShowType | default true -}}
+{{- $currentHacker := .CurrentHacker | default "" -}}
+
+{{/* Build params dict for item templates */}}
+{{- $itemParams := dict "ShowConference" $showConference "ShowHackers" $showHackers "ShowType" $showType "CurrentHacker" $currentHacker -}}
+
+{{/* Route to appropriate style */}}
+{{- if eq $style "visual" -}}
+    {{/* Visual Timeline - left border with dots */}}
+    <div class="timeline">
+    {{- if $groupByType -}}
+        {{- range $pages.GroupByParam "type" -}}
+            <div class="timeline-type-group">
+                <div class="timeline-type-header">{{ .Key | humanize | title }}</div>
+                {{- range .Pages.GroupByDate "2006" -}}
+                    <div class="timeline-year">---- {{ .Key }} ----</div>
+                    {{- range .Pages -}}
+                        {{ template "timeline-item-visual" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                    {{- end -}}
+                {{- end -}}
+            </div>
+        {{- end -}}
+    {{- else -}}
+        {{- range $pages.GroupByDate "2006" -}}
+            <div class="timeline-year">---- {{ .Key }} ----</div>
+            {{- range .Pages -}}
+                {{ template "timeline-item-visual" (merge $itemParams (dict "Page" .)) }}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    </div>
+
+{{- else if eq $style "cards" -}}
+    {{/* Card Grid Style */}}
+    {{- range $pages.GroupByDate "2006" -}}
+        <div class="timeline-cards-year">{{ .Key }}</div>
+        <div class="timeline-cards-grid">
+            {{- range .Pages -}}
+                {{ template "timeline-item-card" (merge $itemParams (dict "Page" .)) }}
+            {{- end -}}
+        </div>
+    {{- end -}}
+
+{{- else if eq $style "table" -}}
+    {{/* Table Style */}}
+    <div class="timeline-table-wrapper">
+        <table class="timeline-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    {{- if $showType }}<th>Type</th>{{ end -}}
+                    <th>Title</th>
+                    {{- if $showConference }}<th>Conference</th>{{ end -}}
+                    {{- if $showHackers }}<th>Speaker(s)</th>{{ end -}}
+                    <th>Resources</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{- range $pages -}}
+                    {{ template "timeline-item-table" (merge $itemParams (dict "Page" .)) }}
+                {{- end -}}
+            </tbody>
+        </table>
+    </div>
+
+{{- else if eq $style "minimal" -}}
+    {{/* Minimal Dashed Style (Retro) */}}
+    <div class="timeline-minimal">
+    {{- if $groupByType -}}
+        {{- range $pages.GroupByParam "type" -}}
+            <div class="timeline-minimal-type">[ {{ .Key | upper }} ]</div>
+            {{- range .Pages.GroupByDate "2006" -}}
+                <div class="timeline-minimal-year">[ {{ .Key }} ]</div>
+                {{- range .Pages -}}
+                    {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+    {{- else -}}
+        {{- range $pages.GroupByDate "2006" -}}
+            <div class="timeline-minimal-year">[ {{ .Key }} ]</div>
+            {{- range .Pages -}}
+                {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" .)) }}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    </div>
+
+{{- else -}}
+    {{/* Simple List Style (Default) */}}
+    <div class="timeline-simple">
+    {{- if $groupByType -}}
+        {{- range $pages.GroupByParam "type" -}}
+            <div class="timeline-simple-type-header">{{ .Key | humanize | title }}</div>
+            {{- range .Pages.GroupByDate "2006" -}}
+                <div class="timeline-simple-year">{{ .Key }}</div>
+                <ul class="timeline-simple-list">
+                    {{- range .Pages -}}
+                        {{ template "timeline-item-simple" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                    {{- end -}}
+                </ul>
+            {{- end -}}
+        {{- end -}}
+    {{- else -}}
+        {{- range $pages.GroupByDate "2006" -}}
+            <div class="timeline-simple-year">{{ .Key }}</div>
+            <ul class="timeline-simple-list">
+                {{- range .Pages -}}
+                    {{ template "timeline-item-simple" (merge $itemParams (dict "Page" .)) }}
+                {{- end -}}
+            </ul>
+        {{- end -}}
+    {{- end -}}
+    </div>
+{{- end -}}
+
+{{/* ==================== ITEM TEMPLATES ==================== */}}
+
+{{/* Simple List Item */}}
+{{- define "timeline-item-simple" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $showType := .ShowType -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    <li>
+        <span class="timeline-simple-date">{{ $page.Date.Format "Jan 02" }}</span>
+        
+        {{- if and $showType $page.Params.type -}}
+            <span class="timeline-simple-type">{{ $page.Params.type | humanize }}</span>
+        {{- end -}}
+        
+        {{- if and $showConference $page.Params.conference -}}
+            <a href="/conference/{{ lower $page.Params.conference | urlize }}" class="timeline-simple-conf">{{ $page.Params.conference | humanize | title }}</a>{{ partial "subconference.html" $page }}
+        {{- end -}}
+        
+        <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+        
+        {{- if $showHackers -}}
+            {{ template "hacker-list" (dict "Page" $page "CurrentHacker" $currentHacker) }}
+        {{- end -}}
+        
+        {{/* Resource Icons */}}
+        {{ template "resource-icons" $page }}
+    </li>
+{{- end -}}
+
+{{/* Visual Timeline Item */}}
+{{- define "timeline-item-visual" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $showType := .ShowType -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    <div class="timeline-item">
+        <div class="timeline-date">{{ $page.Date.Format "2006/01/02" }}</div>
+        <div class="timeline-content">
+            {{- if and $showType $page.Params.type -}}
+                <span class="badge{{ if or (eq $page.Params.type "Keynote") (eq $page.Params.type "Book") }} badge-secondary{{ end }}">
+                    <a href="/type/{{ $page.Params.type | urlize }}/">{{ $page.Params.type | humanize | title }}</a>
+                </span>
+            {{- end -}}
+            
+            {{- if and $showConference $page.Params.conference -}}
+                <a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a>{{ partial "subconference.html" $page }}:
+            {{- end -}}
+            
+            {{- if $page.Params.Publisher -}}
+                {{ $page.Params.Publisher | humanize | title }}:
+            {{- end -}}
+            
+            {{- if $page.Params.award -}}
+                <a href="/award/{{ $page.Params.award | urlize }}">{{ $page.Params.award | humanize | title }}</a>:
+            {{- end -}}
+            
+            <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+            
+            {{- if $showHackers -}}
+                {{ template "hacker-list" (dict "Page" $page "CurrentHacker" $currentHacker) }}
+            {{- end -}}
+            
+            {{ template "resource-icons" $page }}
+        </div>
+    </div>
+{{- end -}}
+
+{{/* Card Item */}}
+{{- define "timeline-item-card" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    <div class="timeline-card">
+        <div class="timeline-card-header">
+            <span class="timeline-card-type">{{ $page.Params.type | humanize | title }}</span>
+            <span class="timeline-card-date">{{ $page.Date.Format "Jan 2006" }}</span>
+        </div>
+        <h3 class="timeline-card-title">
+            <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+        </h3>
+        {{- if and $showConference $page.Params.conference -}}
+            <div class="timeline-card-meta">
+                {{ $page.Params.conference | humanize | title }}
+            </div>
+        {{- end -}}
+        {{- if $showHackers -}}
+            <div class="timeline-card-hackers">
+                {{- range $page.Params.hacker -}}
+                    <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+                {{- end -}}
+            </div>
+        {{- end -}}
+        <div class="timeline-card-resources">
+            {{ template "resource-icons" $page }}
+        </div>
+    </div>
+{{- end -}}
+
+{{/* Table Row Item */}}
+{{- define "timeline-item-table" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $showType := .ShowType -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    <tr>
+        <td>{{ $page.Date.Format "2006-01-02" }}</td>
+        {{- if $showType -}}
+            <td><span class="badge badge-sm">{{ $page.Params.type | humanize }}</span></td>
+        {{- end -}}
+        <td><a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a></td>
+        {{- if $showConference -}}
+            <td>{{ $page.Params.conference | humanize | title }}</td>
+        {{- end -}}
+        {{- if $showHackers -}}
+            <td>
+                {{- range $i, $h := $page.Params.hacker }}{{ if $i }}, {{ end }}{{ $h | humanize | title }}{{ end -}}
+            </td>
+        {{- end -}}
+        <td>{{ template "resource-icons" $page }}</td>
+    </tr>
+{{- end -}}
+
+{{/* Minimal Item */}}
+{{- define "timeline-item-minimal" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $showType := .ShowType -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    <div class="timeline-minimal-item">
+        <code class="timeline-minimal-date">{{ $page.Date.Format "01/02" }}</code>
+        <span class="timeline-minimal-separator">---</span>
+        {{- if and $showType $page.Params.type -}}
+            <span class="timeline-minimal-type">[{{ $page.Params.type | upper | truncate 4 "" }}]</span>
+        {{- end -}}
+        <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+        {{- if and $showConference $page.Params.conference -}}
+            <span class="timeline-minimal-conf">// {{ $page.Params.conference | upper }}</span>
+        {{- end -}}
+        {{ template "resource-icons-minimal" $page }}
+    </div>
+{{- end -}}
+
+{{/* ==================== SHARED COMPONENTS ==================== */}}
+
+{{/* Hacker List with CurrentHacker logic */}}
+{{- define "hacker-list" -}}
+    {{- $page := .Page -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    {{- $hackerCount := 0 -}}
+    {{- if $page.Params.hacker -}}
+        {{- $hackerCount = len $page.Params.hacker -}}
+    {{- end -}}
+    {{- $moreHackerCount := 0 -}}
+    {{- if $page.Params.morehackers -}}
+        {{- $moreHackerCount = len $page.Params.morehackers -}}
+    {{- end -}}
+    {{- $totalHackers := add $hackerCount $moreHackerCount -}}
+    
+    {{- $shouldShowHackers := true -}}
+    {{- if and (ne $currentHacker "") (eq $totalHackers 1) -}}
+        {{- if $page.Params.hacker -}}
+            {{- $onlyHacker := index $page.Params.hacker 0 -}}
+            {{- if eq (lower $onlyHacker) (lower $currentHacker) -}}
+                {{- $shouldShowHackers = false -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    
+    {{- if and $shouldShowHackers (gt $totalHackers 0) -}}
+        <span class="timeline-hackers">
+            - 
+            {{- range $index, $hacker := $page.Params.hacker -}}
+                {{- if gt $index 0 }}, {{ end -}}
+                <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+            {{- end -}}
+            {{- range $page.Params.morehackers -}}
+                , <u>{{ . | humanize | title }}</u>
+            {{- end -}}
+        </span>
+    {{- end -}}
+{{- end -}}
+
+{{/* Resource Icons */}}
+{{- define "resource-icons" -}}
+    <span class="timeline-resources">
+        {{- if .Params.presentation -}}
+            <a href="{{ .Params.presentation }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="Presentation">
+                <img src="/fontawesome/presentation.svg" class="icon-inline" alt="Presentation">
+            </a>
+        {{- end -}}
+        {{- if .Params.whitepaper -}}
+            <a href="{{ .Params.whitepaper }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="Whitepaper">
+                <img src="/fontawesome/whitepaper.svg" class="icon-inline" alt="Whitepaper">
+            </a>
+        {{- end -}}
+        {{- if .Params.Source -}}
+            <a href="{{ .Params.Source }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="Source Code">
+                <img src="/fontawesome/code.svg" class="icon-inline" alt="Source Code">
+            </a>
+        {{- end -}}
+        {{- if .Params.video -}}
+            <a href="{{ .Params.video }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="Video">
+                <img src="/fontawesome/video.svg" class="icon-inline" alt="Video">
+            </a>
+        {{- end -}}
+    </span>
+{{- end -}}
+
+{{/* Resource Icons - Minimal Style */}}
+{{- define "resource-icons-minimal" -}}
+    <span class="timeline-minimal-resources">
+        {{- if .Params.presentation }}[P]{{ end -}}
+        {{- if .Params.whitepaper }}[W]{{ end -}}
+        {{- if .Params.Source }}[S]{{ end -}}
+        {{- if .Params.video }}[V]{{ end -}}
+    </span>
+{{- end -}}

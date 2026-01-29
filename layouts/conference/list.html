@@ -21,7 +21,7 @@
     {{ $photopath = printf ".jfif" | printf "%s%s" .Data.Term | printf "%s%s" "/conference/" |  printf "%s" }}
   {{ end }}
   {{ if $photopath }}
-    <img class="confphoto" src="{{ lower $photopath }}" alt="Avatar">
+    <img class="confphoto no-invert{{ with .Params.logo_bg }} logo-bg-{{ . }}{{ end }}" src="{{ lower $photopath }}" alt="{{ .Title }} logo">
   {{ end }}
   <div class="confcontainer">
     <h2><b>{{ .Title | markdownify | humanize | title }}</b></h2>
@@ -39,37 +39,6 @@
 <div class="listing">
   <h2>List of Sessions</h2>
   <hr/>
-  {{ range .Pages.GroupByDate "2006" }}
-    <center class="year-key"><b>----  {{ .Key }} ----</b></center>
-    {{ range .Pages.GroupByParam "type"}}
-      <center class="type-key"><b><-------- {{ .Key | humanize | title }} --------></b></center>
-    <ul>
-      {{ range .Pages }}
-        <li>
-          <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-          {{ partial "subconference.html" . }} :  <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
-          {{ range .Params.hacker }}
-            <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
-          {{ end }} 
-          {{ range .Params.morehackers }}
-           <u>{{ . | humanize | title }}</u>
-          {{ end }}
-          {{if .Params.presentation }}
-          <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" class="icon-inline" alt="Presentation"></a>
-          {{ end }}
-          {{if .Params.whitepaper }}
-          <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" class="icon-inline" alt="Whitepaper"></a>
-          {{ end }}
-          {{if .Params.Source }}
-          <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" class="icon-inline" alt="Source Code"></a>
-          {{ end }}
-          {{if .Params.video }}
-          <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" class="icon-inline" alt="Video"></a>
-          {{ end }}
-        </li>
-      {{ end }}
-    </ul>
-  {{ end }}
-{{ end }}
+  {{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "simple" "ShowConference" false "ShowHackers" true "ShowType" true) }}
 </div>
 {{ partial "footer.html" . }}
