@@ -24,9 +24,20 @@
 {{- $showHackers := .ShowHackers | default true -}}
 {{- $showType := .ShowType | default true -}}
 {{- $currentHacker := .CurrentHacker | default "" -}}
+{{- $showFocusArea := .ShowFocusArea | default false -}}
+
+{{/* Load focus area data from content files */}}
+{{- $focusAreaConfig := dict -}}
+{{- if $showFocusArea -}}
+  {{- $focusAreaPages := where site.Pages "Section" "focus" -}}
+  {{- $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil -}}
+  {{- range $focusAreaPages -}}
+    {{- $focusAreaConfig = merge $focusAreaConfig (dict .Params.focus_key (dict "name" .Title "color" .Params.color "tags" .Params.related_tags)) -}}
+  {{- end -}}
+{{- end -}}
 
 {{/* Build params dict for item templates */}}
-{{- $itemParams := dict "ShowConference" $showConference "ShowHackers" $showHackers "ShowType" $showType "CurrentHacker" $currentHacker -}}
+{{- $itemParams := dict "ShowConference" $showConference "ShowHackers" $showHackers "ShowType" $showType "CurrentHacker" $currentHacker "ShowFocusArea" $showFocusArea "FocusAreaConfig" $focusAreaConfig -}}
 
 {{/* Route to appropriate style */}}
 {{- if eq $style "visual" -}}
@@ -37,7 +48,7 @@
             <div class="timeline-type-group">
                 <div class="timeline-type-header">{{ .Key | humanize | title }}</div>
                 {{- range .Pages.GroupByDate "2006" -}}
-                    <div class="timeline-year">---- {{ .Key }} ----</div>
+                    <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
                     {{- range .Pages -}}
                         {{ template "timeline-item-visual" (merge $itemParams (dict "Page" . "ShowType" false)) }}
                     {{- end -}}
@@ -46,7 +57,7 @@
         {{- end -}}
     {{- else -}}
         {{- range $pages.GroupByDate "2006" -}}
-            <div class="timeline-year">---- {{ .Key }} ----</div>
+            <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
             {{- range .Pages -}}
                 {{ template "timeline-item-visual" (merge $itemParams (dict "Page" .)) }}
             {{- end -}}
@@ -177,6 +188,21 @@
     {{- $showHackers := .ShowHackers -}}
     {{- $showType := .ShowType -}}
     {{- $currentHacker := .CurrentHacker | default "" -}}
+    {{- $showFocusArea := .ShowFocusArea | default false -}}
+    {{- $focusAreaConfig := .FocusAreaConfig | default dict -}}
+    
+    {{/* Determine primary focus area for this talk */}}
+    {{- $primaryFocus := dict -}}
+    {{- if and $showFocusArea $page.Params.tag $focusAreaConfig -}}
+        {{- range $page.Params.tag -}}
+            {{- $tag := . | lower -}}
+            {{- range $areaKey, $areaData := $focusAreaConfig -}}
+                {{- if and (not $primaryFocus.name) (in $areaData.tags $tag) -}}
+                    {{- $primaryFocus = dict "key" $areaKey "name" $areaData.name "color" $areaData.color -}}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
     
     <div class="timeline-item">
         <div class="timeline-date">{{ $page.Date.Format "2006/01/02" }}</div>
@@ -185,6 +211,10 @@
                 <span class="badge{{ if or (eq $page.Params.type "Keynote") (eq $page.Params.type "Book") }} badge-secondary{{ end }}">
                     <a href="/type/{{ $page.Params.type | urlize }}/">{{ $page.Params.type | humanize | title }}</a>
                 </span>
+            {{- end -}}
+            
+            {{- if $primaryFocus.name -}}
+                <a href="/focus/{{ $primaryFocus.key | urlize }}/" class="focus-badge" style="background-color: {{ $primaryFocus.color }}; color: white;" title="{{ $primaryFocus.name }}">{{ $primaryFocus.name }}</a>
             {{- end -}}
             
             {{- if and $showConference $page.Params.conference -}}

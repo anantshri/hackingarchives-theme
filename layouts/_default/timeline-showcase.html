@@ -8,8 +8,41 @@
 <div class="page-content">
     {{ .Content }}
     
+    {{/* Get all hacker pages for full timeline */}}
+    {{ $allPages := where .Site.RegularPages "Section" "hacker" }}
+    
+    {{/* Calculate year range for navigation */}}
+    {{- $minYear := now.Year -}}
+    {{- $maxYear := 1990 -}}
+    {{- range $allPages -}}
+        {{- $year := .Date.Year -}}
+        {{- if and (gt $year 1990) (lt $year $minYear) }}{{ $minYear = $year }}{{ end -}}
+        {{- if and (gt $year 1990) (gt $year $maxYear) }}{{ $maxYear = $year }}{{ end -}}
+    {{- end -}}
+    
+    {{/* Generate 5-year interval markers (most recent first) */}}
+    {{- $startMarker := mul (div $maxYear 5) 5 -}}
+    {{- if lt $startMarker $maxYear }}{{ $startMarker = add $startMarker 5 }}{{ end -}}
+    {{- $endMarker := mul (div $minYear 5) 5 -}}
+    
+    <!-- Year Jump Navigation -->
+    {{ if gt (len $allPages) 0 }}
+    <nav class="timeline-year-nav" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to year:</span>
+        {{- $yearMarkers := slice -}}
+        {{- range seq $endMarker $startMarker -}}
+            {{- if eq (mod . 5) 0 -}}
+                {{- $yearMarkers = $yearMarkers | append . -}}
+            {{- end -}}
+        {{- end -}}
+        {{- range ($yearMarkers | collections.Reverse) -}}
+            <a href="#year-{{ . }}">{{ . }}</a>
+        {{- end -}}
+    </nav>
+    {{ end }}
+    
     {{/* Get sample pages for demonstration */}}
-    {{ $samplePages := first 15 (where .Site.RegularPages "Section" "hacker") }}
+    {{ $samplePages := first 15 $allPages }}
     
     <hr>
     
@@ -20,7 +53,7 @@
         
         <div class="timeline">
             {{ range $samplePages.GroupByDate "2006" }}
-                <div class="timeline-year">---- {{ .Key }} ----</div>
+                <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
                 {{ range .Pages }}
                     <div class="timeline-item">
                         <div class="timeline-date">{{ .Date.Format "2006/01/02" }}</div>
