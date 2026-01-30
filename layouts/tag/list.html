@@ -1,59 +1,81 @@
 {{ if $.Site.Params.experimental_mode }}
     {{ partial "header.html" . }}
 
-    <div class="notice warning">
-        <h4 class="notice-title">
-            <strong>🧪 Experimental Feature</strong>
-        </h4>
-        <p>
-            Tag-based content organization is an experimental feature. This page and its functionality may change as we refine the tagging system.
-        </p>
+    <div class="container">
+        <div class="notice warning">
+            <h4 class="notice-title">
+                <strong>🧪 Experimental Feature</strong>
+            </h4>
+            <p>
+                Tag-based content organization is an experimental feature. This page and its functionality may change as we refine the tagging system.
+            </p>
+        </div>
+
+        {{if not .IsHome }}
+        <h1>Tag: {{ .Title | markdownify | humanize | title }}</h1>
+        {{ end }}
+
+        {{ .Content }}
+
+        {{ $pages := .Pages }}
+        {{ if .IsHome }}{{ $pages = .Site.RegularPages }}{{ end }}
+        {{ $filteredPages := where $pages "Section" "!=" "" }}
+        {{ $sortedPages := sort $filteredPages "Date" "desc" }}
+
+        {{ if gt (len $sortedPages) 0 }}
+        {{/* Statistics */}}
+        {{ $hackerCount := dict }}
+        {{ range $sortedPages }}
+            {{ range .Params.hacker }}
+                {{ $hacker := . }}
+                {{ $hackerKey := printf "%v" $hacker }}
+                {{ if not (isset $hackerCount $hackerKey) }}
+                    {{ $hackerCount = merge $hackerCount (dict $hackerKey 1) }}
+                {{ else }}
+                    {{ $currentCount := index $hackerCount $hackerKey }}
+                    {{ $hackerCount = merge $hackerCount (dict $hackerKey (add $currentCount 1)) }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+
+        {{/* Statistics Cards */}}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-number">{{ len $sortedPages }}</div>
+                <div class="stat-card-label">Total Entries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-number">{{ len $hackerCount }}</div>
+                <div class="stat-card-label">Contributors</div>
+            </div>
+        </div>
+
+        {{/* Top 5 Contributors */}}
+        {{ if gt (len $hackerCount) 0 }}
+        <div class="tag-cloud">
+            <h3>Top Contributors</h3>
+            {{ $hackerPairs := slice }}
+            {{ range $k, $v := $hackerCount }}
+                {{ $hackerPairs = $hackerPairs | append (dict "Key" $k "Value" $v) }}
+            {{ end }}
+            {{ $hackerCountSorted := sort $hackerPairs "Value" "desc" }}
+            {{ range first 5 $hackerCountSorted }}
+                <a href="/hacker/{{ .Key | urlize }}/">{{ .Key | humanize | title }}<sub>({{ .Value }})</sub></a>
+            {{ end }}
+        </div>
+        {{ end }}
+
+        <hr>
+        <h2>All Entries <span class="subtitle">({{ len $sortedPages }} total, sorted by date)</span></h2>
+
+        {{ partial "timeline-view.html" (dict "Pages" $sortedPages "Context" . "Style" "table" "ShowConference" true "ShowHackers" true "ShowType" true "ShowTags" true) }}
+        {{ else }}
+        <div class="notice error">
+            <h3>No Content Found</h3>
+            <p>No content has been tagged with this tag yet.</p>
+        </div>
+        {{ end }}
     </div>
-
-    {{if not .IsHome }}
-    <h1>{{ .Title | markdownify | humanize | title }}</h1>
-    {{ end }}
-
-    {{ .Content  }}
-
-      {{ $pages := .Pages }}
-      {{ if .IsHome }}{{ $pages = .Site.RegularPages }}{{ end }}
-
-    <hr>
-    {{ range $pages.GroupByParam "type" }}
-    "{{ .Key }}"
-    {{ end }}
-    <hr>
-
-    <ul>
-
-      {{ range (where $pages "Section" "!=" "") }}
-      <li>
-        <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-        <a href="/type/{{ .Params.type | urlize}}/">{{ .Params.type | humanize | title }}</a> : <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a> :    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
-        {{ range .Params.hacker }}
-            <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
-          {{ end }} 
-        {{ range .Params.morehackers }}
-         <u>{{ . | humanize | title }}</u>
-        {{ end }}
-        {{if .Params.presentation }}
-        <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" class="icon-inline" alt="Presentation"></a>
-        {{ end }}
-        {{if .Params.whitepaper }}
-        <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" class="icon-inline" alt="Whitepaper"></a>
-        {{ end }}
-        {{if .Params.Source }}
-        <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" class="icon-inline" alt="Source Code"></a>
-        {{ end }}
-        {{if .Params.video }}
-        <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" class="icon-inline" alt="Video"></a>
-        {{ end }}
-      </li>
-      {{ end }}
-    </ul>
-
-
 
     {{ partial "footer.html" . }}
 {{ end }}

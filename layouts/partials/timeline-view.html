@@ -14,6 +14,9 @@
     - ShowHackers: If true, shows hacker links (default: true)
     - ShowType: If true, shows type badge (default: true)
     - CurrentHacker: If set, hide authors when only this hacker; show all if multiple authors
+    
+    Year grouping: If total entries < 6, all items are shown in one section (no year headers).
+    If 6+ entries, content is grouped by year and a "Jump to year" navigation is shown.
 */}}
 
 {{- $pages := .Pages -}}
@@ -25,6 +28,7 @@
 {{- $showType := .ShowType | default true -}}
 {{- $currentHacker := .CurrentHacker | default "" -}}
 {{- $showFocusArea := .ShowFocusArea | default false -}}
+{{- $showTags := .ShowTags | default false -}}
 
 {{/* Load focus area data from content files */}}
 {{- $focusAreaConfig := dict -}}
@@ -37,43 +41,80 @@
 {{- end -}}
 
 {{/* Build params dict for item templates */}}
-{{- $itemParams := dict "ShowConference" $showConference "ShowHackers" $showHackers "ShowType" $showType "CurrentHacker" $currentHacker "ShowFocusArea" $showFocusArea "FocusAreaConfig" $focusAreaConfig -}}
+{{- $itemParams := dict "ShowConference" $showConference "ShowHackers" $showHackers "ShowType" $showType "CurrentHacker" $currentHacker "ShowFocusArea" $showFocusArea "FocusAreaConfig" $focusAreaConfig "ShowTags" $showTags -}}
+
+{{/* Group by year only when 6+ entries; otherwise single section */}}
+{{- $totalEntries := len $pages -}}
+{{- $groupByYear := ge $totalEntries 6 -}}
+
+{{/* Year navigation (when grouping by year) */}}
+{{- $yearGroups := $pages.GroupByDate "2006" -}}
 
 {{/* Route to appropriate style */}}
 {{- if eq $style "visual" -}}
     {{/* Visual Timeline - left border with dots */}}
+    {{- if $groupByYear -}}
+    <nav class="year-navigation" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to:</span>
+        {{- range $i, $group := $yearGroups -}}
+            {{- if $i }} | {{ end -}}
+            <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+        {{- end -}}
+    </nav>
+    {{- end -}}
     <div class="timeline">
-    {{- if $groupByType -}}
-        {{- range $pages.GroupByParam "type" -}}
-            <div class="timeline-type-group">
-                <div class="timeline-type-header">{{ .Key | humanize | title }}</div>
-                {{- range .Pages.GroupByDate "2006" -}}
-                    <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
-                    {{- range .Pages -}}
-                        {{ template "timeline-item-visual" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+    {{- if $groupByYear -}}
+        {{- if $groupByType -}}
+            {{- range $pages.GroupByParam "type" -}}
+                <div class="timeline-type-group">
+                    <div class="timeline-type-header">{{ .Key | humanize | title }}</div>
+                    {{- range .Pages.GroupByDate "2006" -}}
+                        <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
+                        {{- range .Pages -}}
+                            {{ template "timeline-item-visual" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                        {{- end -}}
                     {{- end -}}
+                </div>
+            {{- end -}}
+        {{- else -}}
+            {{- range $pages.GroupByDate "2006" -}}
+                <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
+                {{- range .Pages -}}
+                    {{ template "timeline-item-visual" (merge $itemParams (dict "Page" .)) }}
                 {{- end -}}
-            </div>
+            {{- end -}}
         {{- end -}}
     {{- else -}}
-        {{- range $pages.GroupByDate "2006" -}}
-            <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
-            {{- range .Pages -}}
-                {{ template "timeline-item-visual" (merge $itemParams (dict "Page" .)) }}
-            {{- end -}}
+        {{- range $pages -}}
+            {{ template "timeline-item-visual" (merge $itemParams (dict "Page" .)) }}
         {{- end -}}
     {{- end -}}
     </div>
 
 {{- else if eq $style "cards" -}}
     {{/* Card Grid Style */}}
-    {{- range $pages.GroupByDate "2006" -}}
-        <div class="timeline-cards-year">{{ .Key }}</div>
+    {{- if $groupByYear -}}
+    <nav class="year-navigation" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to:</span>
+        {{- range $i, $group := $yearGroups -}}
+            {{- if $i }} | {{ end -}}
+            <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+        {{- end -}}
+    </nav>
+    {{- range $yearGroups -}}
+        <div class="timeline-cards-year" id="year-{{ .Key }}">{{ .Key }}</div>
         <div class="timeline-cards-grid">
             {{- range .Pages -}}
                 {{ template "timeline-item-card" (merge $itemParams (dict "Page" .)) }}
             {{- end -}}
         </div>
+    {{- end -}}
+    {{- else -}}
+    <div class="timeline-cards-grid">
+        {{- range $pages -}}
+            {{ template "timeline-item-card" (merge $itemParams (dict "Page" .)) }}
+        {{- end -}}
+    </div>
     {{- end -}}
 
 {{- else if eq $style "table" -}}
@@ -87,6 +128,7 @@
                     <th>Title</th>
                     {{- if $showConference }}<th>Conference</th>{{ end -}}
                     {{- if $showHackers }}<th>Speaker(s)</th>{{ end -}}
+                    {{- if $showTags }}<th>Tags</th>{{ end -}}
                     <th>Resources</th>
                 </tr>
             </thead>
@@ -100,51 +142,83 @@
 
 {{- else if eq $style "minimal" -}}
     {{/* Minimal Dashed Style (Retro) */}}
+    {{- if $groupByYear -}}
+    <nav class="year-navigation" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to:</span>
+        {{- range $i, $group := $yearGroups -}}
+            {{- if $i }} | {{ end -}}
+            <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+        {{- end -}}
+    </nav>
+    {{- end -}}
     <div class="timeline-minimal">
-    {{- if $groupByType -}}
-        {{- range $pages.GroupByParam "type" -}}
-            <div class="timeline-minimal-type">[ {{ .Key | upper }} ]</div>
-            {{- range .Pages.GroupByDate "2006" -}}
-                <div class="timeline-minimal-year">[ {{ .Key }} ]</div>
+    {{- if $groupByYear -}}
+        {{- if $groupByType -}}
+            {{- range $pages.GroupByParam "type" -}}
+                <div class="timeline-minimal-type">[ {{ .Key | upper }} ]</div>
+                {{- range .Pages.GroupByDate "2006" -}}
+                    <div class="timeline-minimal-year" id="year-{{ .Key }}">[ {{ .Key }} ]</div>
+                    {{- range .Pages -}}
+                        {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                    {{- end -}}
+                {{- end -}}
+            {{- end -}}
+        {{- else -}}
+            {{- range $pages.GroupByDate "2006" -}}
+                <div class="timeline-minimal-year" id="year-{{ .Key }}">[ {{ .Key }} ]</div>
                 {{- range .Pages -}}
-                    {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                    {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" .)) }}
                 {{- end -}}
             {{- end -}}
         {{- end -}}
     {{- else -}}
-        {{- range $pages.GroupByDate "2006" -}}
-            <div class="timeline-minimal-year">[ {{ .Key }} ]</div>
-            {{- range .Pages -}}
-                {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" .)) }}
-            {{- end -}}
+        {{- range $pages -}}
+            {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" .)) }}
         {{- end -}}
     {{- end -}}
     </div>
 
 {{- else -}}
     {{/* Simple List Style (Default) */}}
+    {{- if $groupByYear -}}
+    <nav class="year-navigation" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to:</span>
+        {{- range $i, $group := $yearGroups -}}
+            {{- if $i }} | {{ end -}}
+            <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+        {{- end -}}
+    </nav>
+    {{- end -}}
     <div class="timeline-simple">
-    {{- if $groupByType -}}
-        {{- range $pages.GroupByParam "type" -}}
-            <div class="timeline-simple-type-header">{{ .Key | humanize | title }}</div>
-            {{- range .Pages.GroupByDate "2006" -}}
-                <div class="timeline-simple-year">{{ .Key }}</div>
+    {{- if $groupByYear -}}
+        {{- if $groupByType -}}
+            {{- range $pages.GroupByParam "type" -}}
+                <div class="timeline-simple-type-header">{{ .Key | humanize | title }}</div>
+                {{- range .Pages.GroupByDate "2006" -}}
+                    <div class="timeline-simple-year" id="year-{{ .Key }}">{{ .Key }}</div>
+                    <ul class="timeline-simple-list">
+                        {{- range .Pages -}}
+                            {{ template "timeline-item-simple" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                        {{- end -}}
+                    </ul>
+                {{- end -}}
+            {{- end -}}
+        {{- else -}}
+            {{- range $pages.GroupByDate "2006" -}}
+                <div class="timeline-simple-year" id="year-{{ .Key }}">{{ .Key }}</div>
                 <ul class="timeline-simple-list">
                     {{- range .Pages -}}
-                        {{ template "timeline-item-simple" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                        {{ template "timeline-item-simple" (merge $itemParams (dict "Page" .)) }}
                     {{- end -}}
                 </ul>
             {{- end -}}
         {{- end -}}
     {{- else -}}
-        {{- range $pages.GroupByDate "2006" -}}
-            <div class="timeline-simple-year">{{ .Key }}</div>
-            <ul class="timeline-simple-list">
-                {{- range .Pages -}}
-                    {{ template "timeline-item-simple" (merge $itemParams (dict "Page" .)) }}
-                {{- end -}}
-            </ul>
-        {{- end -}}
+        <ul class="timeline-simple-list">
+            {{- range $pages -}}
+                {{ template "timeline-item-simple" (merge $itemParams (dict "Page" .)) }}
+            {{- end -}}
+        </ul>
     {{- end -}}
     </div>
 {{- end -}}
@@ -279,6 +353,7 @@
     {{- $showConference := .ShowConference -}}
     {{- $showHackers := .ShowHackers -}}
     {{- $showType := .ShowType -}}
+    {{- $showTags := .ShowTags | default false -}}
     {{- $currentHacker := .CurrentHacker | default "" -}}
     
     <tr>
@@ -288,11 +363,25 @@
         {{- end -}}
         <td><a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a></td>
         {{- if $showConference -}}
-            <td>{{ $page.Params.conference | humanize | title }}</td>
+            <td><a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a></td>
         {{- end -}}
         {{- if $showHackers -}}
             <td>
-                {{- range $i, $h := $page.Params.hacker }}{{ if $i }}, {{ end }}{{ $h | humanize | title }}{{ end -}}
+                {{- range $i, $h := $page.Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end -}}
+            </td>
+        {{- end -}}
+        {{- if $showTags -}}
+            <td class="timeline-tags-cell">
+                {{- if $page.Params.tag -}}
+                    {{- range $i, $t := $page.Params.tag -}}
+                        {{- if lt $i 3 -}}
+                            <a href="/tag/{{ $t | urlize }}/" class="tag-badge">{{ $t }}</a>
+                        {{- end -}}
+                    {{- end -}}
+                    {{- if gt (len $page.Params.tag) 3 -}}
+                        <span class="tag-more" title="{{ range after 3 $page.Params.tag }}{{ . }} {{ end }}">+{{ sub (len $page.Params.tag) 3 }}</span>
+                    {{- end -}}
+                {{- end -}}
             </td>
         {{- end -}}
         <td>{{ template "resource-icons" $page }}</td>

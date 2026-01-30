@@ -42,11 +42,12 @@
         {{ range $matching_pages }}
             {{ range .Params.hacker }}
                 {{ $hacker := . }}
-                {{ if not (isset $hackerCount $hacker) }}
-                    {{ $hackerCount = merge $hackerCount (dict $hacker 1) }}
+                {{ $hackerKey := printf "%v" $hacker }}
+                {{ if not (isset $hackerCount $hackerKey) }}
+                    {{ $hackerCount = merge $hackerCount (dict $hackerKey 1) }}
                 {{ else }}
-                    {{ $currentCount := index $hackerCount $hacker }}
-                    {{ $hackerCount = merge $hackerCount (dict $hacker (add $currentCount 1)) }}
+                    {{ $currentCount := index $hackerCount $hackerKey }}
+                    {{ $hackerCount = merge $hackerCount (dict $hackerKey (add $currentCount 1)) }}
                 {{ end }}
             {{ end }}
         {{ end }}
@@ -57,11 +58,12 @@
                 {{ range .Params.tag }}
                     {{ $tag := . }}
                     {{ if and $tag (ne $tag "") }}
-                        {{ if not (isset $tagCount $tag) }}
-                            {{ $tagCount = merge $tagCount (dict $tag 1) }}
+                        {{ $tagKey := printf "%v" $tag }}
+                        {{ if not (isset $tagCount $tagKey) }}
+                            {{ $tagCount = merge $tagCount (dict $tagKey 1) }}
                         {{ else }}
-                            {{ $currentCount := index $tagCount $tag }}
-                            {{ $tagCount = merge $tagCount (dict $tag (add $currentCount 1)) }}
+                            {{ $currentCount := index $tagCount $tagKey }}
+                            {{ $tagCount = merge $tagCount (dict $tagKey (add $currentCount 1)) }}
                         {{ end }}
                     {{ end }}
                 {{ end }}
@@ -88,22 +90,7 @@
             </div>
         </div>
 
-        {{/* Top 10 Most Common Tags */}}
-        {{ if gt (len $tagCount) 0 }}
-        <div class="tag-cloud">
-            <h3>Top 10 Most Common Tags</h3>
-            {{ $tagPairs := slice }}
-            {{ range $k, $v := $tagCount }}
-                {{ $tagPairs = $tagPairs | append (dict "Key" $k "Value" $v) }}
-            {{ end }}
-            {{ $tagCountSorted := sort $tagPairs "Value" "desc" }}
-            {{ range first 10 $tagCountSorted }}
-                <a href="/tag/{{ .Key | urlize }}/">{{ .Key | humanize | title }}<sub>({{ .Value }})</sub></a>
-            {{ end }}
-        </div>
-        {{ end }}
-
-        {{/* Top Contributors - Tag Cloud Style */}}
+        {{/* Top 5 Contributors - Tag Cloud Style */}}
         {{ if gt (len $hackerCount) 0 }}
         <div class="tag-cloud">
             <h3>Top Contributors</h3>
@@ -112,41 +99,52 @@
                 {{ $hackerPairs = $hackerPairs | append (dict "Key" $k "Value" $v) }}
             {{ end }}
             {{ $hackerCountSorted := sort $hackerPairs "Value" "desc" }}
-            {{ range first 15 $hackerCountSorted }}
+            {{ range first 5 $hackerCountSorted }}
                 <a href="/hacker/{{ .Key | urlize }}/">{{ .Key | humanize | title }}<sub>({{ .Value }})</sub></a>
             {{ end }}
         </div>
         {{ end }}
 
-        {{/* All Related Tags - Collapsed, sorted by count, only if in use */}}
+        {{/* Related Tags - Top 10 with toggle to show all */}}
         {{ if $related_tags }}
             {{/* Build list of related tags with counts */}}
             {{ $relatedTagsWithCounts := slice }}
             {{ range $related_tags }}
                 {{ $tag := . }}
-                {{ if isset $tagCount $tag }}
-                    {{ $count := index $tagCount $tag }}
+                {{ $tagKey := printf "%v" $tag }}
+                {{ if isset $tagCount $tagKey }}
+                    {{ $count := index $tagCount $tagKey }}
                     {{ $relatedTagsWithCounts = $relatedTagsWithCounts | append (dict "Tag" $tag "Count" $count) }}
                 {{ end }}
             {{ end }}
             
             {{ if gt (len $relatedTagsWithCounts) 0 }}
-            <details class="tag-cloud">
-                <summary><h3 style="display: inline; cursor: pointer;">All Related Tags ({{ len $relatedTagsWithCounts }})</h3></summary>
-                <div style="margin-top: 1rem;">
-                    {{ $sortedRelatedTags := sort $relatedTagsWithCounts "Count" "desc" }}
-                    {{ range $sortedRelatedTags }}
+            {{ $sortedRelatedTags := sort $relatedTagsWithCounts "Count" "desc" }}
+            <div class="tag-cloud">
+                <h3>Related Tags ({{ len $relatedTagsWithCounts }})</h3>
+                <div class="tags-top-10">
+                    {{ range first 10 $sortedRelatedTags }}
                         <a href="/tag/{{ .Tag | urlize }}/">{{ .Tag | humanize | title }}<sub>({{ .Count }})</sub></a>
                     {{ end }}
                 </div>
-            </details>
+                {{ if gt (len $relatedTagsWithCounts) 10 }}
+                <details class="tags-more">
+                    <summary>Show all {{ len $relatedTagsWithCounts }} tags...</summary>
+                    <div class="tags-full-list" style="margin-top: 0.5rem;">
+                        {{ range after 10 $sortedRelatedTags }}
+                            <a href="/tag/{{ .Tag | urlize }}/">{{ .Tag | humanize | title }}<sub>({{ .Count }})</sub></a>
+                        {{ end }}
+                    </div>
+                </details>
+                {{ end }}
+            </div>
             {{ end }}
         {{ end }}
 
         <hr>
         <h2>All Entries <span class="subtitle">({{ len $matching_pages }} total, sorted by date)</span></h2>
 
-        {{ partial "timeline-view.html" (dict "Pages" $matching_pages "Context" . "Style" "simple" "ShowConference" true "ShowHackers" true "ShowType" true) }}
+        {{ partial "timeline-view.html" (dict "Pages" $matching_pages "Context" . "Style" "table" "ShowConference" true "ShowHackers" true "ShowType" true "ShowTags" true) }}
         {{ else }}
         <div class="notice error">
             <h3>No Content Found</h3>

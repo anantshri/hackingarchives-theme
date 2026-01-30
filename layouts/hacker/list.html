@@ -240,20 +240,6 @@
 <!-- Hacktivity Timeline -->
 <section>
   <h2>Hacktivity</h2>
-  
-  {{/* Year navigation for 10+ entries */}}
-  {{- $totalEntries := len .Pages -}}
-  {{- if gt $totalEntries 10 -}}
-    {{- $yearGroups := .Pages.GroupByDate "2006" -}}
-    <nav class="year-navigation" aria-label="Jump to year">
-      <span class="year-nav-label">Jump to:</span>
-      {{- range $i, $group := $yearGroups -}}
-        {{- if $i }} | {{ end -}}
-        <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
-      {{- end -}}
-    </nav>
-  {{- end -}}
-  
   {{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "visual" "ShowConference" true "ShowHackers" true "ShowType" true "ShowFocusArea" true "CurrentHacker" $hacker) }}
 </section>
 

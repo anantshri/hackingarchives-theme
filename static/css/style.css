@@ -3173,3 +3173,58 @@ thead, tfoot, tr:nth-child(even) {
     display: none;
   }
 }
+
+/* ===========================================
+   Tag Badges in Timeline Table
+   =========================================== */
+.timeline-tags-cell {
+  white-space: nowrap;
+}
+
+.tag-badge {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  margin: 0.1rem;
+  font-size: 0.75rem;
+  background-color: var(--color-subtle-bg);
+  color: var(--color-accent);
+  border-radius: 3px;
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+}
+
+.tag-badge:hover {
+  background-color: var(--color-accent);
+  color: white;
+  text-decoration: none;
+}
+
+.tag-more {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  margin: 0.1rem;
+  font-size: 0.7rem;
+  background-color: var(--color-muted);
+  color: var(--color-text-muted);
+  border-radius: 3px;
+  cursor: default;
+}
+
+/* Tags Toggle for Focus Pages */
+.tags-more {
+  margin-top: 0.5rem;
+}
+
+.tags-more summary {
+  cursor: pointer;
+  color: var(--color-accent);
+  font-size: 0.9rem;
+}
+
+.tags-more summary:hover {
+  text-decoration: underline;
+}
+
+.tags-full-list {
+  padding-top: 0.5rem;
+}
