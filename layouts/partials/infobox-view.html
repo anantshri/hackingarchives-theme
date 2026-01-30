@@ -1,0 +1,434 @@
+{{/*
+    Partial: infobox-view.html
+    Purpose: Unified info-box view for displaying hacker summary data
+    
+    Usage:
+    {{ partial "infobox-view.html" (dict "Activities" $categoryCounts "Tools" $uniqueTools "Collaborators" $commonCollaborators "Topics" $commonTags "Style" "table") }}
+    
+    Parameters:
+    - Activities: dict of activity type -> count
+    - Tools: slice of tool names
+    - Collaborators: slice of dicts with "name" and "count"
+    - Topics: slice of dicts with "tag", "name", and "count"
+    - Style: "cards" (default), "simple", "pills", "table", "tags", "minimal", "stats", "oneline"
+*/}}
+
+{{- $activities := .Activities | default dict -}}
+{{- $tools := .Tools | default slice -}}
+{{- $collaborators := .Collaborators | default slice -}}
+{{- $topics := .Topics | default slice -}}
+{{- $style := .Style | default "cards" -}}
+
+{{- $hasData := or (len $activities) (len $tools) (gt (len $collaborators) 0) (gt (len $topics) 0) -}}
+
+{{- if $hasData -}}
+
+{{/* ==================== STYLE: CARDS (Default) ==================== */}}
+{{- if eq $style "cards" -}}
+<div class="info-box">
+    {{- if len $activities -}}
+    <div class="info-box-item">
+        <h4>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M0 96C0 60.7 28.7 32 64 32H448c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zm64 0v64h64V96H64zm384 0H192v64H448V96zM64 224v64h64V224H64zm384 0H192v64H448V224zM64 352v64h64V352H64zm384 0H192v64H448V352z"/></svg>
+            Activities
+        </h4>
+        <div class="info-content">
+            {{- $first := true -}}
+            {{- range $category, $count := $activities -}}
+                {{- if not $first }} &bull; {{ end -}}
+                {{- $first = false -}}
+                <span>{{ $category | humanize | title }} ({{ $count }})</span>
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+    
+    {{- if len $tools -}}
+    <div class="info-box-item">
+        <h4>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4h54.1l109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109V124c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3l-45.3-45.3L19.9 396.1z"/></svg>
+            Tools
+        </h4>
+        <div class="info-content">
+            {{- range $tools -}}
+                <a href="/tool/{{ . | urlize }}">{{ . }}</a>
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+    
+    {{- if gt (len $collaborators) 0 -}}
+    <div class="info-box-item">
+        <h4>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor"><path d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"/></svg>
+            Collaborators
+        </h4>
+        <div class="info-content">
+            {{- range (sort $collaborators "count" "desc") -}}
+                <a href="/hacker/{{ .name }}">{{ .name | humanize | title }} ({{ .count }})</a>
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+
+    {{- if gt (len $topics) 0 -}}
+    <div class="info-box-item">
+        <h4>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M345 39.1L472.8 168.4c52.4 53 52.4 138.2 0 191.2L360.8 472.9c-9.3 9.4-24.5 9.5-33.9 .2s-9.5-24.5-.2-33.9L438.6 325.9c33.9-34.3 33.9-89.4 0-123.7L310.9 72.9c-9.3-9.4-9.2-24.6 .2-33.9s24.6-9.2 33.9 .2zM0 229.5V80C0 53.5 21.5 32 48 32H197.5c17 0 33.3 6.7 45.3 18.7l168 168c25 25 25 65.5 0 90.5L277.3 442.7c-25 25-65.5 25-90.5 0l-168-168C6.7 262.7 0 246.5 0 229.5zM144 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+            Focus Areas
+        </h4>
+        <div class="info-content">
+            {{- range $topics -}}
+                <a href="/focus/{{ .tag | urlize }}/">{{ .name }} ({{ .count }})</a>
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+</div>
+
+{{/* ==================== STYLE: SIMPLE ==================== */}}
+{{- else if eq $style "simple" -}}
+<div class="info-box-simple">
+    {{- if len $activities -}}
+    <p><strong>Activities:</strong> 
+        {{- $first := true -}}
+        {{- range $category, $count := $activities -}}
+            {{- if not $first }}; {{ end -}}
+            {{- $first = false -}}
+            {{ $category | humanize | title }} - {{ $count }}
+        {{- end -}}
+    </p>
+    {{- end -}}
+    
+    {{- if len $tools -}}
+    <p><strong>Tools Contributed or Authored:</strong>
+        {{- range $tools -}}
+            <a href="/tool/{{ . | urlize }}">{{ . }}</a>&nbsp;
+        {{- end -}}
+    </p>
+    {{- end -}}
+    
+    {{- if gt (len $collaborators) 0 -}}
+    <p><strong>Common Collaborators:</strong>
+        {{- range (sort $collaborators "count" "desc") -}}
+            <a href="/hacker/{{ .name }}">{{ .name | humanize | title }}({{ .count }})</a>&nbsp;
+        {{- end -}}
+    </p>
+    {{- end -}}
+
+    {{- if gt (len $topics) 0 -}}
+    <p><strong>Focus Areas:</strong>
+        {{- range $topics -}}
+            <a href="/focus/{{ .tag | urlize }}/">{{ .name }}({{ .count }})</a>&nbsp;
+        {{- end -}}
+    </p>
+    {{- end -}}
+</div>
+
+{{/* ==================== STYLE: PILLS ==================== */}}
+{{- else if eq $style "pills" -}}
+<div class="info-box-pills">
+    {{- if len $activities -}}
+    <div class="info-pill">
+        <span class="pill-label">Activities</span>
+        <span class="pill-content">
+            {{- $first := true -}}
+            {{- range $category, $count := $activities -}}
+                {{- if not $first }} &bull; {{ end -}}
+                {{- $first = false -}}
+                {{ $category | humanize | title }} ({{ $count }})
+            {{- end -}}
+        </span>
+    </div>
+    {{- end -}}
+    
+    {{- if len $tools -}}
+    <div class="info-pill">
+        <span class="pill-label">Tools</span>
+        <span class="pill-content">
+            {{- range $tools -}}
+                <a href="/tool/{{ . | urlize }}">{{ . }}</a>
+            {{- end -}}
+        </span>
+    </div>
+    {{- end -}}
+    
+    {{- if gt (len $collaborators) 0 -}}
+    <div class="info-pill">
+        <span class="pill-label">Collaborators</span>
+        <span class="pill-content">
+            {{- range (sort $collaborators "count" "desc") -}}
+                <a href="/hacker/{{ .name }}">{{ .name | humanize | title }} ({{ .count }})</a>
+            {{- end -}}
+        </span>
+    </div>
+    {{- end -}}
+
+    {{- if gt (len $topics) 0 -}}
+    <div class="info-pill">
+        <span class="pill-label">Focus Areas</span>
+        <span class="pill-content">
+            {{- range $topics -}}
+                <a href="/focus/{{ .tag | urlize }}/">{{ .name }} ({{ .count }})</a>
+            {{- end -}}
+        </span>
+    </div>
+    {{- end -}}
+</div>
+
+{{/* ==================== STYLE: TABLE ==================== */}}
+{{- else if eq $style "table" -}}
+<div class="info-box-table">
+    <table>
+        {{- if len $activities -}}
+        <tr>
+            <th>Activities</th>
+            <td>
+                {{- $first := true -}}
+                {{- range $category, $count := $activities -}}
+                    {{- if not $first }} &bull; {{ end -}}
+                    {{- $first = false -}}
+                    {{ $category | humanize | title }} ({{ $count }})
+                {{- end -}}
+            </td>
+        </tr>
+        {{- end -}}
+        
+        {{- if len $tools -}}
+        <tr>
+            <th>Tools</th>
+            <td>
+                {{- $first := true -}}
+                {{- range $tools -}}
+                    {{- if not $first }} &bull; {{ end -}}
+                    {{- $first = false -}}
+                    <a href="/tool/{{ . | urlize }}">{{ . }}</a>
+                {{- end -}}
+            </td>
+        </tr>
+        {{- end -}}
+        
+        {{- if gt (len $collaborators) 0 -}}
+        <tr>
+            <th>Collaborators</th>
+            <td>
+                {{- $first := true -}}
+                {{- range (sort $collaborators "count" "desc") -}}
+                    {{- if not $first }} &bull; {{ end -}}
+                    {{- $first = false -}}
+                    <a href="/hacker/{{ .name }}">{{ .name | humanize | title }} ({{ .count }})</a>
+                {{- end -}}
+            </td>
+        </tr>
+        {{- end -}}
+
+        {{- if gt (len $topics) 0 -}}
+        <tr>
+            <th>Focus Areas</th>
+            <td>
+                {{- $first := true -}}
+                {{- range $topics -}}
+                    {{- if not $first }} &bull; {{ end -}}
+                    {{- $first = false -}}
+                    <a href="/focus/{{ .tag | urlize }}/">{{ .name }} ({{ .count }})</a>
+                {{- end -}}
+            </td>
+        </tr>
+        {{- end -}}
+    </table>
+</div>
+
+{{/* ==================== STYLE: TAGS ==================== */}}
+{{- else if eq $style "tags" -}}
+<div class="info-box-tags">
+    {{- if len $activities -}}
+    <div class="tag-group">
+        <span class="tag-group-label">Activities:</span>
+        {{- range $category, $count := $activities -}}
+            <span class="tag tag-activity">{{ $category | humanize | title }} ({{ $count }})</span>
+        {{- end -}}
+    </div>
+    {{- end -}}
+    
+    {{- if len $tools -}}
+    <div class="tag-group">
+        <span class="tag-group-label">Tools:</span>
+        {{- range $tools -}}
+            <a href="/tool/{{ . | urlize }}" class="tag tag-tool">{{ . }}</a>
+        {{- end -}}
+    </div>
+    {{- end -}}
+    
+    {{- if gt (len $collaborators) 0 -}}
+    <div class="tag-group">
+        <span class="tag-group-label">Collaborators:</span>
+        {{- range (sort $collaborators "count" "desc") -}}
+            <a href="/hacker/{{ .name }}" class="tag tag-collab">{{ .name | humanize | title }} ({{ .count }})</a>
+        {{- end -}}
+    </div>
+    {{- end -}}
+
+    {{- if gt (len $topics) 0 -}}
+    <div class="tag-group">
+        <span class="tag-group-label">Focus Areas:</span>
+        {{- range $topics -}}
+            <a href="/focus/{{ .tag | urlize }}/" class="tag tag-focus">{{ .name }} ({{ .count }})</a>
+        {{- end -}}
+    </div>
+    {{- end -}}
+</div>
+
+{{/* ==================== STYLE: MINIMAL ==================== */}}
+{{- else if eq $style "minimal" -}}
+<div class="info-box-minimal">
+    {{- if len $activities -}}
+    <div class="minimal-row">
+        <span class="minimal-label">Activities</span>
+        <span class="minimal-value">
+            {{- $first := true -}}
+            {{- range $category, $count := $activities -}}
+                {{- if not $first }}, {{ end -}}
+                {{- $first = false -}}
+                {{ $category | humanize | title }} ({{ $count }})
+            {{- end -}}
+        </span>
+    </div>
+    {{- end -}}
+    
+    {{- if len $tools -}}
+    <div class="minimal-row">
+        <span class="minimal-label">Tools</span>
+        <span class="minimal-value">
+            {{- $first := true -}}
+            {{- range $tools -}}
+                {{- if not $first }}, {{ end -}}
+                {{- $first = false -}}
+                <a href="/tool/{{ . | urlize }}">{{ . }}</a>
+            {{- end -}}
+        </span>
+    </div>
+    {{- end -}}
+    
+    {{- if gt (len $collaborators) 0 -}}
+    <div class="minimal-row">
+        <span class="minimal-label">Collaborators</span>
+        <span class="minimal-value">
+            {{- $first := true -}}
+            {{- range (sort $collaborators "count" "desc") -}}
+                {{- if not $first }}, {{ end -}}
+                {{- $first = false -}}
+                <a href="/hacker/{{ .name }}">{{ .name | humanize | title }} ({{ .count }})</a>
+            {{- end -}}
+        </span>
+    </div>
+    {{- end -}}
+
+    {{- if gt (len $topics) 0 -}}
+    <div class="minimal-row">
+        <span class="minimal-label">Focus Areas</span>
+        <span class="minimal-value">
+            {{- $first := true -}}
+            {{- range $topics -}}
+                {{- if not $first }}, {{ end -}}
+                {{- $first = false -}}
+                <a href="/focus/{{ .tag | urlize }}/">{{ .name }} ({{ .count }})</a>
+            {{- end -}}
+        </span>
+    </div>
+    {{- end -}}
+</div>
+
+{{/* ==================== STYLE: STATS ==================== */}}
+{{- else if eq $style "stats" -}}
+{{- $totalActivities := 0 -}}
+{{- range $cat, $cnt := $activities -}}
+    {{- $totalActivities = add $totalActivities $cnt -}}
+{{- end -}}
+<div class="info-box-stats">
+    {{- if len $activities -}}
+    <div class="stat-item">
+        <div class="stat-number">{{ $totalActivities }}</div>
+        <div class="stat-label">Total Activities</div>
+        <div class="stat-detail">
+            {{- $first := true -}}
+            {{- range $category, $count := $activities -}}
+                {{- if not $first }}, {{ end -}}
+                {{- $first = false -}}
+                {{ $count }} {{ $category | humanize | lower }}{{ if gt $count 1 }}s{{ end }}
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+    
+    {{- if len $tools -}}
+    <div class="stat-item">
+        <div class="stat-number">{{ len $tools }}</div>
+        <div class="stat-label">Tools Created</div>
+        <div class="stat-detail">
+            {{- $first := true -}}
+            {{- range $tools -}}
+                {{- if not $first }}, {{ end -}}
+                {{- $first = false -}}
+                <a href="/tool/{{ . | urlize }}">{{ . }}</a>
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+    
+    {{- if gt (len $collaborators) 0 -}}
+    <div class="stat-item">
+        <div class="stat-number">{{ len $collaborators }}</div>
+        <div class="stat-label">Collaborators</div>
+        <div class="stat-detail">
+            {{- $first := true -}}
+            {{- range first 3 (sort $collaborators "count" "desc") -}}
+                {{- if not $first }}, {{ end -}}
+                {{- $first = false -}}
+                <a href="/hacker/{{ .name }}">{{ .name | humanize | title }}</a>
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+
+    {{- if gt (len $topics) 0 -}}
+    <div class="stat-item">
+        <div class="stat-number">{{ len $topics }}</div>
+        <div class="stat-label">Focus Areas</div>
+        <div class="stat-detail">
+            {{- $first := true -}}
+            {{- range first 3 $topics -}}
+                {{- if not $first }}, {{ end -}}
+                {{- $first = false -}}
+                <a href="/focus/{{ .tag | urlize }}/">{{ .name }}</a>
+            {{- end -}}
+        </div>
+    </div>
+    {{- end -}}
+</div>
+
+{{/* ==================== STYLE: ONELINE ==================== */}}
+{{- else if eq $style "oneline" -}}
+{{- $totalActivities := 0 -}}
+{{- range $cat, $cnt := $activities -}}
+    {{- $totalActivities = add $totalActivities $cnt -}}
+{{- end -}}
+<div class="info-box-oneline">
+    {{- if len $activities -}}
+    <span class="oneline-stat"><strong>{{ $totalActivities }}</strong> activities</span>
+    {{- end -}}
+    {{- if len $tools -}}
+    <span class="oneline-sep">&bull;</span>
+    <span class="oneline-stat"><strong>{{ len $tools }}</strong> tools</span>
+    {{- end -}}
+    {{- if gt (len $collaborators) 0 -}}
+    <span class="oneline-sep">&bull;</span>
+    <span class="oneline-stat"><strong>{{ len $collaborators }}</strong> collaborators</span>
+    {{- end -}}
+    {{- if gt (len $topics) 0 -}}
+    <span class="oneline-sep">&bull;</span>
+    <span class="oneline-stat"><strong>{{ len $topics }}</strong> focus areas</span>
+    {{- end -}}
+</div>
+
+{{- end -}}
+{{- end -}}
