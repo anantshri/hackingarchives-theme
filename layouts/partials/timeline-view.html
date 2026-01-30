@@ -235,22 +235,35 @@
     <li>
         <span class="timeline-simple-date">{{ $page.Date.Format "Jan 02" }}</span>
         
+        {{- if and $showConference $page.Params.conference -}}
+            <span class="timeline-sep">-</span>
+            <a href="/conference/{{ lower $page.Params.conference | urlize }}" class="timeline-simple-conf">{{ $page.Params.conference | humanize | title }}</a>{{- if $page.Params.subconference -}}<span class="timeline-subconf">({{ $page.Params.subconference | humanize | title }})</span>{{- else if and (eq (lower $page.Params.conference) "blackhat") (eq (lower $page.Params.Type) "tool demo") -}}<span class="timeline-subconf">(Arsenal)</span>{{- else if and (eq (lower $page.Params.conference) "defcon") (eq (lower $page.Params.Type) "tool demo") -}}<span class="timeline-subconf">(DemoLabs)</span>{{- end -}}
+        {{- end -}}
+        
         {{- if and $showType $page.Params.type -}}
+            <span class="timeline-sep">-</span>
             <span class="timeline-simple-type">{{ $page.Params.type | humanize }}</span>
         {{- end -}}
         
-        {{- if and $showConference $page.Params.conference -}}
-            <a href="/conference/{{ lower $page.Params.conference | urlize }}" class="timeline-simple-conf">{{ $page.Params.conference | humanize | title }}</a>{{ partial "subconference.html" $page }}
+        <span class="timeline-sep">-</span>
+        <a href="{{ $page.RelPermalink }}" class="timeline-simple-title">{{ $page.Title | markdownify }}</a>
+        
+        {{- $hasResources := or $page.Params.presentation $page.Params.whitepaper $page.Params.Source $page.Params.video -}}
+        {{- if $hasResources -}}
+            <span class="timeline-sep">-</span>
+            {{ template "resource-icons" $page }}
         {{- end -}}
         
-        <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+        {{- $hackerCount := 0 -}}
+        {{- if $page.Params.hacker -}}{{- $hackerCount = len $page.Params.hacker -}}{{- end -}}
+        {{- $moreHackerCount := 0 -}}
+        {{- if $page.Params.morehackers -}}{{- $moreHackerCount = len $page.Params.morehackers -}}{{- end -}}
+        {{- $totalHackers := add $hackerCount $moreHackerCount -}}
         
-        {{- if $showHackers -}}
-            {{ template "hacker-list" (dict "Page" $page "CurrentHacker" $currentHacker) }}
+        {{- if and $showHackers (gt $totalHackers 0) -}}
+            <span class="timeline-sep">-</span>
+            {{ template "hacker-list-inline" (dict "Page" $page "CurrentHacker" $currentHacker) }}
         {{- end -}}
-        
-        {{/* Resource Icons */}}
-        {{ template "resource-icons" $page }}
     </li>
 {{- end -}}
 
@@ -441,6 +454,44 @@
     {{- if and $shouldShowHackers (gt $totalHackers 0) -}}
         <span class="timeline-hackers">
             - 
+            {{- range $index, $hacker := $page.Params.hacker -}}
+                {{- if gt $index 0 }}, {{ end -}}
+                <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+            {{- end -}}
+            {{- range $page.Params.morehackers -}}
+                , <u>{{ . | humanize | title }}</u>
+            {{- end -}}
+        </span>
+    {{- end -}}
+{{- end -}}
+
+{{/* Hacker List Inline (no leading dash) */}}
+{{- define "hacker-list-inline" -}}
+    {{- $page := .Page -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    {{- $hackerCount := 0 -}}
+    {{- if $page.Params.hacker -}}
+        {{- $hackerCount = len $page.Params.hacker -}}
+    {{- end -}}
+    {{- $moreHackerCount := 0 -}}
+    {{- if $page.Params.morehackers -}}
+        {{- $moreHackerCount = len $page.Params.morehackers -}}
+    {{- end -}}
+    {{- $totalHackers := add $hackerCount $moreHackerCount -}}
+    
+    {{- $shouldShowHackers := true -}}
+    {{- if and (ne $currentHacker "") (eq $totalHackers 1) -}}
+        {{- if $page.Params.hacker -}}
+            {{- $onlyHacker := index $page.Params.hacker 0 -}}
+            {{- if eq (lower $onlyHacker) (lower $currentHacker) -}}
+                {{- $shouldShowHackers = false -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    
+    {{- if and $shouldShowHackers (gt $totalHackers 0) -}}
+        <span class="timeline-hackers-inline">
             {{- range $index, $hacker := $page.Params.hacker -}}
                 {{- if gt $index 0 }}, {{ end -}}
                 <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>

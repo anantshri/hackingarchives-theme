@@ -2722,11 +2722,11 @@ thead, tfoot, tr:nth-child(even) {
 .timeline-simple-list li {
   padding: var(--spacing-sm) 0;
   border-bottom: 1px solid var(--color-border);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  align-items: baseline;
   line-height: 1.6;
+}
+
+.timeline-simple-list li > * {
+  margin-right: 0;
 }
 
 .timeline-simple-list li:last-child {
@@ -2737,22 +2737,44 @@ thead, tfoot, tr:nth-child(even) {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--color-text-light);
-  min-width: 50px;
+}
+
+.timeline-sep {
+  color: var(--color-text-light);
+  opacity: 0.6;
+  margin: 0 0.35em;
+}
+
+.timeline-subconf {
+  color: var(--color-text-light);
+  font-size: 0.9em;
+}
+
+.timeline-hackers-inline {
+  color: var(--color-text-light);
+  font-size: 0.9em;
+}
+
+.timeline-hackers-inline a {
+  color: var(--color-text-light);
 }
 
 .timeline-simple-conf {
-  color: var(--color-text-light);
-  margin-right: var(--spacing-xs);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.timeline-simple-title {
+  color: var(--color-text);
 }
 
 .timeline-simple-list .timeline-resources {
-  margin-left: var(--spacing-sm);
+  margin-left: 0;
 }
 
 .timeline-simple-list .timeline-hackers {
   color: var(--color-text-light);
   font-size: 0.9em;
-}
 }
 
 .timeline-simple-type {
@@ -3042,9 +3064,9 @@ thead, tfoot, tr:nth-child(even) {
 
 @media (max-width: 768px) {
   /* Simple List Responsive */
-  .timeline-simple-list li {
-    flex-direction: column;
-    gap: var(--spacing-xs);
+  .timeline-simple-list li > * {
+    display: inline;
+    margin-right: var(--spacing-xs);
   }
   
   .timeline-simple-date {
