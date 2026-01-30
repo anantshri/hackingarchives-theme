@@ -3228,3 +3228,163 @@ thead, tfoot, tr:nth-child(even) {
 .tags-full-list {
   padding-top: 0.5rem;
 }
+
+/* ===========================================
+   Focus Area Table Column Widths
+   =========================================== */
+.timeline-table-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.timeline-table-focus {
+  /* Use auto layout so title can expand freely */
+  table-layout: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure cells don't break the table layout */
+.timeline-table-focus td,
+.timeline-table-focus th {
+  box-sizing: border-box;
+}
+
+/* Date and Type cells stay on one line */
+.timeline-table-focus .col-date,
+.timeline-table-focus .col-type {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Conference and Speakers can wrap */
+.timeline-table-focus .col-conf,
+.timeline-table-focus .col-speakers {
+  overflow: visible;
+}
+
+.timeline-table-focus .col-date {
+  width: 85px;
+  white-space: nowrap;
+}
+
+.timeline-table-focus .col-type {
+  width: 55px;
+  white-space: nowrap;
+}
+
+.timeline-table-focus .col-conf {
+  width: 80px;
+  /* Allow conference names to wrap at spaces */
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.timeline-table-focus .col-title {
+  /* Title gets all remaining space - NEVER truncate */
+  width: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.timeline-table-focus .col-speakers {
+  width: 12%;
+  max-width: 150px;
+  /* Allow speaker names to wrap at spaces */
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.timeline-table-focus .col-tags {
+  width: 13%;
+  max-width: 140px;
+  /* Allow tag wrapping */
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Resource icons inline with title */
+.timeline-table-focus .col-title .timeline-resources {
+  display: inline-flex;
+  margin-left: var(--spacing-sm);
+  vertical-align: middle;
+}
+
+/* Tags cell styling */
+.timeline-table-focus .timeline-tags-cell {
+  white-space: normal;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.timeline-table-focus .tag-badge {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  margin: 0.05rem;
+  font-size: 0.7rem;
+  background-color: var(--color-background-alt);
+  color: var(--color-accent);
+  border-radius: 3px;
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+  /* Allow long tags to wrap to multiple lines */
+  white-space: normal;
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.3;
+}
+
+.timeline-table-focus .tag-badge:hover {
+  background-color: var(--color-accent);
+  color: white;
+  text-decoration: none;
+}
+
+.timeline-table-focus .tag-more {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  margin: 0.05rem;
+  font-size: 0.65rem;
+  background-color: var(--color-border);
+  color: var(--color-text-light);
+  border-radius: 3px;
+  cursor: help;
+}
+
+/* Responsive adjustments for focus table */
+@media (max-width: 1024px) {
+  .timeline-table-focus .col-tags {
+    width: 15%;
+  }
+  
+  .timeline-table-focus .col-speakers {
+    width: 14%;
+  }
+}
+
+@media (max-width: 768px) {
+  .timeline-table-focus .col-date,
+  .timeline-table-focus .col-type,
+  .timeline-table-focus .col-conf,
+  .timeline-table-focus .col-speakers,
+  .timeline-table-focus .col-tags {
+    width: auto;
+    max-width: unset;
+  }
+  
+  /* Stack resources below title on mobile */
+  .timeline-table-focus .col-title .timeline-resources {
+    display: block;
+    margin-left: 0;
+    margin-top: var(--spacing-xs);
+  }
+}

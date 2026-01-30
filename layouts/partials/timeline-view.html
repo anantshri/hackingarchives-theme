@@ -120,16 +120,15 @@
 {{- else if eq $style "table" -}}
     {{/* Table Style */}}
     <div class="timeline-table-wrapper">
-        <table class="timeline-table">
+        <table class="timeline-table timeline-table-focus">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    {{- if $showType }}<th>Type</th>{{ end -}}
-                    <th>Title</th>
-                    {{- if $showConference }}<th>Conference</th>{{ end -}}
-                    {{- if $showHackers }}<th>Speaker(s)</th>{{ end -}}
-                    {{- if $showTags }}<th>Tags</th>{{ end -}}
-                    <th>Resources</th>
+                    <th class="col-date">Date</th>
+                    {{- if $showType }}<th class="col-type">Type</th>{{ end -}}
+                    {{- if $showConference }}<th class="col-conf">Conference</th>{{ end -}}
+                    <th class="col-title">Title</th>
+                    {{- if $showHackers }}<th class="col-speakers">Speaker(s)</th>{{ end -}}
+                    {{- if $showTags }}<th class="col-tags">Tags</th>{{ end -}}
                 </tr>
             </thead>
             <tbody>
@@ -357,21 +356,24 @@
     {{- $currentHacker := .CurrentHacker | default "" -}}
     
     <tr>
-        <td>{{ $page.Date.Format "2006-01-02" }}</td>
+        <td class="col-date">{{ $page.Date.Format "2006-01-02" }}</td>
         {{- if $showType -}}
-            <td><span class="badge badge-sm">{{ $page.Params.type | humanize }}</span></td>
+            <td class="col-type"><span class="badge badge-sm">{{ $page.Params.type | humanize }}</span></td>
         {{- end -}}
-        <td><a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a></td>
         {{- if $showConference -}}
-            <td><a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a></td>
+            <td class="col-conf"><a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a></td>
         {{- end -}}
+        <td class="col-title">
+            <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+            {{ template "resource-icons" $page }}
+        </td>
         {{- if $showHackers -}}
-            <td>
+            <td class="col-speakers">
                 {{- range $i, $h := $page.Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end -}}
             </td>
         {{- end -}}
         {{- if $showTags -}}
-            <td class="timeline-tags-cell">
+            <td class="col-tags timeline-tags-cell">
                 {{- if $page.Params.tag -}}
                     {{- range $i, $t := $page.Params.tag -}}
                         {{- if lt $i 3 -}}
@@ -384,7 +386,6 @@
                 {{- end -}}
             </td>
         {{- end -}}
-        <td>{{ template "resource-icons" $page }}</td>
     </tr>
 {{- end -}}
 
