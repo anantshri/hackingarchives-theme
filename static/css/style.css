@@ -538,6 +538,13 @@ blockquote {
   text-decoration: none;
 }
 
+/* Menu icon links (for About, Contribute, RoadMap) */
+.menu a.menu-icon-link {
+  font-size: 1.2em;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  line-height: 1;
+}
+
 /* ========================================
    Mobile Hamburger Menu (CSS-only)
    ======================================== */
@@ -842,6 +849,19 @@ footer a {
   text-decoration: none;
 }
 
+.footer-links {
+  margin-bottom: var(--spacing-sm);
+}
+
+.footer-links a {
+  color: var(--color-primary);
+  padding: 0 var(--spacing-xs);
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
 hr {
   border-style: dashed;
   color: var(--color-border);
@@ -983,6 +1003,11 @@ thead, tfoot, tr:nth-child(even) {
   display: inline-block;
   text-decoration: none;
   font-size: 0.7em;
+}
+
+#focusarea-cloud a .focus-icon {
+  display: inline-block;
+  text-decoration: none;
 }
 
 /* ========================================
@@ -2616,6 +2641,26 @@ thead, tfoot, tr:nth-child(even) {
   font-size: 0.9em;
 }
 
+/* Stats grid mobile - force 2 columns */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+  
+  .stat-card {
+    padding: var(--spacing-md);
+  }
+  
+  .stat-card-number {
+    font-size: 1.5rem;
+  }
+  
+  .stat-card-label {
+    font-size: 0.8em;
+  }
+}
+
 /* Tag Cloud (Focus Area specific) */
 .tag-cloud {
   background: var(--color-background-alt);
@@ -3627,4 +3672,41 @@ thead, tfoot, tr:nth-child(even) {
   .tag-focus-label {
     margin-bottom: var(--spacing-xs);
   }
+}
+
+/* Collaborators with Photos */
+.collaborators-with-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.collaborator-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-bg-tertiary);
+  border-radius: 20px;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+}
+
+.collaborator-link:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.collaborator-photo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.collaborator-link:hover .collaborator-photo {
+  border-color: white;
 }

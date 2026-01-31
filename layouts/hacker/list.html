@@ -166,8 +166,74 @@
 {{- end -}}
 {{- $commonTags = sort $commonTags "count" "desc" -}}
 
-<!-- Activities Summary -->
-{{ partial "infobox-view.html" (dict "Activities" $categoryCounts "Tools" $uniqueTools "Collaborators" $commonCollaborators "Topics" $commonTags "Style" "table") }}
+<!-- Activities Summary - Stat Boxes -->
+{{- $normalizedCounts := dict -}}
+{{- range $category, $count := $categoryCounts -}}
+    {{- $normalizedType := $category | lower | strings.TrimSpace -}}
+    {{- if eq $normalizedType "tool demo" -}}
+        {{- $normalizedType = "tooldemo" -}}
+    {{- end -}}
+    {{- if not (isset $normalizedCounts $normalizedType) -}}
+        {{- $normalizedCounts = merge $normalizedCounts (dict $normalizedType $count) -}}
+    {{- else -}}
+        {{- $existingCount := index $normalizedCounts $normalizedType -}}
+        {{- $normalizedCounts = merge $normalizedCounts (dict $normalizedType (add $existingCount $count)) -}}
+    {{- end -}}
+{{- end -}}
+
+<div class="stats-grid">
+    {{ with index $normalizedCounts "talk" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Talks</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "tooldemo" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Tool Demos</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "workshop" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Workshops</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "panel" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Panels</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "keynote" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Keynotes</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "book" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Books</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "award" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Awards</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "article" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Articles</div>
+    </div>
+    {{ end }}
+</div>
+
+<!-- Tools, Collaborators, Topics -->
+{{ partial "infobox-view.html" (dict "Tools" $uniqueTools "Collaborators" $commonCollaborators "Topics" $commonTags "Style" "table") }}
 
 <!-- Timeline Section -->
 {{- $timelineYears := add (sub $hackerLastTalk.Year $hackerFirstTalk.Year) 1 -}}

@@ -1,6 +1,11 @@
   <footer>
   {{ partial "foot_custom.html" . }}
   <hr/>
+  <div class="footer-links">
+    <a href="/about/">About</a> |
+    <a href="/contribute/">Contribute</a> |
+    <a href="/roadmap/">RoadMap</a>
+  </div>
   <span>Last update date: {{ now.Format "Jan 2, 2006 (IST)" }}</span>
   <br />
   {{ with .Site.Params.footer }}

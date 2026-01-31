@@ -211,12 +211,24 @@
         {{- if gt (len $collaborators) 0 -}}
         <tr>
             <th>Collaborators</th>
-            <td>
-                {{- $first := true -}}
+            <td class="collaborators-with-photos">
                 {{- range (sort $collaborators "count" "desc") -}}
-                    {{- if not $first }} &bull; {{ end -}}
-                    {{- $first = false -}}
-                    <a href="/hacker/{{ .name }}">{{ .name | humanize | title }} ({{ .count }})</a>
+                    {{- $collabName := .name -}}
+                    {{- $imgBasePath := path.Join "static" "hacker" $collabName -}}
+                    {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
+                    {{- $photopath := "" -}}
+                    {{- range $ext := $extensions -}}
+                        {{- if (fileExists (print $imgBasePath $ext)) -}}
+                            {{- $photopath = print "/hacker/" $collabName $ext -}}
+                            {{- break -}}
+                        {{- end -}}
+                    {{- end -}}
+                    <a href="/hacker/{{ .name }}" class="collaborator-link">
+                        {{- if $photopath -}}
+                        <img src="{{ $photopath }}" alt="{{ .name | humanize | title }}" class="collaborator-photo">
+                        {{- end -}}
+                        <span>{{ .name | humanize | title }} ({{ .count }})</span>
+                    </a>
                 {{- end -}}
             </td>
         </tr>

@@ -50,6 +50,25 @@
             {{ end }}
         {{ end }}
         
+        {{/* Count content by type - normalize by lowercasing and trimming */}}
+        {{ $typeCount := dict }}
+        {{ range $matching_pages }}
+            {{ $rawType := .Params.type | default "" }}
+            {{ $type := $rawType | lower | strings.TrimSpace }}
+            {{ if eq $type "tool demo" }}
+                {{ $type = "tooldemo" }}
+            {{ end }}
+            {{ if and $type (ne $type "") }}
+                {{ if not (isset $typeCount $type) }}
+                    {{ $typeCount = merge $typeCount (dict $type 1) }}
+                {{ else }}
+                    {{ $currentCount := index $typeCount $type }}
+                    {{ $typeCount = merge $typeCount (dict $type (add $currentCount 1)) }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+
+        {{/* Build tag count for related tags display later */}}
         {{ $tagCount := dict }}
         {{ range $matching_pages }}
             {{ if .Params.tag }}
@@ -68,24 +87,62 @@
             {{ end }}
         {{ end }}
 
-        {{/* Statistics Cards */}}
+        {{/* Statistics Cards - only show types with count > 0 */}}
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-number">{{ len $matching_pages }}</div>
-                <div class="stat-card-label">Total Entries</div>
-            </div>
+            {{ if gt (len $hackerCount) 0 }}
             <div class="stat-card">
                 <div class="stat-card-number">{{ len $hackerCount }}</div>
                 <div class="stat-card-label">Contributors</div>
             </div>
+            {{ end }}
+            {{ with index $typeCount "talk" }}
             <div class="stat-card">
-                <div class="stat-card-number">{{ len $tagCount }}</div>
-                <div class="stat-card-label">Unique Tags</div>
+                <div class="stat-card-number">{{ . }}</div>
+                <div class="stat-card-label">Talks</div>
             </div>
+            {{ end }}
+            {{ with index $typeCount "tooldemo" }}
             <div class="stat-card">
-                <div class="stat-card-number">{{ len $related_tags }}</div>
-                <div class="stat-card-label">Related Tags</div>
+                <div class="stat-card-number">{{ . }}</div>
+                <div class="stat-card-label">Tool Demos</div>
             </div>
+            {{ end }}
+            {{ with index $typeCount "workshop" }}
+            <div class="stat-card">
+                <div class="stat-card-number">{{ . }}</div>
+                <div class="stat-card-label">Workshops</div>
+            </div>
+            {{ end }}
+            {{ with index $typeCount "panel" }}
+            <div class="stat-card">
+                <div class="stat-card-number">{{ . }}</div>
+                <div class="stat-card-label">Panels</div>
+            </div>
+            {{ end }}
+            {{ with index $typeCount "keynote" }}
+            <div class="stat-card">
+                <div class="stat-card-number">{{ . }}</div>
+                <div class="stat-card-label">Keynotes</div>
+            </div>
+            {{ end }}
+            {{ with index $typeCount "book" }}
+            <div class="stat-card">
+                <div class="stat-card-number">{{ . }}</div>
+                <div class="stat-card-label">Books</div>
+            </div>
+            {{ end }}
+            {{ with index $typeCount "award" }}
+            <div class="stat-card">
+                <div class="stat-card-number">{{ . }}</div>
+                <div class="stat-card-label">Awards</div>
+            </div>
+            {{ end }}
+            {{ with index $typeCount "article" }}
+            <div class="stat-card">
+                <div class="stat-card-number">{{ . }}</div>
+                <div class="stat-card-label">Articles</div>
+            </div>
+            {{ end }}
         </div>
 
         {{/* Top 5 Contributors - Tag Cloud Style */}}
@@ -199,6 +256,7 @@
                     {{- $weight := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
                     {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weight)) -}}
                     <a href="{{ $page.RelPermalink }}" style="font-size:{{ $currentFontSize }}{{ $fontUnit }};">
+                        {{- with $page.Params.icon }}<span class="focus-icon">{{ . }}</span> {{ end -}}
                         {{- $page.Title -}}
                         {{- if gt $count 0 -}}<sub>({{ $count }})</sub>{{- end -}}
                     </a>&nbsp;
