@@ -15,9 +15,7 @@
         {{/* This is a specific focus area page - show individual focus area content */}}
         <div class="focus-detail-header">
             <h1>
-                <span class="focus-detail-icon">
-                    <i class="fas fa-{{ .Params.icon }}"></i>
-                </span>
+                {{ with .Params.icon }}<span class="focus-detail-icon">{{ . }}</span>{{ end }}
                 {{ .Title }}
             </h1>
             <p>{{ .Params.description }}</p>

@@ -16,22 +16,36 @@
   <body>
     <!-- Theme Toggle (CSS-only, no JavaScript) -->
     <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox" aria-label="Toggle dark mode">
+    <!-- Mobile Menu Toggle (CSS-only, no JavaScript) -->
+    <input type="checkbox" id="menu-toggle" class="menu-toggle-checkbox" aria-label="Toggle navigation menu">
 
     <header class="site-header">
       <div class="header-container">
         <a href="{{ .Site.BaseURL }}" class="site-title">{{ .Site.Title }}</a>
+        
         <nav class="site-nav">
           <ul class="menu">
             {{ range .Site.Menus.main }}
             <li><a href="{{ .URL | relURL }}">{{ .Name }}</a></li>
             {{ end }}
           </ul>
+        </nav>
+        
+        <!-- Mobile controls: theme toggle + hamburger -->
+        <div class="header-controls">
           <!-- Theme Toggle Label -->
           <label for="theme-toggle" class="theme-toggle-label" title="Toggle dark/light mode">
             <span class="theme-icon-light">☀️</span>
             <span class="theme-icon-dark">🌙</span>
           </label>
-        </nav>
+          
+          <!-- Hamburger Menu Button (mobile only) -->
+          <label for="menu-toggle" class="menu-toggle-label" aria-label="Toggle menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </label>
+        </div>
       </div>
     </header>
 

@@ -15,6 +15,35 @@
         <h1>Tag: {{ .Title | markdownify | humanize | title }}</h1>
         {{ end }}
 
+        {{/* Find which focus areas contain this tag */}}
+        {{ $currentTag := .Title | urlize }}
+        {{ $focusAreaPages := where .Site.Pages "Section" "focus" }}
+        {{ $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil }}
+        {{ $matchingFocusAreas := slice }}
+        {{ range $focusAreaPages }}
+            {{ $focusPage := . }}
+            {{ if .Params.related_tags }}
+                {{ range .Params.related_tags }}
+                    {{ if eq (. | urlize) $currentTag }}
+                        {{ $matchingFocusAreas = $matchingFocusAreas | append $focusPage }}
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+        {{ $matchingFocusAreas = uniq $matchingFocusAreas }}
+
+        {{ if gt (len $matchingFocusAreas) 0 }}
+        <div class="tag-focus-areas">
+            <span class="tag-focus-label">Focus Area{{ if gt (len $matchingFocusAreas) 1 }}s{{ end }}:</span>
+            {{ range $matchingFocusAreas }}
+                <a href="{{ .RelPermalink }}" class="tag-focus-link">
+                    {{ with .Params.icon }}<span class="focus-icon">{{ . }}</span>{{ end }}
+                    {{ .Title }}
+                </a>
+            {{ end }}
+        </div>
+        {{ end }}
+
         {{ .Content }}
 
         {{ $pages := .Pages }}
