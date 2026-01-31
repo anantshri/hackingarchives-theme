@@ -2685,6 +2685,60 @@ thead, tfoot, tr:nth-child(even) {
   font-size: 0.9em;
 }
 
+/* Clickable stat cards (links) */
+a.stat-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+a.stat-card-link:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px var(--color-card-shadow-hover);
+  border-color: var(--color-accent);
+}
+
+a.stat-card-link:hover .stat-card-number {
+  color: var(--color-accent);
+}
+
+a.stat-card-link:visited {
+  color: inherit;
+}
+
+/* Stats Grid Variants */
+.stats-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.stats-grid-types {
+  margin-top: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+  .stats-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Conference Summary */
+.conference-summary {
+  background: var(--color-background-alt);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  margin: var(--spacing-lg) 0;
+  border-left: 4px solid var(--color-accent);
+  line-height: 1.8;
+}
+
+.conference-summary a {
+  color: var(--color-link);
+}
+
+.conference-summary a:hover {
+  color: var(--color-accent);
+}
+
 /* Stats grid mobile - force 2 columns */
 @media (max-width: 768px) {
   .stats-grid {
@@ -3758,4 +3812,76 @@ thead, tfoot, tr:nth-child(even) {
 
 .collaborator-link:hover .collaborator-photo {
   border-color: white;
+}
+
+/* 404 Error Page */
+.error-page {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.error-page h1 {
+  font-size: 3rem;
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-md);
+}
+
+.error-message {
+  font-size: 1.2rem;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.error-suggestions {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.error-suggestions h2 {
+  font-size: 1.3rem;
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text);
+}
+
+.error-page .stats-grid {
+  max-width: 600px;
+  margin: 0 auto var(--spacing-lg);
+}
+
+.error-page .stat-card-number {
+  font-size: 2rem;
+}
+
+.error-help {
+  background: var(--color-background-alt);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.error-help p {
+  margin-bottom: var(--spacing-md);
+}
+
+.error-help p:last-child {
+  margin-bottom: 0;
+}
+
+.error-help a {
+  color: var(--color-link);
+}
+
+.error-help a:hover {
+  color: var(--color-accent);
+}
+
+@media (max-width: 768px) {
+  .error-page h1 {
+    font-size: 2rem;
+  }
+  
+  .error-page .stat-card-number {
+    font-size: 1.5rem;
+  }
 }
