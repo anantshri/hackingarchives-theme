@@ -750,8 +750,8 @@ blockquote {
     gap: var(--spacing-md);
   }
   
-  /* Single stat card should be full width on mobile */
-  .stats-grid .stat-card:only-child {
+  /* Last stat card spans full width when odd count (includes single card) */
+  .stats-grid .stat-card:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
   
@@ -2692,8 +2692,8 @@ thead, tfoot, tr:nth-child(even) {
     gap: var(--spacing-sm);
   }
   
-  /* Single stat card should be full width on mobile */
-  .stats-grid .stat-card:only-child {
+  /* Last stat card spans full width when odd count (includes single card) */
+  .stats-grid .stat-card:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
   

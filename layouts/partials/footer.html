@@ -1,18 +1,18 @@
-  <footer>
-  {{ partial "foot_custom.html" . }}
-  <hr/>
-  <div class="footer-links">
-    <a href="/about/">About</a> |
-    <a href="/contribute/">Contribute</a> |
-    <a href="/roadmap/">RoadMap</a>
-  </div>
-  <span>Last update date: {{ now.Format "Jan 2, 2006 (IST)" }}</span>
-  <br />
+<footer>
+{{ partial "foot_custom.html" . }}
+<hr/>
+<span class="footer-last-update">Last update date: {{ now.Format "Jan 2, 2006 (IST)" }}</span>
+<div class="footer-links">
+  <a href="/about/">About</a> |
+  <a href="/contribute/">Contribute</a> |
+  <a href="/roadmap/">RoadMap</a>
+  {{- with .Site.Params.buymeacoffee }} | <a href="{{ . }}" target="_blank" rel="noopener">Buy Me a Coffee</a>{{- end }}
+  {{- with .Site.Params.github_sponsor }} | <a href="{{ . }}" target="_blank" rel="noopener">GitHub Sponsor</a>{{- end }}
+</div>
   {{ with .Site.Params.footer }}
   {{ . | markdownify }} {{ now.Format "2006" }}
   {{ end }}
   </footer>
   <hr/>
-
   </body>
 </html>
