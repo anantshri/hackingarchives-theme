@@ -545,6 +545,23 @@ blockquote {
   line-height: 1;
 }
 
+/* Hide text on desktop, show only icon */
+.menu .menu-icon-link .menu-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.menu .menu-icon-link .menu-icon {
+  display: inline;
+}
+
 /* ========================================
    Mobile Hamburger Menu (CSS-only)
    ======================================== */
@@ -622,7 +639,7 @@ blockquote {
   
   /* Show navigation when checkbox is checked */
   .menu-toggle-checkbox:checked ~ .site-header .site-nav {
-    max-height: 500px;
+    max-height: 540px;
   }
   
   /* Stack menu items vertically - full width */
@@ -644,6 +661,28 @@ blockquote {
     padding: var(--spacing-md);
     width: 100%;
     box-sizing: border-box;
+  }
+  
+  /* Show text instead of icons on mobile - match other menu items */
+  .menu .menu-icon-link {
+    font-size: 1rem;
+    padding: var(--spacing-md) !important;
+    line-height: 1.65 !important;
+  }
+  
+  .menu .menu-icon-link .menu-text {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+  
+  .menu .menu-icon-link .menu-icon {
+    display: none;
   }
   
   /* Header controls stay visible on mobile */
@@ -709,6 +748,11 @@ blockquote {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
+  }
+  
+  /* Single stat card should be full width on mobile */
+  .stats-grid .stat-card:only-child {
+    grid-column: 1 / -1;
   }
   
   .stat-card-number {
@@ -2646,6 +2690,11 @@ thead, tfoot, tr:nth-child(even) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-sm);
+  }
+  
+  /* Single stat card should be full width on mobile */
+  .stats-grid .stat-card:only-child {
+    grid-column: 1 / -1;
   }
   
   .stat-card {
