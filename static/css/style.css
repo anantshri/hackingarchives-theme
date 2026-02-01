@@ -24,6 +24,7 @@
   --color-info-border: #2a5f6f;
   --color-warning-bg: #fef8e8;
   --color-warning-border: #a07030;
+  --color-warning-text: #664d03;
   --color-success-bg: #e8f5e8;
   --color-success-border: #5a9a5a;
   --color-link: #2a5f6f;
@@ -70,8 +71,8 @@
     /* Dark Color Palette - Terminal/CRT aesthetic with amber accents */
     --color-primary: #d4d8c8;
     --color-secondary: #b0b5a5;
-    --color-accent: #d4a020;
-    --color-accent-hover: #e8b830;
+    --color-accent: #b8942a;
+    --color-accent-hover: #c9a535;
     --color-text: #c9d1c5;
     --color-text-light: #8a9088;
     --color-background: #0d1210;
@@ -84,6 +85,7 @@
     --color-info-border: #4a8090;
     --color-warning-bg: #2a2518;
     --color-warning-border: #d4a040;
+    --color-warning-text: #e8d4a0;
     --color-success-bg: #1a2a1a;
     --color-success-border: #4a8a4a;
     --color-link: #58a6c8;
@@ -203,8 +205,8 @@ body:has(.theme-toggle-checkbox:checked) .theme-icon-dark {
 body:has(.theme-toggle-checkbox:checked) {
   --color-primary: #d4d8c8;
   --color-secondary: #b0b5a5;
-  --color-accent: #d4a020;
-  --color-accent-hover: #e8b830;
+  --color-accent: #b8942a;
+  --color-accent-hover: #c9a535;
   --color-text: #c9d1c5;
   --color-text-light: #8a9088;
   --color-background: #0d1210;
@@ -217,6 +219,7 @@ body:has(.theme-toggle-checkbox:checked) {
   --color-info-border: #4a8090;
   --color-warning-bg: #2a2518;
   --color-warning-border: #d4a040;
+  --color-warning-text: #e8d4a0;
   --color-success-bg: #1a2a1a;
   --color-success-border: #4a8a4a;
   --color-link: #58a6c8;
@@ -300,6 +303,7 @@ body:has(.theme-toggle-checkbox:checked) .purchase-link:hover {
     --color-info-border: #2a5f6f;
     --color-warning-bg: #fef8e8;
     --color-warning-border: #a07030;
+    --color-warning-text: #664d03;
     --color-success-bg: #e8f5e8;
     --color-success-border: #5a9a5a;
     --color-link: #2a5f6f;
@@ -1949,6 +1953,7 @@ thead, tfoot, tr:nth-child(even) {
 .notice.warning {
   border-left-color: var(--color-warning-border);
   background-color: var(--color-warning-bg);
+  color: var(--color-warning-text, inherit);
 }
 
 .notice.info {

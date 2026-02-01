@@ -11,13 +11,64 @@
     {{ $spread := sub $max $min }}
     {{ $fontStep := div $fontSpread $spread }}
 
+    {{/* Calculate stats */}}
+    {{ $totalTools := len $.Site.Taxonomies.tool }}
+    
+    {{/* Count total presentations and collect unique conferences/hackers */}}
+    {{ $allPresentations := slice }}
+    {{ $uniqueConferences := slice }}
+    {{ $uniqueHackers := slice }}
+    {{ range $name, $taxonomy := $.Site.Taxonomies.tool }}
+        {{ range $taxonomy.Pages }}
+            {{ $allPresentations = $allPresentations | append .Permalink }}
+            {{ if .Params.conference }}
+                {{ $uniqueConferences = $uniqueConferences | append (lower .Params.conference) }}
+            {{ end }}
+            {{ if .Params.hacker }}
+                {{ range .Params.hacker }}
+                    {{ $uniqueHackers = $uniqueHackers | append . }}
+                {{ end }}
+            {{ end }}
+            {{ if .Params.morehackers }}
+                {{ range .Params.morehackers }}
+                    {{ $uniqueHackers = $uniqueHackers | append . }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+    {{ end }}
+    {{ $totalPresentations := len (uniq $allPresentations) }}
+    {{ $totalConferences := len (uniq $uniqueConferences) }}
+    {{ $totalContributors := len (uniq $uniqueHackers) }}
 
 <div>
 
 {{ .Content }}
 
+<div class="stats-grid stats-grid-4">
+    <a href="#tool-cloud" class="stat-card-link">
+        <div class="stat-card">
+            <div class="stat-card-number">{{ $totalTools }}</div>
+            <div class="stat-card-label">Tools Catalogued</div>
+        </div>
+    </a>
+    <div class="stat-card">
+        <div class="stat-card-number">{{ $totalPresentations }}</div>
+        <div class="stat-card-label">Tool Presentations</div>
+    </div>
+    <a href="/conference/" class="stat-card-link">
+        <div class="stat-card">
+            <div class="stat-card-number">{{ $totalConferences }}</div>
+            <div class="stat-card-label">Conferences Covered</div>
+        </div>
+    </a>
+    <a href="/hacker/" class="stat-card-link">
+        <div class="stat-card">
+            <div class="stat-card-number">{{ $totalContributors }}</div>
+            <div class="stat-card-label">Tool Contributors</div>
+        </div>
+    </a>
+</div>
 
-	Total Tools so far: <b>{{ len $.Site.Taxonomies.tool }}</b>
 </div>
 
 <h2>Tools Cloud (Listed by presentation count)</h2>

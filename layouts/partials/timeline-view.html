@@ -40,12 +40,12 @@
   {{- end -}}
 {{- end -}}
 
-{{/* Build params dict for item templates */}}
-{{- $itemParams := dict "ShowConference" $showConference "ShowHackers" $showHackers "ShowType" $showType "CurrentHacker" $currentHacker "ShowFocusArea" $showFocusArea "FocusAreaConfig" $focusAreaConfig "ShowTags" $showTags -}}
-
 {{/* Group by year only when 6+ entries; otherwise single section */}}
 {{- $totalEntries := len $pages -}}
 {{- $groupByYear := ge $totalEntries 6 -}}
+
+{{/* Build params dict for item templates - include ShowYearInDate when not grouping by year */}}
+{{- $itemParams := dict "ShowConference" $showConference "ShowHackers" $showHackers "ShowType" $showType "CurrentHacker" $currentHacker "ShowFocusArea" $showFocusArea "FocusAreaConfig" $focusAreaConfig "ShowTags" $showTags "ShowYearInDate" (not $groupByYear) -}}
 
 {{/* Year navigation (when grouping by year) */}}
 {{- $yearGroups := $pages.GroupByDate "2006" -}}
@@ -231,9 +231,10 @@
     {{- $showHackers := .ShowHackers -}}
     {{- $showType := .ShowType -}}
     {{- $currentHacker := .CurrentHacker | default "" -}}
+    {{- $showYearInDate := .ShowYearInDate | default false -}}
     
     <li>
-        <span class="timeline-simple-date">{{ $page.Date.Format "Jan 02" }}</span>
+        <span class="timeline-simple-date">{{ if $showYearInDate }}{{ $page.Date.Format "Jan 02, 2006" }}{{ else }}{{ $page.Date.Format "Jan 02" }}{{ end }}</span>
         
         {{- if and $showConference $page.Params.conference -}}
             <span class="timeline-sep">-</span>
@@ -409,9 +410,10 @@
     {{- $showHackers := .ShowHackers -}}
     {{- $showType := .ShowType -}}
     {{- $currentHacker := .CurrentHacker | default "" -}}
+    {{- $showYearInDate := .ShowYearInDate | default false -}}
     
     <div class="timeline-minimal-item">
-        <code class="timeline-minimal-date">{{ $page.Date.Format "01/02" }}</code>
+        <code class="timeline-minimal-date">{{ if $showYearInDate }}{{ $page.Date.Format "2006/01/02" }}{{ else }}{{ $page.Date.Format "01/02" }}{{ end }}</code>
         <span class="timeline-minimal-separator">---</span>
         {{- if and $showType $page.Params.type -}}
             <span class="timeline-minimal-type">[{{ $page.Params.type | upper | truncate 4 "" }}]</span>

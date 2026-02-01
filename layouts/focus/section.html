@@ -13,7 +13,9 @@
 
     {{ if and .File .Params.focus_key }}
         {{/* This is a specific focus area page - show individual focus area content */}}
-        <div class="focus-detail-header">
+        {{/* Calculate darker shade for gradient */}}
+        {{ $focusColor := .Params.color | default "#8b6914" }}
+        <div class="focus-detail-header" style="--focus-color: {{ $focusColor }}; --focus-color-dark: color-mix(in srgb, {{ $focusColor }} 70%, black);">
             <h1>
                 {{ with .Params.icon }}<span class="focus-detail-icon">{{ . }}</span>{{ end }}
                 {{ .Title }}
