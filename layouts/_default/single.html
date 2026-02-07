@@ -2,6 +2,7 @@
 
 <!-- Entry Header -->
 <div class="entry-header">
+    {{ partial "share.html" . }}
     <h1>{{ .Title | markdownify }}</h1>
     
     {{ if .Params.hacker }}

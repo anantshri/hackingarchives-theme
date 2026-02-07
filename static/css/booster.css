@@ -261,3 +261,225 @@ width:100%;
         top: .125em;
         position: relative;
     }
+
+/* Share box - top-right of entry-header / profile-header */
+.entry-header,
+.profile-header {
+    position: relative;
+}
+
+/* Entry header: dark gradient in dark mode (avoid bright flash) */
+@media (prefers-color-scheme: dark) {
+    .entry-header {
+        background: linear-gradient(135deg, var(--color-card-bg) 0%, var(--color-background-alt) 100%) !important;
+    }
+}
+
+body:has(.theme-toggle-checkbox:checked) .entry-header {
+    background: linear-gradient(135deg, var(--color-card-bg) 0%, var(--color-background-alt) 100%) !important;
+}
+
+.share-box {
+    position: absolute;
+    top: var(--spacing-md, 1rem);
+    right: var(--spacing-md, 1rem);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.profile-header .share-box {
+    background-color: #f0f0f0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.share-box-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.15rem;
+}
+
+.share-box-icon-img {
+    width: 1.25rem;
+    height: 1.25rem;
+    opacity: 0.95;
+}
+
+.profile-header .share-box-icon-img {
+    filter: none;
+}
+
+.entry-header .share-box-icon-img {
+    filter: brightness(0) invert(1);
+}
+
+.share-box .share-buttons {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.share-box .share-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.entry-header .share-box .share-link:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.profile-header .share-box .share-link {
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.profile-header .share-box .share-link:hover {
+    background-color: #e8e8e8;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.share-box .share-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.entry-header .share-box .share-icon {
+    filter: brightness(0) invert(1);
+}
+
+.share-box .share-icon-text {
+    font-size: 0.7rem;
+    padding: 0 0.15rem;
+}
+
+.entry-header .share-box .share-icon-text {
+    color: white;
+}
+
+.profile-header .share-box .share-icon-text {
+    color: #333;
+}
+
+@media (max-width: 600px) {
+    .share-box {
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.25rem 0.4rem;
+        gap: 0.2rem;
+    }
+    .share-box-icon-img {
+        width: 1rem;
+        height: 1rem;
+    }
+    .share-box .share-link {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    .share-box .share-icon {
+        width: 0.85rem;
+        height: 0.85rem;
+    }
+}
+
+/* Dark mode: system preference */
+@media (prefers-color-scheme: dark) {
+    .profile-header .share-box {
+        background-color: var(--color-card-bg, #151a17);
+        border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+    }
+    .profile-header .share-box .share-link {
+        background-color: var(--color-background-alt, #1a1f1c);
+        border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+    }
+    .profile-header .share-box .share-link:hover {
+        background-color: var(--color-border, #3a4038);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    .profile-header .share-box .share-icon-text {
+        color: var(--color-text, #c9d1c5);
+    }
+    .profile-header .share-box .share-icon,
+    .profile-header .share-box .share-box-icon-img {
+        filter: invert(1) brightness(0.9);
+    }
+}
+
+/* Dark mode: manual toggle (theme uses this selector) */
+body:has(.theme-toggle-checkbox:checked) .profile-header .share-box {
+    background-color: var(--color-card-bg, #151a17);
+    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+body:has(.theme-toggle-checkbox:checked) .profile-header .share-box .share-link {
+    background-color: var(--color-background-alt, #1a1f1c);
+    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+body:has(.theme-toggle-checkbox:checked) .profile-header .share-box .share-link:hover {
+    background-color: var(--color-border, #3a4038);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body:has(.theme-toggle-checkbox:checked) .profile-header .share-box .share-icon-text {
+    color: var(--color-text, #c9d1c5);
+}
+
+body:has(.theme-toggle-checkbox:checked) .profile-header .share-box .share-icon,
+body:has(.theme-toggle-checkbox:checked) .profile-header .share-box .share-box-icon-img {
+    filter: invert(1) brightness(0.9);
+}
+
+/* Dark mode: entry-header when gradient is dark (use theme vars) */
+body:has(.theme-toggle-checkbox:checked) .entry-header .share-box {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-link {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-link:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Legacy body.dark support */
+body.dark .profile-header .share-box {
+    background-color: var(--color-card-bg, #151a17);
+    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+body.dark .profile-header .share-box .share-link {
+    background-color: var(--color-background-alt, #1a1f1c);
+    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+body.dark .profile-header .share-box .share-link:hover {
+    background-color: var(--color-border, #3a4038);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.dark .profile-header .share-box .share-icon-text {
+    color: var(--color-text, #c9d1c5);
+}
+
+body.dark .profile-header .share-box .share-icon,
+body.dark .profile-header .share-box .share-box-icon-img {
+    filter: invert(1) brightness(0.9);
+}
