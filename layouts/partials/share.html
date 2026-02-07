@@ -11,7 +11,7 @@
   
   Usage in templates:
     {{ partial "share.html" . }}
-  Renders as a share-box (positioned top-right by CSS) with share icon + service buttons.
+  Renders as a details/summary: click the share icon to open/close the service buttons (no JavaScript).
 */}}
 
 {{- $shareConfig := .Site.Params.share | default dict -}}
@@ -31,10 +31,10 @@
   {{- $pageURL := .Permalink -}}
   {{- $pageTitle := .Title -}}
   
-  <div class="share-box">
-    <span class="share-box-icon" aria-hidden="true">
+  <details class="share-box">
+    <summary class="share-box-trigger" aria-label="Share this page">
       <img src="/fontawesome/share.svg" alt="" class="share-box-icon-img">
-    </span>
+    </summary>
     <div class="share-buttons">
       {{- range $services -}}
         {{- $serviceKey := . -}}
@@ -66,5 +66,5 @@
         {{- end -}}
       {{- end -}}
     </div>
-  </div>
+  </details>
 {{- end -}}

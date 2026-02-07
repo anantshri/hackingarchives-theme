@@ -206,9 +206,11 @@
   {{ $newPath := delimit (slice (index $pathParts 2) (index $pathParts 3)) "_" }}
   {{ $file_path := printf ".md.txt.txt" | printf "%s%s" $newPath | printf "%s%s" "transcribe/summary_transcribe_" | printf "%s"}}
   {{ if fileExists $file_path }}
-  <section class="info-box">
+  <section class="info-box ai-summary-box">
     <h3>AI Generated Summary <small><a href="/ai_experiements/">(may contain errors)</a></small></h3>
-    {{ readFile $file_path | markdownify }}
+    <div class="ai-summary-body">
+      {{ readFile $file_path | markdownify }}
+    </div>
   </section>
   {{ end }}
 </div>

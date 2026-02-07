@@ -195,7 +195,10 @@
   {{ if eq $isimportant "Y" }}
     <tr>
     <td>{{ $count }}</td>
-    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>
+      <a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a>
+      {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
+    </td>
     <td>{{ $whatismissing }}</td>
     </tr>
     {{ $count = add $count 1 }}
@@ -251,7 +254,10 @@
   {{ if eq $isimportant "Y" }}
     <tr>
     <td>{{ $count }}</td>
-    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>
+      <a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a>
+      {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
+    </td>
     <td>{{ $whatismissing }}</td>
     </tr>
     {{ $count = add $count 1 }}
@@ -341,7 +347,10 @@
   {{ if eq $isimportant "Y" }}
     <tr>
     <td>{{ $count }}</td>
-    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>
+      <a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a>
+      {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
+    </td>
     <td>{{ $whatismissing }}</td>
     </tr>
     {{ $count = add $count 1 }}
@@ -439,7 +448,10 @@
   {{ if not $hasTags }}
     <tr>
     <td>{{ $count }}</td>
-    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>
+      <a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a>
+      {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
+    </td>
     <td>{{ .Params.conference | humanize | title  }}</td>
     <td>{{ .Params.year }}</td>
     </tr>

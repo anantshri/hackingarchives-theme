@@ -1421,6 +1421,48 @@ thead, tfoot, tr:nth-child(even) {
   grid-column: 1 / -1;
 }
 
+/* AI Generated Summary: single-column flow, clear list styling */
+.info-box.ai-summary-box {
+  display: block;
+  grid-template-columns: unset;
+  gap: unset;
+}
+
+.ai-summary-box .ai-summary-body {
+  margin-top: var(--spacing-sm);
+}
+
+.ai-summary-box .ai-summary-body > * + * {
+  margin-top: var(--spacing-md);
+}
+
+.ai-summary-box .ai-summary-body ol,
+.ai-summary-box .ai-summary-body ul {
+  margin: var(--spacing-sm) 0;
+  padding-left: 1.5em;
+  list-style-position: outside;
+}
+
+.ai-summary-box .ai-summary-body li {
+  margin: var(--spacing-xs) 0;
+  padding-left: 0.25em;
+  display: list-item;
+}
+
+.ai-summary-box .ai-summary-body p {
+  margin: var(--spacing-sm) 0;
+}
+
+.ai-summary-box .ai-summary-body strong {
+  display: block;
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+.ai-summary-box .ai-summary-body strong:first-child {
+  margin-top: 0;
+}
+
 /* ========================================
    Info-Box Style: Simple
    ======================================== */
