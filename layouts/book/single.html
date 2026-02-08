@@ -12,7 +12,8 @@
 
 {{if not .IsHome }}
 <!-- Book Detail Layout -->
-<div class="book-detail">
+<div class="book-detail" style="position: relative;">
+  {{ partial "share.html" . }}
   <div>
     {{ $img_loc := printf "%s.*" $book_id | printf "%s%s" "/book/" }}
     {{ with try ( resources.GetMatch $img_loc ) }}

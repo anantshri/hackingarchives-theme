@@ -9,7 +9,8 @@
 
 {{if not .IsHome }}
 <center>
-  <div class="card">
+  <div class="card" style="position: relative;">
+  {{ partial "share.html" . }}
   {{ $logoSVG := "" }}
   {{ $photopath := "" }}
   {{ range $ext := slice ".svg" ".jpg" ".png" ".jpeg" ".jfif" ".gif" }}

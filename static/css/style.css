@@ -3329,9 +3329,6 @@ a.conference-card-link:hover {
   margin-bottom: var(--spacing-xs);
 }
 
-.timeline-card-hackers {
-  font-size: 0.8rem;
-}
 
 .timeline-card-hackers a {
   color: var(--color-link);
@@ -4417,6 +4414,7 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
     position: absolute;
     top: var(--spacing-md, 1rem);
     right: var(--spacing-md, 1rem);
+    z-index: 100;
 }
 
 /* Clickable share trigger (summary) - no disclosure triangle */
@@ -4431,8 +4429,8 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
     list-style: none;
     cursor: pointer;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: #f0f0f0;
+    border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .share-box-trigger::-webkit-details-marker {
@@ -4443,17 +4441,18 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
     content: "";
 }
 
-.profile-header .share-box-trigger {
-    background-color: #f0f0f0;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
 .share-box-trigger:hover {
-    background-color: rgba(255, 255, 255, 0.35);
+    background-color: #e0e0e0;
 }
 
-.profile-header .share-box-trigger:hover {
-    background-color: #e0e0e0;
+/* Entry header sits on a dark gradient — translucent trigger */
+.entry-header .share-box-trigger {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.entry-header .share-box-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.35);
 }
 
 .share-box-icon-img {
@@ -4462,10 +4461,7 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
     opacity: 0.95;
 }
 
-.profile-header .share-box .share-box-icon-img {
-    filter: none;
-}
-
+/* Entry header trigger icon: invert to white for dark gradient */
 .entry-header .share-box .share-box-icon-img {
     filter: brightness(0) invert(1);
 }
@@ -4480,22 +4476,16 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
     padding: 0.5rem;
     min-width: 10rem;
     border-radius: 0.75rem;
-    background-color: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
     position: absolute;
     top: 100%;
     right: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .share-box[open] .share-buttons {
     display: flex;
-}
-
-.profile-header .share-box .share-buttons {
-    background-color: #f0f0f0;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .share-box .share-link {
@@ -4506,25 +4496,15 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
     min-height: 2.25rem;
     padding: 0.4rem 0.6rem;
     border-radius: 0.5rem;
-    background-color: rgba(255, 255, 255, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    background-color: #f5f5f5;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     text-decoration: none;
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.entry-header .share-box .share-link:hover {
-    background-color: rgba(255, 255, 255, 0.4);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-.profile-header .share-box .share-link {
-    background-color: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.profile-header .share-box .share-link:hover {
+.share-box .share-link:hover {
     background-color: #e8e8e8;
-    border-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.15);
 }
 
 .share-box .share-icon {
@@ -4533,21 +4513,10 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
     flex-shrink: 0;
 }
 
-.entry-header .share-box .share-icon {
-    filter: brightness(0) invert(1);
-}
-
 .share-box .share-icon-text {
     font-size: 0.875rem;
     padding: 0 0.1rem;
     white-space: nowrap;
-}
-
-.entry-header .share-box .share-icon-text {
-    color: white;
-}
-
-.profile-header .share-box .share-icon-text {
     color: #333;
 }
 
@@ -4641,7 +4610,36 @@ body:has(.theme-toggle-checkbox:checked) .profile-header .share-box .share-box-i
     filter: invert(1) brightness(0.9);
 }
 
-/* Dark mode: entry-header when gradient is dark (use theme vars) */
+/* Dark mode: entry-header share box — solid dark backgrounds */
+@media (prefers-color-scheme: dark) {
+    .entry-header .share-box .share-box-trigger {
+        background-color: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .entry-header .share-box .share-box-trigger:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    .entry-header .share-box .share-buttons {
+        background-color: var(--color-card-bg, #1e2320);
+        border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .entry-header .share-box .share-link {
+        background-color: var(--color-background-alt, #252a27);
+        border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+    }
+    .entry-header .share-box .share-link:hover {
+        background-color: var(--color-border, #3a4038);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    .entry-header .share-box .share-icon {
+        filter: invert(1) brightness(0.9);
+    }
+    .entry-header .share-box .share-icon-text {
+        color: var(--color-text, #c9d1c5);
+    }
+}
+
 body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-box-trigger {
     background-color: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.2);
@@ -4651,14 +4649,28 @@ body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-box-tri
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-buttons {
+    background-color: var(--color-card-bg, #1e2320);
+    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
 body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-link {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.3);
+    background-color: var(--color-background-alt, #252a27);
+    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
 }
 
 body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-link:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.4);
+    background-color: var(--color-border, #3a4038);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-icon {
+    filter: invert(1) brightness(0.9);
+}
+
+body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-icon-text {
+    color: var(--color-text, #c9d1c5);
 }
 
 /* Legacy body.dark support */
