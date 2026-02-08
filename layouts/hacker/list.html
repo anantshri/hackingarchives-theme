@@ -114,11 +114,19 @@
 <!-- Profile Header Section -->
 <div class="profile-header">
   {{ partial "share.html" . }}
-  {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
+  {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
   {{- $photopath := "" -}}
   {{- range $ext := $extensions -}}
     {{- with resources.Get (path.Join "hacker" (printf "%s%s" $hacker $ext)) -}}
-      {{- $photopath = .RelPermalink -}}
+      {{- $img := . -}}
+      {{- if ne $ext ".svg" -}}
+        {{- with try (.Fill "400x400 Center q100") -}}
+          {{- if not .Err -}}
+            {{- $img = .Value -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $photopath = $img.RelPermalink -}}
       {{- break -}}
     {{- end -}}
   {{- end -}}

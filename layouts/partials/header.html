@@ -10,6 +10,7 @@
     {{end}}
     <link rel="stylesheet" href="{{ "/css/style.css" | relURL }}?{{ now.Unix }}" />
     <link rel="stylesheet" href="{{ "/css/fonts.css" | relURL }}?{{ now.Unix }}" />
+    {{ partial "seo.html" . }}
     {{ partial "head_custom.html" . }}
   </head>
 

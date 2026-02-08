@@ -1,0 +1,343 @@
+{{- /* SEO & Social Sharing Meta Tags Partial */ -}}
+{{- /* Supports: Open Graph (Facebook/LinkedIn/Bluesky), Twitter Cards, basic meta SEO */ -}}
+
+{{- /* ===== 1. Determine Page Title ===== */ -}}
+{{- $seoTitle := "" -}}
+{{- if .IsHome -}}
+  {{- $seoTitle = .Site.Title -}}
+{{- else -}}
+  {{- $seoTitle = printf "%s | %s" (.Title | title) .Site.Title -}}
+{{- end -}}
+
+{{- /* ===== 2. Determine Page Description ===== */ -}}
+{{- $seoDescription := .Site.Params.description | default "Hacking Archives of India - Documenting the history of Indian security researchers" -}}
+
+{{- /* Use page description if set in frontmatter */ -}}
+{{- with .Description -}}
+  {{- $seoDescription = . -}}
+{{- else -}}
+  {{- /* Generate contextual descriptions based on content type */ -}}
+  {{- if .IsPage -}}
+    {{- /* Single content pages (talks, books, awards, etc.) */ -}}
+    {{- $entryType := .Params.type | default "" | lower -}}
+
+    {{- if eq $entryType "book" -}}
+      {{- /* Book pages */ -}}
+      {{- $authors := slice -}}
+      {{- range .Params.hacker -}}
+        {{- $authors = $authors | append (. | humanize | title) -}}
+      {{- end -}}
+      {{- if gt (len $authors) 0 -}}
+        {{- $seoDescription = printf "%s by %s. Published by %s." .Title (delimit $authors ", ") (.Params.publisher | default "Unknown Publisher") -}}
+      {{- else -}}
+        {{- $seoDescription = printf "%s - A cybersecurity book catalogued on Hacking Archives of India." .Title -}}
+      {{- end -}}
+
+    {{- else if or (eq $entryType "talk") (eq $entryType "workshop") (eq $entryType "arsenal") (eq $entryType "panel") (eq $entryType "keynote") -}}
+      {{- /* Talk/presentation pages */ -}}
+      {{- $speakers := slice -}}
+      {{- range .Params.hacker -}}
+        {{- $speakers = $speakers | append (. | humanize | title) -}}
+      {{- end -}}
+      {{- $conf := .Params.conference | default "" | humanize | title -}}
+      {{- if and (gt (len $speakers) 0) (ne $conf "") -}}
+        {{- $seoDescription = printf "%s - %s by %s at %s (%d)." ($entryType | title) .Title (delimit $speakers ", ") $conf (.Params.year | default .Date.Year) -}}
+      {{- else if gt (len $speakers) 0 -}}
+        {{- $seoDescription = printf "%s by %s - Security research presented on Hacking Archives of India." .Title (delimit $speakers ", ") -}}
+      {{- end -}}
+
+    {{- else if eq $entryType "award" -}}
+      {{- /* Award pages */ -}}
+      {{- $recipients := slice -}}
+      {{- range .Params.hacker -}}
+        {{- $recipients = $recipients | append (. | humanize | title) -}}
+      {{- end -}}
+      {{- if gt (len $recipients) 0 -}}
+        {{- $seoDescription = printf "%s - Award received by %s. Catalogued on Hacking Archives of India." .Title (delimit $recipients ", ") -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- /* If content body exists and description is still default, use truncated content */ -}}
+    {{- if and (eq $seoDescription $.Site.Params.description) .Plain -}}
+      {{- $seoDescription = .Plain | truncate 160 "..." -}}
+    {{- end -}}
+
+  {{- else if .IsSection -}}
+    {{- /* Section list pages */ -}}
+    {{- if eq .Section "hacker" -}}
+      {{- $seoDescription = printf "Browse profiles of Indian security researchers and hackers on %s." .Site.Title -}}
+    {{- else if eq .Section "book" -}}
+      {{- $seoDescription = printf "Cybersecurity books authored by Indian security researchers on %s." .Site.Title -}}
+    {{- else if eq .Section "tool" -}}
+      {{- $seoDescription = printf "Security tools created by Indian researchers on %s." .Site.Title -}}
+    {{- else if eq .Section "focus" -}}
+      {{- $seoDescription = printf "Security focus areas and domains covered on %s." .Site.Title -}}
+    {{- end -}}
+
+  {{- else if .Data.Term -}}
+    {{- /* Taxonomy term pages (individual hacker, conference, tool, tag, etc.) */ -}}
+    {{- $term := .Data.Term -}}
+    {{- $taxonomy := .Data.Plural | default "" -}}
+
+    {{- if eq $taxonomy "hacker" -}}
+      {{- /* Hacker profile page */ -}}
+      {{- $pageCount := len .Pages -}}
+      {{- $seoDescription = printf "Explore %s's security research contributions - %d entries including talks, tools, and publications on %s." (.Title | title) $pageCount .Site.Title -}}
+    {{- else if eq $taxonomy "conference" -}}
+      {{- $pageCount := len .Pages -}}
+      {{- $seoDescription = printf "%s - %d talks and presentations by Indian security researchers, catalogued on %s." (.Title | title) $pageCount .Site.Title -}}
+    {{- else if eq $taxonomy "tool" -}}
+      {{- $seoDescription = printf "%s - Security tool featured on %s with talks and demonstrations." (.Title | title) .Site.Title -}}
+    {{- else if eq $taxonomy "tag" -}}
+      {{- $pageCount := len .Pages -}}
+      {{- $seoDescription = printf "Security research tagged '%s' - %d entries on %s." (.Title | title) $pageCount .Site.Title -}}
+    {{- else if eq $taxonomy "award" -}}
+      {{- $seoDescription = printf "%s - Awards and recognition in the Indian security community on %s." (.Title | title) .Site.Title -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Truncate description to 200 chars max for social platforms */ -}}
+{{- if gt (len $seoDescription) 200 -}}
+  {{- $seoDescription = $seoDescription | truncate 200 "..." -}}
+{{- end -}}
+
+{{- /* ===== 3. Determine OG Image ===== */ -}}
+{{- $ogImage := "" -}}
+{{- $ogImageWidth := "" -}}
+{{- $ogImageHeight := "" -}}
+{{- $ogImageType := "" -}}
+{{- $twitterCardType := "summary" -}}
+
+{{- /* Check frontmatter for explicit og_image override */ -}}
+{{- with .Params.og_image -}}
+  {{- $ogImage = . | absURL -}}
+  {{- $twitterCardType = "summary_large_image" -}}
+{{- else -}}
+  {{- /* Content-type specific image resolution */ -}}
+  {{- if .Data.Term -}}
+    {{- $term := .Data.Term -}}
+    {{- $taxonomy := .Data.Plural | default "" -}}
+
+    {{- if eq $taxonomy "hacker" -}}
+      {{- /* Hacker profile: use profile photo */ -}}
+      {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
+        {{- with resources.Get (path.Join "hacker" (printf "%s%s" $term $ext)) -}}
+          {{- with try (.Fill "600x600 Center q85") -}}
+            {{- with .Err -}}
+              {{- /* Image processing failed (corrupt file), skip */ -}}
+            {{- else -}}
+              {{- $resized := .Value -}}
+              {{- $ogImage = $resized.Permalink -}}
+              {{- $ogImageWidth = "600" -}}
+              {{- $ogImageHeight = "600" -}}
+              {{- $ogImageType = $resized.MediaType.Type -}}
+            {{- end -}}
+          {{- end -}}
+          {{- break -}}
+        {{- end -}}
+      {{- end -}}
+
+    {{- else if eq $taxonomy "tool" -}}
+      {{- /* Tool: use tool logo */ -}}
+      {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".gif" -}}
+        {{- with resources.Get (path.Join "tool" (printf "%s%s" (urlize $term) $ext)) -}}
+          {{- with try (.Fill "600x600 Center q85") -}}
+            {{- with .Err -}}
+              {{- /* Image processing failed, skip */ -}}
+            {{- else -}}
+              {{- $resized := .Value -}}
+              {{- $ogImage = $resized.Permalink -}}
+              {{- $ogImageWidth = "600" -}}
+              {{- $ogImageHeight = "600" -}}
+              {{- $ogImageType = $resized.MediaType.Type -}}
+              {{- $twitterCardType = "summary" -}}
+            {{- end -}}
+          {{- end -}}
+          {{- break -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+
+  {{- else if .IsPage -}}
+    {{- $entryType := .Params.type | default "" | lower -}}
+
+    {{- if eq $entryType "book" -}}
+      {{- /* Book: use cover image from assets or imageUrl frontmatter */ -}}
+      {{- $bookId := urlize .Params.print_isbn13 -}}
+      {{- $imgLoc := printf "/book/%s.*" $bookId -}}
+      {{- with try (resources.GetMatch $imgLoc) -}}
+        {{- with .Err -}}
+          {{- /* no image found, fall through */ -}}
+        {{- else -}}
+          {{- $img := .Value -}}
+          {{- with try ($img.Resize "x630 q85") -}}
+            {{- with .Err -}}
+              {{- /* image processing failed, skip */ -}}
+            {{- else -}}
+              {{- $resized := .Value -}}
+              {{- $ogImage = $resized.Permalink -}}
+              {{- $ogImageWidth = printf "%d" $resized.Width -}}
+              {{- $ogImageHeight = printf "%d" $resized.Height -}}
+              {{- $ogImageType = $resized.MediaType.Type -}}
+              {{- $twitterCardType = "summary_large_image" -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- /* Fallback to imageUrl from frontmatter */ -}}
+      {{- if and (eq $ogImage "") .Params.imageUrl -}}
+        {{- $ogImage = .Params.imageUrl -}}
+        {{- $twitterCardType = "summary_large_image" -}}
+      {{- end -}}
+
+    {{- else if or (eq $entryType "talk") (eq $entryType "workshop") (eq $entryType "arsenal") (eq $entryType "panel") (eq $entryType "keynote") (eq $entryType "award") -}}
+      {{- /* Talks/presentations: try YouTube thumbnail, then hacker profile photo */ -}}
+      {{- if and .Params.video (in .Params.video "youtube.com") -}}
+        {{- $videoURL := .Params.video -}}
+        {{- $parts := split $videoURL "?v=" -}}
+        {{- if gt (len $parts) 1 -}}
+          {{- $videoID := index $parts 1 -}}
+          {{- /* Strip any additional query params */ -}}
+          {{- $ampParts := split $videoID "&" -}}
+          {{- $videoID = index $ampParts 0 -}}
+          {{- $ogImage = printf "https://img.youtube.com/vi/%s/maxresdefault.jpg" $videoID -}}
+          {{- $ogImageWidth = "1280" -}}
+          {{- $ogImageHeight = "720" -}}
+          {{- $ogImageType = "image/jpeg" -}}
+          {{- $twitterCardType = "summary_large_image" -}}
+        {{- end -}}
+      {{- end -}}
+      {{- /* Fallback: try hacker profile photo */ -}}
+      {{- if and (eq $ogImage "") .Params.hacker -}}
+        {{- $hackerName := index .Params.hacker 0 -}}
+        {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
+          {{- with resources.Get (path.Join "hacker" (printf "%s%s" $hackerName $ext)) -}}
+            {{- with try (.Fill "600x600 Center q85") -}}
+              {{- with .Err -}}
+                {{- /* Image processing failed, skip */ -}}
+              {{- else -}}
+                {{- $resized := .Value -}}
+                {{- $ogImage = $resized.Permalink -}}
+                {{- $ogImageWidth = "600" -}}
+                {{- $ogImageHeight = "600" -}}
+                {{- $ogImageType = $resized.MediaType.Type -}}
+              {{- end -}}
+            {{- end -}}
+            {{- break -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Fallback: use default OG image from config */ -}}
+{{- if eq $ogImage "" -}}
+  {{- with .Site.Params.seo.default_og_image -}}
+    {{- $ogImage = . | absURL -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* ===== 4. Determine OG Type ===== */ -}}
+{{- $ogType := "website" -}}
+{{- if .IsPage -}}
+  {{- $ogType = "article" -}}
+{{- end -}}
+{{- if and .Data.Term (eq (.Data.Plural | default "") "hacker") -}}
+  {{- $ogType = "profile" -}}
+{{- end -}}
+
+{{- /* ===== 5. Canonical URL ===== */ -}}
+{{- $canonicalURL := .Permalink -}}
+
+{{- /* ===== 6. Output Meta Tags ===== */ -}}
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{{ $seoDescription }}">
+    <link rel="canonical" href="{{ $canonicalURL }}">
+    {{- with .Site.Params.seo.author }}
+    <meta name="author" content="{{ . }}">
+    {{- end }}
+    {{- with .Site.Params.seo.keywords }}
+    <meta name="keywords" content="{{ . }}">
+    {{- end }}
+
+    <!-- Open Graph / Facebook / LinkedIn / Bluesky -->
+    <meta property="og:site_name" content="{{ .Site.Title }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $canonicalURL }}">
+    <meta property="og:type" content="{{ $ogType }}">
+    <meta property="og:locale" content="en_US">
+    {{- if $ogImage }}
+    <meta property="og:image" content="{{ $ogImage }}">
+    {{- with $ogImageWidth }}
+    <meta property="og:image:width" content="{{ . }}">
+    {{- end }}
+    {{- with $ogImageHeight }}
+    <meta property="og:image:height" content="{{ . }}">
+    {{- end }}
+    {{- with $ogImageType }}
+    <meta property="og:image:type" content="{{ . }}">
+    {{- end }}
+    {{- end }}
+
+    {{- /* Profile-specific OG tags for hacker pages */ -}}
+    {{- if eq $ogType "profile" }}
+    {{- $nameParts := split (.Title | title) " " }}
+    {{- if ge (len $nameParts) 2 }}
+    <meta property="profile:first_name" content="{{ index $nameParts 0 }}">
+    <meta property="profile:last_name" content="{{ index $nameParts (sub (len $nameParts) 1) }}">
+    {{- end }}
+    {{- end }}
+
+    {{- /* Article-specific OG tags for talks/entries */ -}}
+    {{- if eq $ogType "article" }}
+    {{- if not .Date.IsZero }}
+    <meta property="article:published_time" content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+    {{- end }}
+    {{- range .Params.tag }}
+    <meta property="article:tag" content="{{ . }}">
+    {{- end }}
+    {{- range .Params.hacker }}
+    <meta property="article:author" content="{{ . | humanize | title }}">
+    {{- end }}
+    {{- end }}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="{{ $twitterCardType }}">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    {{- with .Site.Params.seo.twitter_site }}
+    <meta name="twitter:site" content="@{{ . }}">
+    {{- end }}
+    {{- if $ogImage }}
+    <meta name="twitter:image" content="{{ $ogImage }}">
+    {{- end }}
+    {{- /* If the hacker has a Twitter handle, use it as creator */ -}}
+    {{- if and .Data.Term (eq (.Data.Plural | default "") "hacker") -}}
+      {{- with .Params.twitter -}}
+        {{- $twitterURL := . -}}
+        {{- $parts := split $twitterURL "/" -}}
+        {{- $handle := index $parts (sub (len $parts) 1) -}}
+        {{- if $handle }}
+    <meta name="twitter:creator" content="@{{ $handle }}">
+        {{- end -}}
+      {{- end -}}
+    {{- else if .IsPage -}}
+      {{- /* For talk pages, try to find the first hacker's twitter handle */ -}}
+      {{- if .Params.hacker -}}
+        {{- $hackerName := index .Params.hacker 0 -}}
+        {{- $hackerPage := $.Site.GetPage (printf "/hacker/%s" $hackerName) -}}
+        {{- with $hackerPage -}}
+          {{- with .Params.twitter -}}
+            {{- $parts := split . "/" -}}
+            {{- $handle := index $parts (sub (len $parts) 1) -}}
+            {{- if $handle }}
+    <meta name="twitter:creator" content="@{{ $handle }}">
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}

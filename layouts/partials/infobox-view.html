@@ -214,14 +214,16 @@
             <td class="collaborators-with-photos">
                 {{- range (sort $collaborators "count" "desc") -}}
                     {{- $collabName := .name -}}
-                    {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
+                    {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
                     {{- $photopath := "" -}}
                     {{- range $ext := $extensions -}}
                         {{- with resources.Get (path.Join "hacker" (printf "%s%s" $collabName $ext)) -}}
                             {{- $img := . -}}
-                            {{- with try (.Resize "48x48 q75") -}}
-                                {{- if not .Err -}}
-                                    {{- $img = .Value -}}
+                            {{- if ne $ext ".svg" -}}
+                                {{- with try (.Resize "48x48 q100") -}}
+                                    {{- if not .Err -}}
+                                        {{- $img = .Value -}}
+                                    {{- end -}}
                                 {{- end -}}
                             {{- end -}}
                             {{- $photopath = $img.RelPermalink -}}
