@@ -25,16 +25,20 @@
 </center>
 {{ end }}
 
-<!-- Stats: Winners, Years -->
+<!-- Stats: Winners, Years (only show when count > 0) -->
 <div class="stats-grid stats-grid-4" style="margin-top:1rem;">
+  {{ if gt $totalWinners 0 }}
   <div class="stat-card">
     <div class="stat-card-number">{{ $totalWinners }}</div>
     <div class="stat-card-label">Winners</div>
   </div>
+  {{ end }}
+  {{ if gt $uniqueYears 0 }}
   <div class="stat-card">
     <div class="stat-card-number">{{ $uniqueYears }}</div>
     <div class="stat-card-label">Years</div>
   </div>
+  {{ end }}
 </div>
 
 <div class="confcontent">

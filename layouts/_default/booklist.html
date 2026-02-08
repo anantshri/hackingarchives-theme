@@ -34,24 +34,32 @@
   {{ .Content }}
 
   <div class="stats-grid stats-grid-4">
+    {{ if gt $totalBooks 0 }}
     <div class="stat-card">
       <div class="stat-card-number">{{ $totalBooks }}</div>
       <div class="stat-card-label">Books Catalogued</div>
     </div>
+    {{ end }}
+    {{ if gt $totalAuthors 0 }}
     <a href="/hacker/" class="stat-card-link">
       <div class="stat-card">
         <div class="stat-card-number">{{ $totalAuthors }}</div>
         <div class="stat-card-label">Authors</div>
       </div>
     </a>
+    {{ end }}
+    {{ if gt $totalPublishers 0 }}
     <div class="stat-card">
       <div class="stat-card-number">{{ $totalPublishers }}</div>
       <div class="stat-card-label">Publishers</div>
     </div>
+    {{ end }}
+    {{ if gt $yearsCount 0 }}
     <div class="stat-card">
       <div class="stat-card-number">{{ $yearsCount }}</div>
       <div class="stat-card-label">Years of Publication</div>
     </div>
+    {{ end }}
   </div>
 
   <hr />

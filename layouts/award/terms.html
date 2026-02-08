@@ -39,30 +39,38 @@
 {{- $totalConferences := len (uniq $uniqueConferences) -}}
 {{- $totalContributors := len (uniq $uniqueHackers) -}}
 
-<!-- Stats Grid (like /tool/) -->
+<!-- Stats Grid (like /tool/): only show cards when count > 0 -->
 <div class="stats-grid stats-grid-4">
+  {{ if gt $totalAwardEntries 0 }}
   <a href="#award-timeline" class="stat-card-link">
     <div class="stat-card">
       <div class="stat-card-number">{{ $totalAwardEntries }}</div>
       <div class="stat-card-label">Award Entries</div>
     </div>
   </a>
+  {{ end }}
+  {{ if gt $uniqueAwardCount 0 }}
   <div class="stat-card">
     <div class="stat-card-number">{{ $uniqueAwardCount }}</div>
     <div class="stat-card-label">Unique Awards</div>
   </div>
+  {{ end }}
+  {{ if gt $totalConferences 0 }}
   <a href="/conference/" class="stat-card-link">
     <div class="stat-card">
       <div class="stat-card-number">{{ $totalConferences }}</div>
       <div class="stat-card-label">Conferences Covered</div>
     </div>
   </a>
+  {{ end }}
+  {{ if gt $totalContributors 0 }}
   <a href="/hacker/" class="stat-card-link">
     <div class="stat-card">
       <div class="stat-card-number">{{ $totalContributors }}</div>
       <div class="stat-card-label">Award Recipients</div>
     </div>
   </a>
+  {{ end }}
 </div>
 
 <!-- Award cloud: unique awards with count -->

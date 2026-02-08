@@ -45,28 +45,36 @@
 {{ .Content }}
 
 <div class="stats-grid stats-grid-4">
+    {{ if gt $totalTools 0 }}
     <a href="#tool-cloud" class="stat-card-link">
         <div class="stat-card">
             <div class="stat-card-number">{{ $totalTools }}</div>
             <div class="stat-card-label">Tools Catalogued</div>
         </div>
     </a>
+    {{ end }}
+    {{ if gt $totalPresentations 0 }}
     <div class="stat-card">
         <div class="stat-card-number">{{ $totalPresentations }}</div>
         <div class="stat-card-label">Tool Presentations</div>
     </div>
+    {{ end }}
+    {{ if gt $totalConferences 0 }}
     <a href="/conference/" class="stat-card-link">
         <div class="stat-card">
             <div class="stat-card-number">{{ $totalConferences }}</div>
             <div class="stat-card-label">Conferences Covered</div>
         </div>
     </a>
+    {{ end }}
+    {{ if gt $totalContributors 0 }}
     <a href="/hacker/" class="stat-card-link">
         <div class="stat-card">
             <div class="stat-card-number">{{ $totalContributors }}</div>
             <div class="stat-card-label">Tool Contributors</div>
         </div>
     </a>
+    {{ end }}
 </div>
 
 </div>

@@ -51,44 +51,60 @@
 {{- $totalBooks := len (where .Site.RegularPages "Type" "book") -}}
 {{- $totalTools := len $.Site.Taxonomies.tool -}}
 
-<!-- Stats Grid - Row 1: Overview -->
+<!-- Stats Grid - Row 1: Overview (only show when count > 0) -->
 <div class="stats-grid stats-grid-4">
+  {{ if gt $primaryEntries 0 }}
   <a href="/timeline/" class="stat-card stat-card-link">
     <div class="stat-card-number">{{ $primaryEntries }}</div>
     <div class="stat-card-label">Total Entries</div>
   </a>
+  {{ end }}
+  {{ if gt $primaryHackers 0 }}
   <a href="#hacker-cloud" class="stat-card stat-card-link">
     <div class="stat-card-number">{{ $primaryHackers }}</div>
     <div class="stat-card-label">Hackers</div>
   </a>
+  {{ end }}
+  {{ if gt $totalFocusAreas 0 }}
   <a href="/focus/" class="stat-card stat-card-link">
     <div class="stat-card-number">{{ $totalFocusAreas }}</div>
     <div class="stat-card-label">Focus Areas</div>
   </a>
+  {{ end }}
+  {{ if gt $totalTags 0 }}
   <a href="/tag/" class="stat-card stat-card-link">
     <div class="stat-card-number">{{ $totalTags }}</div>
     <div class="stat-card-label">Tags</div>
   </a>
+  {{ end }}
 </div>
 
-<!-- Stats Grid - Row 2: Talks, Books, Tools, Awards (total entries) -->
+<!-- Stats Grid - Row 2: Talks, Books, Tools, Awards (only show when count > 0) -->
 <div class="stats-grid stats-grid-4 stats-grid-types" style="margin-top:0.5rem;">
+  {{ if gt $talkCount 0 }}
   <a href="/type/talk/" class="stat-card stat-card-link">
     <div class="stat-card-number">{{ $talkCount }}</div>
     <div class="stat-card-label">Talks</div>
   </a>
+  {{ end }}
+  {{ if gt $totalBooks 0 }}
   <a href="/book/" class="stat-card stat-card-link">
     <div class="stat-card-number">{{ $totalBooks }}</div>
     <div class="stat-card-label">Books</div>
   </a>
+  {{ end }}
+  {{ if gt $totalTools 0 }}
   <a href="/tool/" class="stat-card stat-card-link">
     <div class="stat-card-number">{{ $totalTools }}</div>
     <div class="stat-card-label">Tools</div>
   </a>
+  {{ end }}
+  {{ if gt $totalAwardEntries 0 }}
   <a href="/award/" class="stat-card stat-card-link">
     <div class="stat-card-number">{{ $totalAwardEntries }}</div>
     <div class="stat-card-label">Awards</div>
   </a>
+  {{ end }}
 </div>
 
 <!-- Conferences Covered -->
