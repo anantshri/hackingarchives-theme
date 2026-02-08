@@ -665,10 +665,11 @@ blockquote {
     padding: var(--spacing-md);
     width: 100%;
     box-sizing: border-box;
+    font-size: 1rem;
   }
   
   /* Show text instead of icons on mobile - match other menu items */
-  .menu .menu-icon-link {
+  .menu a.menu-icon-link {
     font-size: 1rem;
     padding: var(--spacing-md) !important;
     line-height: 1.65 !important;
