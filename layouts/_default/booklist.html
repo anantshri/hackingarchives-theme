@@ -3,11 +3,56 @@
 <div class="container">
   {{ $books := where .Site.RegularPages "Type" "book" }}
 
-  <div class="book-stats">
-    Total Books listed so far: <b>{{ len $books }}</b>
-  </div>
+  {{/* Stats: total books, authors, publishers, years */}}
+  {{ $totalBooks := len $books }}
+  {{ $uniqueAuthors := slice }}
+  {{ $uniquePublishers := slice }}
+  {{ $publicationYears := slice }}
+  {{ range $books }}
+    {{ with .Params.hacker }}
+      {{ range . }}
+        {{ $uniqueAuthors = $uniqueAuthors | append . }}
+      {{ end }}
+    {{ end }}
+    {{ with .Params.morehackers }}
+      {{ range . }}
+        {{ $uniqueAuthors = $uniqueAuthors | append . }}
+      {{ end }}
+    {{ end }}
+    {{ with .Params.publisher }}
+      {{ $uniquePublishers = $uniquePublishers | append . }}
+    {{ end }}
+    {{ with .Params.published_on }}
+      {{ $year := index (split . "-") 0 }}
+      {{ $publicationYears = $publicationYears | append $year }}
+    {{ end }}
+  {{ end }}
+  {{ $totalAuthors := len (uniq $uniqueAuthors) }}
+  {{ $totalPublishers := len (uniq $uniquePublishers) }}
+  {{ $yearsCount := len (uniq $publicationYears) }}
 
   {{ .Content }}
+
+  <div class="stats-grid stats-grid-4">
+    <div class="stat-card">
+      <div class="stat-card-number">{{ $totalBooks }}</div>
+      <div class="stat-card-label">Books Catalogued</div>
+    </div>
+    <a href="/hacker/" class="stat-card-link">
+      <div class="stat-card">
+        <div class="stat-card-number">{{ $totalAuthors }}</div>
+        <div class="stat-card-label">Authors</div>
+      </div>
+    </a>
+    <div class="stat-card">
+      <div class="stat-card-number">{{ $totalPublishers }}</div>
+      <div class="stat-card-label">Publishers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-number">{{ $yearsCount }}</div>
+      <div class="stat-card-label">Years of Publication</div>
+    </div>
+  </div>
 
   <hr />
 
@@ -28,9 +73,25 @@
   {{ end }}
   {{ $years = sort $years "value" "desc" }}
 
+  <nav class="year-navigation" aria-label="Jump to year">
+    <span class="year-nav-label">Jump to:</span>
+    {{ range $i, $y := $years }}
+      {{ if $i }} | {{ end }}
+      {{ $count := len (index $booksByYear $y) }}
+      <a href="#{{ $y }}-key">{{ $y }} ({{ $count }})</a>
+    {{ end }}
+  </nav>
+
   {{ range $year := $years }}
     {{ $books := index $booksByYear $year }}
-    <center class="year-key" id="{{ $year }}-key"><b>----  {{ $year }} ----</b></center>
+    {{ $yearAuthors := slice }}
+    {{ range $books }}
+      {{ with .Params.hacker }}{{ range . }}{{ $yearAuthors = $yearAuthors | append . }}{{ end }}{{ end }}
+      {{ with .Params.morehackers }}{{ range . }}{{ $yearAuthors = $yearAuthors | append . }}{{ end }}{{ end }}
+    {{ end }}
+    {{ $authorsCount := len (uniq $yearAuthors) }}
+    {{ $bookCount := len $books }}
+    <div class="year-key" id="{{ $year }}-key">{{ $year }} — {{ $bookCount }} {{ if eq $bookCount 1 }}book{{ else }}books{{ end }}, {{ $authorsCount }} {{ if eq $authorsCount 1 }}author{{ else }}authors{{ end }}</div>
     <div class="book-grid">
       {{ range $books }}
         {{ $book_id := urlize .Params.print_isbn13 }}

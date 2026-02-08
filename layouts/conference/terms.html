@@ -11,16 +11,6 @@
     <strong>Total Talks:</strong> <b>{{ len (where .Site.RegularPages "Section" "eq" "hacker") }}</b>
 </div>
 
-{{/* View Toggle Buttons */}}
-<div style="text-align: center; margin: 20px 0;">
-    <button id="grid-view-btn" onclick="showView('grid')" style="padding: 10px 20px; margin: 0 10px; border: 2px solid var(--color-primary); background: var(--color-primary); color: white; border-radius: 5px; cursor: pointer; font-weight: bold;">
-        📱 Card View
-    </button>
-    <button id="table-view-btn" onclick="showView('table')" style="padding: 10px 20px; margin: 0 10px; border: 2px solid var(--color-primary); background: transparent; color: var(--color-primary); border-radius: 5px; cursor: pointer; font-weight: bold;">
-        📊 Table View
-    </button>
-</div>
-
 {{/* Sorting Note */}}
 <div style="text-align: center; margin: 10px 0; color: var(--color-text-light);">
     <em>Sorted by entry count (highest to lowest)</em>
@@ -56,20 +46,12 @@
     
     {{/* Find logo path - $name is the conference key */}}
     {{ $confName := $name }}
-    {{ $imgpath := path.Join "static" "conference" $confName }}
-    {{ $jpgpath := printf "%s.jpg" $imgpath }}
-    {{ $pngpath := printf "%s.png" $imgpath }}
-    {{ $jpegpath := printf "%s.jpeg" $imgpath }}
-    {{ $jfifpath := printf "%s.jfif" $imgpath }}
     {{ $photopath := "" }}
-    {{ if fileExists $jpgpath }}
-        {{ $photopath = printf "/conference/%s.jpg" $confName }}
-    {{ else if fileExists $pngpath }}
-        {{ $photopath = printf "/conference/%s.png" $confName }}
-    {{ else if fileExists $jpegpath }}
-        {{ $photopath = printf "/conference/%s.jpeg" $confName }}
-    {{ else if fileExists $jfifpath }}
-        {{ $photopath = printf "/conference/%s.jfif" $confName }}
+    {{ range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" }}
+      {{ with resources.Get (path.Join "conference" (printf "%s%s" $confName $ext)) }}
+        {{ $photopath = .RelPermalink }}
+        {{ break }}
+      {{ end }}
     {{ end }}
     
     {{/* Add to conferences array */}}
@@ -81,253 +63,35 @@
 {{/* Sort conferences by count (descending) */}}
 {{ $sortedConferences := sort $conferences "count" "desc" }}
 
-{{/* Conference Grid View */}}
-<div id="conference-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px;">
+{{/* Conference Grid (card view only) */}}
+<div id="conference-grid" class="conference-list-grid">
     {{ range $sortedConferences }}
-    <div class="conference-card" 
-         style="border: 1px solid var(--color-border); border-radius: 8px; padding: 15px; transition: all 0.3s ease; background: var(--color-background-alt);">
-        
-        <a href="{{ .url }}" style="text-decoration: none; color: inherit;">
-            {{/* Conference Logo */}}
-            <div style="text-align: center; margin-bottom: 15px;">
-                {{ if .photopath }}
-                    <img src="{{ .photopath | lower }}" 
-                         alt="{{ .title }}" 
-                         style="max-width: 200px; max-height: 100px; object-fit: contain;">
-                {{ else }}
-                    <div style="height: 100px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--color-accent);">
-                        🎯
-                    </div>
-                {{ end }}
-            </div>
-            
-            {{/* Conference Name */}}
-            <h3 style="text-align: center; margin: 10px 0; color: var(--color-primary);">
-                {{ .title }}
-            </h3>
-            
-            {{/* Entry Count */}}
-            <div style="text-align: center; margin: 10px 0; font-size: 1.2rem; color: var(--color-accent);">
-                <strong>{{ .count }}</strong> {{ if eq .count 1 }}entry{{ else }}entries{{ end }}
-            </div>
-            
-            {{/* Date Range */}}
-            <div style="text-align: center; margin: 10px 0; font-size: 0.9rem; color: var(--color-text-light);">
-                {{ if gt .count 1 }}
-                    📅 {{ .firstDate.Format "2006" }} - {{ .lastDate.Format "2006" }}
-                    <br />
-                    <small>({{ div .timeframeDays 365 }} year span)</small>
-                {{ else }}
-                    📅 {{ .firstDate.Format "2006" }}
-                {{ end }}
-            </div>
-            
-            {{/* Most Recent Entry */}}
-            <div style="text-align: center; margin: 5px 0; font-size: 0.85rem; color: var(--color-text-light);">
-                Latest: {{ .lastDate.Format "Jan 2006" }}
-            </div>
-        </a>
-    </div>
+    <a href="{{ .url }}" class="conference-card conference-card-link">
+        <div class="conference-card-logo">
+            {{ if .photopath }}
+                <img src="{{ .photopath }}" alt="{{ .title }}" class="conference-card-logo-img">
+            {{ else }}
+                <span class="conference-card-logo-placeholder" aria-hidden="true">&#127919;</span>
+            {{ end }}
+        </div>
+        <h3 class="conference-card-title">{{ .title }}</h3>
+        <div class="conference-card-count">
+            <strong>{{ .count }}</strong> {{ if eq .count 1 }}entry{{ else }}entries{{ end }}
+        </div>
+        <div class="conference-card-dates">
+            {{ if gt .count 1 }}
+                {{ .firstDate.Format "2006" }} &ndash; {{ .lastDate.Format "2006" }}
+                <br />
+                <small>({{ div .timeframeDays 365 }} year span)</small>
+            {{ else }}
+                {{ .firstDate.Format "2006" }}
+            {{ end }}
+        </div>
+        <div class="conference-card-meta">
+            Latest: {{ .lastDate.Format "Jan 2006" }}
+        </div>
+    </a>
     {{ end }}
 </div>
-
-{{/* Conference Table View */}}
-<div id="conference-table-container" style="display: none; padding: 20px; overflow-x: auto;">
-    <table id="conference-table" style="width: 100%; border-collapse: collapse; background: var(--color-background-alt);">
-        <thead>
-            <tr style="background: var(--color-primary); color: white; border-bottom: 2px solid var(--color-border);">
-                <th style="padding: 12px; text-align: center; border: 1px solid var(--color-border);">Logo</th>
-                <th style="padding: 12px; text-align: left; border: 1px solid var(--color-border);">Conference Name</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid var(--color-border);">Entries</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid var(--color-border);">First Entry</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid var(--color-border);">Latest Entry</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid var(--color-border);">Timespan</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{ range $sortedConferences }}
-            <tr class="conference-row" style="border-bottom: 1px solid var(--color-border);">
-                {{/* Logo */}}
-                <td style="padding: 12px; text-align: center; border: 1px solid var(--color-border); width: 120px;">
-                    <a href="{{ .url }}" style="text-decoration: none;">
-                        {{ if .photopath }}
-                            <img src="{{ .photopath | lower }}" 
-                                 alt="{{ .title }}" 
-                                 style="max-width: 80px; max-height: 60px; object-fit: contain;">
-                        {{ else }}
-                            <div style="font-size: 1.5rem; color: var(--color-accent);">🎯</div>
-                        {{ end }}
-                    </a>
-                </td>
-                
-                {{/* Conference Name */}}
-                <td style="padding: 12px; border: 1px solid var(--color-border);">
-                    <a href="{{ .url }}" style="text-decoration: none; color: var(--color-primary); font-weight: bold; font-size: 1.1rem;">
-                        {{ .title }}
-                    </a>
-                </td>
-                
-                {{/* Entry Count */}}
-                <td style="padding: 12px; text-align: center; border: 1px solid var(--color-border); font-size: 1.1rem; font-weight: bold; color: var(--color-accent);">
-                    {{ .count }}
-                </td>
-                
-                {{/* First Entry Date */}}
-                <td style="padding: 12px; text-align: center; border: 1px solid var(--color-border); color: var(--color-text-light);">
-                    {{ .firstDate.Format "Jan 2006" }}
-                </td>
-                
-                {{/* Latest Entry Date */}}
-                <td style="padding: 12px; text-align: center; border: 1px solid var(--color-border); color: var(--color-text-light);">
-                    {{ .lastDate.Format "Jan 2006" }}
-                </td>
-                
-                {{/* Timespan */}}
-                <td style="padding: 12px; text-align: center; border: 1px solid var(--color-border); color: var(--color-text-light);">
-                    {{ if gt .count 1 }}
-                        {{ div .timeframeDays 365 }} years
-                    {{ else }}
-                        <span style="color: var(--color-text-light); font-size: 0.9rem;">—</span>
-                    {{ end }}
-                </td>
-            </tr>
-            {{ end }}
-        </tbody>
-    </table>
-</div>
-
-
-<style>
-/* Card View Styles */
-.conference-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
-}
-
-/* Table View Styles */
-.conference-row:hover {
-    background: rgba(0, 123, 255, 0.05);
-    transition: background 0.2s ease;
-}
-
-#conference-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--color-primary);
-}
-
-/* Button Active State */
-button.view-active {
-    background: var(--color-primary) !important;
-    color: white !important;
-}
-
-button.view-inactive {
-    background: transparent !important;
-    color: var(--color-primary) !important;
-}
-
-@media (prefers-color-scheme: dark) {
-    .conference-card:hover {
-        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
-    }
-    
-    .conference-row:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
-}
-
-@media (max-width: 768px) {
-    #conference-grid {
-        grid-template-columns: 1fr !important;
-    }
-    
-    #conference-table {
-        font-size: 0.9rem;
-    }
-    
-    #conference-table th,
-    #conference-table td {
-        padding: 8px 4px;
-    }
-}
-
-/* Mobile responsive for table */
-@media (max-width: 480px) {
-    #conference-table thead {
-        display: none;
-    }
-    
-    #conference-table, 
-    #conference-table tbody, 
-    #conference-table tr, 
-    #conference-table td {
-        display: block;
-        width: 100%;
-    }
-    
-    #conference-table tr {
-        margin-bottom: 15px;
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        padding: 10px;
-    }
-    
-    #conference-table td {
-        text-align: left !important;
-        border: none !important;
-        padding: 5px 0 !important;
-        position: relative;
-        padding-left: 50% !important;
-    }
-    
-    #conference-table td:before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 45%;
-        padding-right: 10px;
-        font-weight: bold;
-        text-align: left;
-    }
-    
-    #conference-table td:nth-of-type(1):before { content: "Logo"; }
-    #conference-table td:nth-of-type(2):before { content: "Conference"; }
-    #conference-table td:nth-of-type(3):before { content: "Entries"; }
-    #conference-table td:nth-of-type(4):before { content: "First Entry"; }
-    #conference-table td:nth-of-type(5):before { content: "Latest Entry"; }
-    #conference-table td:nth-of-type(6):before { content: "Timespan"; }
-}
-</style>
-
-<script>
-function showView(view) {
-    const gridView = document.getElementById('conference-grid');
-    const tableView = document.getElementById('conference-table-container');
-    const gridBtn = document.getElementById('grid-view-btn');
-    const tableBtn = document.getElementById('table-view-btn');
-    
-    if (view === 'grid') {
-        gridView.style.display = 'grid';
-        tableView.style.display = 'none';
-        gridBtn.className = 'view-active';
-        tableBtn.className = 'view-inactive';
-        localStorage.setItem('conferenceView', 'grid');
-    } else {
-        gridView.style.display = 'none';
-        tableView.style.display = 'block';
-        gridBtn.className = 'view-inactive';
-        tableBtn.className = 'view-active';
-        localStorage.setItem('conferenceView', 'table');
-    }
-}
-
-// Restore saved view preference on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const savedView = localStorage.getItem('conferenceView') || 'grid';
-    showView(savedView);
-});
-</script>
 
 {{ partial "footer.html" . }}

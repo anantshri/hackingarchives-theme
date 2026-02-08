@@ -114,13 +114,11 @@
 <!-- Profile Header Section -->
 <div class="profile-header">
   {{ partial "share.html" . }}
-  {{- $imgBasePath := path.Join "static" "hacker" $hacker -}}
   {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
   {{- $photopath := "" -}}
-  
   {{- range $ext := $extensions -}}
-    {{- if (fileExists (print $imgBasePath $ext)) -}}
-      {{- $photopath = print "/hacker/" $hacker $ext -}}
+    {{- with resources.Get (path.Join "hacker" (printf "%s%s" $hacker $ext)) -}}
+      {{- $photopath = .RelPermalink -}}
       {{- break -}}
     {{- end -}}
   {{- end -}}

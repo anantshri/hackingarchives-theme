@@ -214,18 +214,23 @@
             <td class="collaborators-with-photos">
                 {{- range (sort $collaborators "count" "desc") -}}
                     {{- $collabName := .name -}}
-                    {{- $imgBasePath := path.Join "static" "hacker" $collabName -}}
                     {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
                     {{- $photopath := "" -}}
                     {{- range $ext := $extensions -}}
-                        {{- if (fileExists (print $imgBasePath $ext)) -}}
-                            {{- $photopath = print "/hacker/" $collabName $ext -}}
+                        {{- with resources.Get (path.Join "hacker" (printf "%s%s" $collabName $ext)) -}}
+                            {{- $img := . -}}
+                            {{- with try (.Resize "48x48 q75") -}}
+                                {{- if not .Err -}}
+                                    {{- $img = .Value -}}
+                                {{- end -}}
+                            {{- end -}}
+                            {{- $photopath = $img.RelPermalink -}}
                             {{- break -}}
                         {{- end -}}
                     {{- end -}}
                     <a href="/hacker/{{ .name }}" class="collaborator-link">
                         {{- if $photopath -}}
-                        <img src="{{ $photopath }}" alt="{{ .name | humanize | title }}" class="collaborator-photo">
+                        <img src="{{ $photopath }}" alt="{{ .name | humanize | title }}" class="collaborator-photo" width="24" height="24" loading="lazy">
                         {{- end -}}
                         <span>{{ .name | humanize | title }} ({{ .count }})</span>
                     </a>
