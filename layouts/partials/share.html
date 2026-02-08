@@ -58,10 +58,9 @@
              rel="noopener noreferrer nofollow"
              title="Share on {{ $service.name }}">
             {{- if $iconExists -}}
-              <img src="{{ $iconPath }}" alt="{{ $service.name }}" class="share-icon">
-            {{- else -}}
-              <span class="share-icon-text">{{ $service.name }}</span>
+              <img src="{{ $iconPath }}" alt="" class="share-icon">
             {{- end -}}
+            <span class="share-icon-text">{{ $service.name }}</span>
           </a>
         {{- end -}}
       {{- end -}}
