@@ -3355,6 +3355,15 @@ a.conference-card-link:hover {
   width: 32px;
   height: 32px;
   vertical-align: middle;
+  opacity: 0.9;
+}
+@media (prefers-color-scheme: dark) {
+  .award-card .award-icon {
+    filter: invert(1) brightness(0.9);
+  }
+}
+body:has(.theme-toggle-checkbox:checked) .award-card .award-icon {
+  filter: invert(1) brightness(0.9);
 }
 .award-card .timeline-card-title,
 .award-card .award-card-title {
@@ -3365,6 +3374,19 @@ a.conference-card-link:hover {
   font-size: 0.85rem;
   color: var(--color-text-light);
   text-align: center;
+}
+
+/* Award list page: header icon (80px trophy in .card) */
+.award-header-icon {
+  opacity: 0.9;
+}
+@media (prefers-color-scheme: dark) {
+  .award-header-icon {
+    filter: invert(1) brightness(0.9);
+  }
+}
+body:has(.theme-toggle-checkbox:checked) .award-header-icon {
+  filter: invert(1) brightness(0.9);
 }
 
 /* Entry header: award badge (trophy icon – centered, visible in light/dark) */
@@ -3383,6 +3405,11 @@ a.conference-card-link:hover {
   opacity: 0.9;
 }
 /* Dark mode: invert so trophy is light on dark background */
+@media (prefers-color-scheme: dark) {
+  .entry-award-badge .award-icon-header {
+    filter: invert(1) brightness(0.9);
+  }
+}
 body:has(.theme-toggle-checkbox:checked) .entry-award-badge .award-icon-header {
   filter: invert(1) brightness(0.9);
 }
