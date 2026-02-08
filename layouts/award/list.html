@@ -1,36 +1,54 @@
 {{ partial "header.html" . }}
 
-{{if not .IsHome }}
+{{- $awardPages := sort .Pages "Date" "desc" -}}
+{{- $totalWinners := len $awardPages -}}
+{{- $years := slice -}}
+{{- range $awardPages -}}
+  {{- $years = $years | append (printf "%d" .Date.Year) -}}
+{{- end -}}
+{{- $uniqueYears := len (uniq $years) -}}
+
+{{ if not .IsHome }}
 <center>
   <div class="card">
-  {{ $section := .Section }}
-  {{ $term := .Data.Term }}
-  {{ $photopath := "" }}
-  {{ range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" }}
-    {{ with resources.Get (path.Join $section (printf "%s%s" $term $ext)) }}
-      {{ $photopath = .RelPermalink }}
-      {{ break }}
-    {{ end }}
-  {{ end }}
-  {{ if $photopath }}
-    <img class="confphoto no-invert{{ with .Params.logo_bg }} logo-bg-{{ . }}{{ end }}" src="{{ $photopath }}" alt="{{ .Title }} logo">
-  {{ end }}
-  <div class="confcontainer">
-    <h2><b>{{ .Title | markdownify | humanize | title }}</b></h2>
-
-      <p>  
-{{ partial "social.html" . }}
-    </p>
+  <div class="container">
+  <span class="confphoto confphoto-svg no-invert" aria-label="{{ .Title }} award">
+    <img src="/fontawesome/award.svg" alt="Award" class="award-header-icon" width="80" height="80">
+  </span>
+  <br />
+  <h2><b>{{ .Title | markdownify | humanize | title }}</b></h2>
+  <p>
+    {{ partial "social.html" . }}
+  </p>
   </div>
 </div>
 </center>
 {{ end }}
-<div class="confcontent">
-{{ .Content  }}
+
+<!-- Stats: Winners, Years -->
+<div class="stats-grid stats-grid-4" style="margin-top:1rem;">
+  <div class="stat-card">
+    <div class="stat-card-number">{{ $totalWinners }}</div>
+    <div class="stat-card-label">Winners</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-number">{{ $uniqueYears }}</div>
+    <div class="stat-card-label">Years</div>
+  </div>
 </div>
+
+<div class="confcontent">
+{{ .Content }}
+</div>
+
 <div class="listing">
   <h2>List of Winners</h2>
   <hr/>
-  {{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "simple" "ShowConference" false "ShowHackers" true "ShowType" false) }}
+  {{ if gt $totalWinners 0 }}
+    {{ partial "award-cards.html" (dict "Pages" $awardPages "Context" . "MinEntriesForYearNav" 20) }}
+  {{ else }}
+    <p>No winners listed yet.</p>
+  {{ end }}
 </div>
+
 {{ partial "footer.html" . }}

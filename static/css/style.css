@@ -3340,6 +3340,52 @@ a.conference-card-link:hover {
   border-top: 1px solid var(--color-border);
 }
 
+/* Award cards: trophy, hacker, entry, year */
+/* Award cards: center-aligned text and content */
+.award-card {
+  text-align: center;
+}
+.award-card-trophy {
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  justify-content: center;
+}
+.award-card .award-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
+}
+.award-card .timeline-card-title,
+.award-card .award-card-title {
+  text-align: center;
+}
+.award-card-year {
+  margin-top: var(--spacing-xs);
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+/* Entry header: award badge (trophy icon – centered, visible in light/dark) */
+.entry-award-badge {
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+  width: 100%;
+}
+.entry-award-badge .award-icon-header {
+  width: 128px;
+  height: 128px;
+  vertical-align: middle;
+  display: inline-block;
+  /* Light mode: SVG is dark on light background */
+  opacity: 0.9;
+}
+/* Dark mode: invert so trophy is light on dark background */
+body:has(.theme-toggle-checkbox:checked) .entry-award-badge .award-icon-header {
+  filter: invert(1) brightness(0.9);
+}
+
 /* Style 4: Table */
 .timeline-table-wrapper {
   overflow-x: auto;

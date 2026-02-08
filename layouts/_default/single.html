@@ -3,6 +3,17 @@
 <!-- Entry Header -->
 <div class="entry-header">
     {{ partial "share.html" . }}
+
+
+    <!-- Award: trophy + link to award page (like tool links) -->
+    {{ $entryType := .Params.type | default "" | lower | strings.TrimSpace }}
+    {{ if and (eq $entryType "award") .Params.award }}
+    <div class="entry-award-badge">
+      <img src="/fontawesome/award.svg" class="award-icon-header" alt="Award">
+    </div>
+    {{ end }}
+
+
     <h1>{{ .Title | markdownify }}</h1>
     
     {{ if .Params.hacker }}
@@ -54,6 +65,7 @@
       {{ end }}
     </div>
     {{ end }}
+
   </div>
 </div>
 
