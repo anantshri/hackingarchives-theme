@@ -83,7 +83,7 @@
       <div class="entry-tags">
         {{ range .Params.tag }}
           {{ if and . (ne . "") }}
-            <a href="/tag/{{ . }}" class="tag-link" target="_blank" rel="noreferrer noopener nofollow">{{ . }}</a>
+            <a href="/tag/{{ . }}" class="tag-link" target="_blank" rel="noreferrer noopener nofollow">#{{ . }}</a>
           {{ end }}
         {{ end }}
       </div>

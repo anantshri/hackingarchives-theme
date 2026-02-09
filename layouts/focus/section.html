@@ -181,7 +181,7 @@
                 <h3>Related Tags ({{ len $relatedTagsWithCounts }})</h3>
                 <div class="tags-top-10">
                     {{ range first 10 $sortedRelatedTags }}
-                        <a href="/tag/{{ .Tag | urlize }}/">{{ .Tag | humanize | title }}<sub>({{ .Count }})</sub></a>
+                        <a href="/tag/{{ .Tag | urlize }}/">#{{ .Tag | humanize | title }}<sub>({{ .Count }})</sub></a>
                     {{ end }}
                 </div>
                 {{ if gt (len $relatedTagsWithCounts) 10 }}
@@ -189,7 +189,7 @@
                     <summary>Show all {{ len $relatedTagsWithCounts }} tags...</summary>
                     <div class="tags-full-list" style="margin-top: 0.5rem;">
                         {{ range after 10 $sortedRelatedTags }}
-                            <a href="/tag/{{ .Tag | urlize }}/">{{ .Tag | humanize | title }}<sub>({{ .Count }})</sub></a>
+                            <a href="/tag/{{ .Tag | urlize }}/">#{{ .Tag | humanize | title }}<sub>({{ .Count }})</sub></a>
                         {{ end }}
                     </div>
                 </details>

@@ -391,11 +391,11 @@
                 {{- if $page.Params.tag -}}
                     {{- range $i, $t := $page.Params.tag -}}
                         {{- if lt $i 3 -}}
-                            <a href="/tag/{{ $t | urlize }}/" class="tag-badge">{{ $t }}</a>
+                            <a href="/tag/{{ $t | urlize }}/" class="tag-badge">#{{ $t }}</a>
                         {{- end -}}
                     {{- end -}}
                     {{- if gt (len $page.Params.tag) 3 -}}
-                        <span class="tag-more" title="{{ range after 3 $page.Params.tag }}{{ . }} {{ end }}">+{{ sub (len $page.Params.tag) 3 }}</span>
+                        <span class="tag-more" title="{{ range after 3 $page.Params.tag }}#{{ . }} {{ end }}">+{{ sub (len $page.Params.tag) 3 }}</span>
                     {{- end -}}
                 {{- end -}}
             </td>
