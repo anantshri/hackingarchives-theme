@@ -1,0 +1,101 @@
+{{/*
+  Share Partial - Pure URL-based social sharing (No JavaScript)
+  
+  Configuration (in config.toml under [params.share]):
+    enabled = true                              # Enable/disable share links globally
+    services = ["twitter", "linkedin", "email"] # Which services to show
+  
+  Per-page override (in frontmatter):
+    share_enabled: false                        # Disable on this page
+    share_services: ["twitter", "email"]        # Override services for this page
+  
+  Usage in templates:
+    {{ partial "share.html" . }}
+  Renders as a details/summary: click the share icon to open/close the service buttons (no JavaScript).
+
+  Share text placeholders:
+    {url}   - Page permalink
+    {title} - Raw page title (used for subject lines, LinkedIn)
+    {text}  - Enticing share message (context-aware, used for tweets/posts/messages)
+*/}}
+
+{{- $shareConfig := .Site.Params.share | default dict -}}
+{{- $globalEnabled := $shareConfig.enabled | default false -}}
+{{- $globalServices := $shareConfig.services | default (slice "twitter" "linkedin" "email") -}}
+
+{{/* Per-page overrides */}}
+{{- $pageEnabled := .Params.share_enabled -}}
+{{- $pageServices := .Params.share_services -}}
+
+{{/* Determine final settings - page overrides site config */}}
+{{- $enabled := cond (isset .Params "share_enabled") $pageEnabled $globalEnabled -}}
+{{- $services := cond (isset .Params "share_services") $pageServices $globalServices -}}
+
+{{- if $enabled -}}
+  {{- $shareData := .Site.Data.shareservices | default dict -}}
+  {{- $pageURL := .Permalink -}}
+  {{- $pageTitle := .Title -}}
+
+  {{/* Build enticing share text based on page type */}}
+  {{- $shareText := .Title -}}
+
+  {{- if and .Params.hacker .Params.conference -}}
+    {{/* Talk / entry page — mention speakers & conference */}}
+    {{- $hackerNames := slice -}}
+    {{- range .Params.hacker -}}
+      {{- $hackerNames = $hackerNames | append (. | humanize | title) -}}
+    {{- end -}}
+    {{- $speakers := delimit $hackerNames " & " -}}
+    {{- $conf := .Params.conference | humanize | title -}}
+    {{- $shareText = printf "\"%s\" by %s at %s — worth your time if you're into security." .Title $speakers $conf -}}
+  {{- else if eq .Section "hacker" -}}
+    {{/* Hacker profile page */}}
+    {{- $shareText = printf "Check out %s's security research — talks, tools & contributions, all in one place." .Title -}}
+  {{- else if eq .Section "book" -}}
+    {{/* Book page */}}
+    {{- $shareText = printf "\"%s\" — solid read for anyone in security." .Title -}}
+  {{- else if eq .Section "conference" -}}
+    {{/* Conference page */}}
+    {{- $shareText = printf "Some great security talks from %s — worth diving into." .Title -}}
+  {{- else if eq .Section "tool" -}}
+    {{/* Tool page */}}
+    {{- $shareText = printf "%s — security tool worth checking out." .Title -}}
+  {{- end -}}
+  
+  <details class="share-box">
+    <summary class="share-box-trigger" aria-label="Share this page">
+      <img src="/fontawesome/share.svg" alt="" class="share-box-icon-img">
+    </summary>
+    <div class="share-buttons">
+      {{- range $services -}}
+        {{- $serviceKey := . -}}
+        {{- $service := index $shareData $serviceKey -}}
+        {{- if $service -}}
+          {{- $shareURL := $service.url -}}
+          {{- $shareURL = replace $shareURL "{url}" ($pageURL | urlquery) -}}
+          {{- $shareURL = replace $shareURL "{title}" ($pageTitle | urlquery) -}}
+          {{- $shareURL = replace $shareURL "{text}" ($shareText | urlquery) -}}
+          {{- $iconFile := printf "%s.svg" $service.icon -}}
+          {{- $iconPath := printf "/fontawesome/%s" $iconFile -}}
+          {{- $iconExists := false -}}
+          {{/* Check project static folder first, then theme static folder */}}
+          {{- if fileExists (printf "static/fontawesome/%s" $iconFile) -}}
+            {{- $iconExists = true -}}
+          {{- else if fileExists (printf "themes/hackingarchives-theme/static/fontawesome/%s" $iconFile) -}}
+            {{- $iconExists = true -}}
+          {{- end -}}
+          <a href="{{ $shareURL }}" 
+             class="share-link share-{{ $serviceKey }}" 
+             target="_blank" 
+             rel="noopener noreferrer nofollow"
+             title="Share on {{ $service.name }}">
+            {{- if $iconExists -}}
+              <img src="{{ $iconPath }}" alt="" class="share-icon">
+            {{- end -}}
+            <span class="share-icon-text">{{ $service.name }}</span>
+          </a>
+        {{- end -}}
+      {{- end -}}
+    </div>
+  </details>
+{{- end -}}

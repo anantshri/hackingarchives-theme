@@ -1,0 +1,542 @@
+{{/*
+    Partial: timeline-view.html
+    Purpose: Unified timeline view for displaying entries consistently across the site
+    
+    Usage:
+    {{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "simple") }}
+    
+    Parameters:
+    - Pages: The collection of pages to display
+    - Context: The current context (usually .)
+    - Style: Timeline style - "simple" (default), "visual", "cards", "table", "minimal"
+    - GroupByType: If true, groups by type first, then by year (default: false)
+    - ShowConference: If true, shows conference link (default: true)
+    - ShowHackers: If true, shows hacker links (default: true)
+    - ShowType: If true, shows type badge (default: true)
+    - CurrentHacker: If set, hide authors when only this hacker; show all if multiple authors
+    
+    Year grouping: If total entries < 6, all items are shown in one section (no year headers).
+    If 6+ entries, content is grouped by year and a "Jump to year" navigation is shown.
+*/}}
+
+{{- $pages := .Pages -}}
+{{- $context := .Context -}}
+{{- $style := .Style | default "simple" -}}
+{{- $groupByType := .GroupByType | default false -}}
+{{- $showConference := .ShowConference | default true -}}
+{{- $showHackers := .ShowHackers | default true -}}
+{{- $showType := .ShowType | default true -}}
+{{- $currentHacker := .CurrentHacker | default "" -}}
+{{- $showFocusArea := .ShowFocusArea | default false -}}
+{{- $showTags := .ShowTags | default false -}}
+
+{{/* Load focus area data from content files */}}
+{{- $focusAreaConfig := dict -}}
+{{- if $showFocusArea -}}
+  {{- $focusAreaPages := where site.Pages "Section" "focus" -}}
+  {{- $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil -}}
+  {{- range $focusAreaPages -}}
+    {{- $focusAreaConfig = merge $focusAreaConfig (dict .Params.focus_key (dict "name" .Title "color" .Params.color "tags" .Params.related_tags)) -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Group by year only when 6+ entries; otherwise single section */}}
+{{- $totalEntries := len $pages -}}
+{{- $groupByYear := ge $totalEntries 6 -}}
+
+{{/* Build params dict for item templates - include ShowYearInDate when not grouping by year */}}
+{{- $itemParams := dict "ShowConference" $showConference "ShowHackers" $showHackers "ShowType" $showType "CurrentHacker" $currentHacker "ShowFocusArea" $showFocusArea "FocusAreaConfig" $focusAreaConfig "ShowTags" $showTags "ShowYearInDate" (not $groupByYear) -}}
+
+{{/* Year navigation (when grouping by year) */}}
+{{- $yearGroups := $pages.GroupByDate "2006" -}}
+
+{{/* Route to appropriate style */}}
+{{- if eq $style "visual" -}}
+    {{/* Visual Timeline - left border with dots */}}
+    {{- if $groupByYear -}}
+    <nav class="year-navigation" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to:</span>
+        {{- range $i, $group := $yearGroups -}}
+            {{- if $i }} | {{ end -}}
+            <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+        {{- end -}}
+    </nav>
+    {{- end -}}
+    <div class="timeline">
+    {{- if $groupByYear -}}
+        {{- if $groupByType -}}
+            {{- range $pages.GroupByParam "type" -}}
+                <div class="timeline-type-group">
+                    <div class="timeline-type-header">{{ .Key | humanize | title }}</div>
+                    {{- range .Pages.GroupByDate "2006" -}}
+                        <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
+                        {{- range .Pages -}}
+                            {{ template "timeline-item-visual" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                        {{- end -}}
+                    {{- end -}}
+                </div>
+            {{- end -}}
+        {{- else -}}
+            {{- range $pages.GroupByDate "2006" -}}
+                <div class="timeline-year" id="year-{{ .Key }}">---- {{ .Key }} ----</div>
+                {{- range .Pages -}}
+                    {{ template "timeline-item-visual" (merge $itemParams (dict "Page" .)) }}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+    {{- else -}}
+        {{- range $pages -}}
+            {{ template "timeline-item-visual" (merge $itemParams (dict "Page" .)) }}
+        {{- end -}}
+    {{- end -}}
+    </div>
+
+{{- else if eq $style "cards" -}}
+    {{/* Card Grid Style */}}
+    {{- if $groupByYear -}}
+    <nav class="year-navigation" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to:</span>
+        {{- range $i, $group := $yearGroups -}}
+            {{- if $i }} | {{ end -}}
+            <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+        {{- end -}}
+    </nav>
+    {{- range $yearGroups -}}
+        <div class="timeline-cards-year" id="year-{{ .Key }}">{{ .Key }}</div>
+        <div class="timeline-cards-grid">
+            {{- range .Pages -}}
+                {{ template "timeline-item-card" (merge $itemParams (dict "Page" .)) }}
+            {{- end -}}
+        </div>
+    {{- end -}}
+    {{- else -}}
+    <div class="timeline-cards-grid">
+        {{- range $pages -}}
+            {{ template "timeline-item-card" (merge $itemParams (dict "Page" .)) }}
+        {{- end -}}
+    </div>
+    {{- end -}}
+
+{{- else if eq $style "table" -}}
+    {{/* Table Style */}}
+    <div class="timeline-table-wrapper">
+        <table class="timeline-table timeline-table-focus">
+            <thead>
+                <tr>
+                    <th class="col-date">Date</th>
+                    {{- if $showType }}<th class="col-type">Type</th>{{ end -}}
+                    {{- if $showConference }}<th class="col-conf">Conference</th>{{ end -}}
+                    <th class="col-title">Title</th>
+                    {{- if $showHackers }}<th class="col-speakers">Speaker(s)</th>{{ end -}}
+                    {{- if $showTags }}<th class="col-tags">Tags</th>{{ end -}}
+                </tr>
+            </thead>
+            <tbody>
+                {{- range $pages -}}
+                    {{ template "timeline-item-table" (merge $itemParams (dict "Page" .)) }}
+                {{- end -}}
+            </tbody>
+        </table>
+    </div>
+
+{{- else if eq $style "minimal" -}}
+    {{/* Minimal Dashed Style (Retro) */}}
+    {{- if $groupByYear -}}
+    <nav class="year-navigation" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to:</span>
+        {{- range $i, $group := $yearGroups -}}
+            {{- if $i }} | {{ end -}}
+            <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+        {{- end -}}
+    </nav>
+    {{- end -}}
+    <div class="timeline-minimal">
+    {{- if $groupByYear -}}
+        {{- if $groupByType -}}
+            {{- range $pages.GroupByParam "type" -}}
+                <div class="timeline-minimal-type">[ {{ .Key | upper }} ]</div>
+                {{- range .Pages.GroupByDate "2006" -}}
+                    <div class="timeline-minimal-year" id="year-{{ .Key }}">[ {{ .Key }} ]</div>
+                    {{- range .Pages -}}
+                        {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                    {{- end -}}
+                {{- end -}}
+            {{- end -}}
+        {{- else -}}
+            {{- range $pages.GroupByDate "2006" -}}
+                <div class="timeline-minimal-year" id="year-{{ .Key }}">[ {{ .Key }} ]</div>
+                {{- range .Pages -}}
+                    {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" .)) }}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+    {{- else -}}
+        {{- range $pages -}}
+            {{ template "timeline-item-minimal" (merge $itemParams (dict "Page" .)) }}
+        {{- end -}}
+    {{- end -}}
+    </div>
+
+{{- else -}}
+    {{/* Simple List Style (Default) */}}
+    {{- if $groupByYear -}}
+    <nav class="year-navigation" aria-label="Jump to year">
+        <span class="year-nav-label">Jump to:</span>
+        {{- range $i, $group := $yearGroups -}}
+            {{- if $i }} | {{ end -}}
+            <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+        {{- end -}}
+    </nav>
+    {{- end -}}
+    <div class="timeline-simple">
+    {{- if $groupByYear -}}
+        {{- if $groupByType -}}
+            {{- range $pages.GroupByParam "type" -}}
+                <div class="timeline-simple-type-header">{{ .Key | humanize | title }}</div>
+                {{- range .Pages.GroupByDate "2006" -}}
+                    <div class="timeline-simple-year" id="year-{{ .Key }}">{{ .Key }}</div>
+                    <ul class="timeline-simple-list">
+                        {{- range .Pages -}}
+                            {{ template "timeline-item-simple" (merge $itemParams (dict "Page" . "ShowType" false)) }}
+                        {{- end -}}
+                    </ul>
+                {{- end -}}
+            {{- end -}}
+        {{- else -}}
+            {{- range $pages.GroupByDate "2006" -}}
+                <div class="timeline-simple-year" id="year-{{ .Key }}">{{ .Key }}</div>
+                <ul class="timeline-simple-list">
+                    {{- range .Pages -}}
+                        {{ template "timeline-item-simple" (merge $itemParams (dict "Page" .)) }}
+                    {{- end -}}
+                </ul>
+            {{- end -}}
+        {{- end -}}
+    {{- else -}}
+        <ul class="timeline-simple-list">
+            {{- range $pages -}}
+                {{ template "timeline-item-simple" (merge $itemParams (dict "Page" .)) }}
+            {{- end -}}
+        </ul>
+    {{- end -}}
+    </div>
+{{- end -}}
+
+{{/* ==================== ITEM TEMPLATES ==================== */}}
+
+{{/* Simple List Item */}}
+{{- define "timeline-item-simple" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $showType := .ShowType -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    {{- $showYearInDate := .ShowYearInDate | default false -}}
+    
+    <li>
+        <span class="timeline-simple-date">{{ if $showYearInDate }}{{ $page.Date.Format "Jan 02, 2006" }}{{ else }}{{ $page.Date.Format "Jan 02" }}{{ end }}</span>
+        
+        {{- if and $showConference $page.Params.conference -}}
+            <span class="timeline-sep">-</span>
+            <a href="/conference/{{ lower $page.Params.conference | urlize }}" class="timeline-simple-conf">{{ $page.Params.conference | humanize | title }}</a>{{- if $page.Params.subconference -}}<span class="timeline-subconf">({{ $page.Params.subconference | humanize | title }})</span>{{- else if and (eq (lower $page.Params.conference) "blackhat") (eq (lower $page.Params.Type) "tool demo") -}}<span class="timeline-subconf">(Arsenal)</span>{{- else if and (eq (lower $page.Params.conference) "defcon") (eq (lower $page.Params.Type) "tool demo") -}}<span class="timeline-subconf">(DemoLabs)</span>{{- end -}}
+        {{- end -}}
+        
+        {{- if and $showType $page.Params.type -}}
+            <span class="timeline-sep">-</span>
+            <span class="timeline-simple-type">{{ $page.Params.type | humanize }}</span>
+        {{- end -}}
+        
+        <span class="timeline-sep">-</span>
+        <a href="{{ $page.RelPermalink }}" class="timeline-simple-title">{{ $page.Title | markdownify }}</a>
+        
+        {{- $hasResources := or $page.Params.presentation $page.Params.whitepaper $page.Params.Source $page.Params.video -}}
+        {{- if $hasResources -}}
+            <span class="timeline-sep">-</span>
+            {{ template "resource-icons" $page }}
+        {{- end -}}
+        
+        {{- $hackerCount := 0 -}}
+        {{- if $page.Params.hacker -}}{{- $hackerCount = len $page.Params.hacker -}}{{- end -}}
+        {{- $moreHackerCount := 0 -}}
+        {{- if $page.Params.morehackers -}}{{- $moreHackerCount = len $page.Params.morehackers -}}{{- end -}}
+        {{- $totalHackers := add $hackerCount $moreHackerCount -}}
+        
+        {{- if and $showHackers (gt $totalHackers 0) -}}
+            <span class="timeline-sep">-</span>
+            {{ template "hacker-list-inline" (dict "Page" $page "CurrentHacker" $currentHacker) }}
+        {{- end -}}
+    </li>
+{{- end -}}
+
+{{/* Visual Timeline Item */}}
+{{- define "timeline-item-visual" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $showType := .ShowType -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    {{- $showFocusArea := .ShowFocusArea | default false -}}
+    {{- $focusAreaConfig := .FocusAreaConfig | default dict -}}
+    
+    {{/* Determine primary focus area for this talk */}}
+    {{- $primaryFocus := dict -}}
+    {{- if and $showFocusArea $page.Params.tag $focusAreaConfig -}}
+        {{- range $page.Params.tag -}}
+            {{- $tag := . | lower -}}
+            {{- range $areaKey, $areaData := $focusAreaConfig -}}
+                {{- if and (not $primaryFocus.name) (in $areaData.tags $tag) -}}
+                    {{- $primaryFocus = dict "key" $areaKey "name" $areaData.name "color" $areaData.color -}}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    
+    <div class="timeline-item">
+        <div class="timeline-date">{{ $page.Date.Format "2006/01/02" }}</div>
+        <div class="timeline-content">
+            {{- if and $showType $page.Params.type -}}
+                <span class="badge{{ if or (eq $page.Params.type "Keynote") (eq $page.Params.type "Book") }} badge-secondary{{ end }}">
+                    <a href="/type/{{ $page.Params.type | urlize }}/">{{ $page.Params.type | humanize | title }}</a>
+                </span>
+            {{- end -}}
+            
+            {{- if $primaryFocus.name -}}
+                <a href="/focus/{{ $primaryFocus.key | urlize }}/" class="focus-badge" style="background-color: {{ $primaryFocus.color }}; color: white;" title="{{ $primaryFocus.name }}">{{ $primaryFocus.name }}</a>
+            {{- end -}}
+            
+            {{- if and $showConference $page.Params.conference -}}
+                <a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a>{{ partial "subconference.html" $page }}:
+            {{- end -}}
+            
+            {{- if $page.Params.Publisher -}}
+                {{ $page.Params.Publisher | humanize | title }}:
+            {{- end -}}
+            
+            {{- if $page.Params.award -}}
+                <a href="/award/{{ $page.Params.award | urlize }}">{{ $page.Params.award | humanize | title }}</a>:
+            {{- end -}}
+            
+            <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+            
+            {{- if $showHackers -}}
+                {{ template "hacker-list" (dict "Page" $page "CurrentHacker" $currentHacker) }}
+            {{- end -}}
+            
+            {{ template "resource-icons" $page }}
+        </div>
+    </div>
+{{- end -}}
+
+{{/* Card Item */}}
+{{- define "timeline-item-card" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    <div class="timeline-card">
+        <div class="timeline-card-header">
+            <span class="timeline-card-type">{{ $page.Params.type | humanize | title }}</span>
+            <span class="timeline-card-date">{{ $page.Date.Format "Jan 2006" }}</span>
+        </div>
+        <h3 class="timeline-card-title">
+            <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+        </h3>
+        {{- if and $showConference $page.Params.conference -}}
+            <div class="timeline-card-meta">
+                {{ $page.Params.conference | humanize | title }}
+            </div>
+        {{- end -}}
+        {{- if $showHackers -}}
+            <div class="timeline-card-hackers">
+                {{- range $page.Params.hacker -}}
+                    <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+                {{- end -}}
+            </div>
+        {{- end -}}
+        <div class="timeline-card-resources">
+            {{ template "resource-icons" $page }}
+        </div>
+    </div>
+{{- end -}}
+
+{{/* Table Row Item */}}
+{{- define "timeline-item-table" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $showType := .ShowType -}}
+    {{- $showTags := .ShowTags | default false -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    <tr>
+        <td class="col-date">{{ $page.Date.Format "2006-01-02" }}</td>
+        {{- if $showType -}}
+            <td class="col-type"><span class="badge badge-sm">{{ $page.Params.type | humanize }}</span></td>
+        {{- end -}}
+        {{- if $showConference -}}
+            <td class="col-conf"><a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a></td>
+        {{- end -}}
+        <td class="col-title">
+            <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+            {{ template "resource-icons" $page }}
+        </td>
+        {{- if $showHackers -}}
+            <td class="col-speakers">
+                {{- range $i, $h := $page.Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end -}}
+            </td>
+        {{- end -}}
+        {{- if $showTags -}}
+            <td class="col-tags timeline-tags-cell">
+                {{- if $page.Params.tag -}}
+                    {{- range $i, $t := $page.Params.tag -}}
+                        {{- if lt $i 3 -}}
+                            <a href="/tag/{{ $t | urlize }}/" class="tag-badge">#{{ $t }}</a>
+                        {{- end -}}
+                    {{- end -}}
+                    {{- if gt (len $page.Params.tag) 3 -}}
+                        <span class="tag-more" title="{{ range after 3 $page.Params.tag }}#{{ . }} {{ end }}">+{{ sub (len $page.Params.tag) 3 }}</span>
+                    {{- end -}}
+                {{- end -}}
+            </td>
+        {{- end -}}
+    </tr>
+{{- end -}}
+
+{{/* Minimal Item */}}
+{{- define "timeline-item-minimal" -}}
+    {{- $page := .Page -}}
+    {{- $showConference := .ShowConference -}}
+    {{- $showHackers := .ShowHackers -}}
+    {{- $showType := .ShowType -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    {{- $showYearInDate := .ShowYearInDate | default false -}}
+    
+    <div class="timeline-minimal-item">
+        <code class="timeline-minimal-date">{{ if $showYearInDate }}{{ $page.Date.Format "2006/01/02" }}{{ else }}{{ $page.Date.Format "01/02" }}{{ end }}</code>
+        <span class="timeline-minimal-separator">---</span>
+        {{- if and $showType $page.Params.type -}}
+            <span class="timeline-minimal-type">[{{ $page.Params.type | upper | truncate 4 "" }}]</span>
+        {{- end -}}
+        <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
+        {{- if and $showConference $page.Params.conference -}}
+            <span class="timeline-minimal-conf">// {{ $page.Params.conference | upper }}</span>
+        {{- end -}}
+        {{ template "resource-icons-minimal" $page }}
+    </div>
+{{- end -}}
+
+{{/* ==================== SHARED COMPONENTS ==================== */}}
+
+{{/* Hacker List with CurrentHacker logic */}}
+{{- define "hacker-list" -}}
+    {{- $page := .Page -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    {{- $hackerCount := 0 -}}
+    {{- if $page.Params.hacker -}}
+        {{- $hackerCount = len $page.Params.hacker -}}
+    {{- end -}}
+    {{- $moreHackerCount := 0 -}}
+    {{- if $page.Params.morehackers -}}
+        {{- $moreHackerCount = len $page.Params.morehackers -}}
+    {{- end -}}
+    {{- $totalHackers := add $hackerCount $moreHackerCount -}}
+    
+    {{- $shouldShowHackers := true -}}
+    {{- if and (ne $currentHacker "") (eq $totalHackers 1) -}}
+        {{- if $page.Params.hacker -}}
+            {{- $onlyHacker := index $page.Params.hacker 0 -}}
+            {{- if eq (lower $onlyHacker) (lower $currentHacker) -}}
+                {{- $shouldShowHackers = false -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    
+    {{- if and $shouldShowHackers (gt $totalHackers 0) -}}
+        <span class="timeline-hackers">
+            - 
+            {{- range $index, $hacker := $page.Params.hacker -}}
+                {{- if gt $index 0 }}, {{ end -}}
+                <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+            {{- end -}}
+            {{- range $page.Params.morehackers -}}
+                , <u>{{ . | humanize | title }}</u>
+            {{- end -}}
+        </span>
+    {{- end -}}
+{{- end -}}
+
+{{/* Hacker List Inline (no leading dash) */}}
+{{- define "hacker-list-inline" -}}
+    {{- $page := .Page -}}
+    {{- $currentHacker := .CurrentHacker | default "" -}}
+    
+    {{- $hackerCount := 0 -}}
+    {{- if $page.Params.hacker -}}
+        {{- $hackerCount = len $page.Params.hacker -}}
+    {{- end -}}
+    {{- $moreHackerCount := 0 -}}
+    {{- if $page.Params.morehackers -}}
+        {{- $moreHackerCount = len $page.Params.morehackers -}}
+    {{- end -}}
+    {{- $totalHackers := add $hackerCount $moreHackerCount -}}
+    
+    {{- $shouldShowHackers := true -}}
+    {{- if and (ne $currentHacker "") (eq $totalHackers 1) -}}
+        {{- if $page.Params.hacker -}}
+            {{- $onlyHacker := index $page.Params.hacker 0 -}}
+            {{- if eq (lower $onlyHacker) (lower $currentHacker) -}}
+                {{- $shouldShowHackers = false -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+    
+    {{- if and $shouldShowHackers (gt $totalHackers 0) -}}
+        <span class="timeline-hackers-inline">
+            {{- range $index, $hacker := $page.Params.hacker -}}
+                {{- if gt $index 0 }}, {{ end -}}
+                <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
+            {{- end -}}
+            {{- range $page.Params.morehackers -}}
+                , <u>{{ . | humanize | title }}</u>
+            {{- end -}}
+        </span>
+    {{- end -}}
+{{- end -}}
+
+{{/* Resource Icons */}}
+{{- define "resource-icons" -}}
+    <span class="timeline-resources">
+        {{- if .Params.presentation -}}
+            <a href="{{ .Params.presentation }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="Presentation">
+                <img src="/fontawesome/presentation.svg" class="icon-inline" alt="Presentation">
+            </a>
+        {{- end -}}
+        {{- if .Params.whitepaper -}}
+            <a href="{{ .Params.whitepaper }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="Whitepaper">
+                <img src="/fontawesome/whitepaper.svg" class="icon-inline" alt="Whitepaper">
+            </a>
+        {{- end -}}
+        {{- if .Params.Source -}}
+            <a href="{{ .Params.Source }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="Source Code">
+                <img src="/fontawesome/code.svg" class="icon-inline" alt="Source Code">
+            </a>
+        {{- end -}}
+        {{- if .Params.video -}}
+            <a href="{{ .Params.video }}" class="resource-icon" target="_blank" rel="noreferrer noopener nofollow" title="Video">
+                <img src="/fontawesome/video.svg" class="icon-inline" alt="Video">
+            </a>
+        {{- end -}}
+    </span>
+{{- end -}}
+
+{{/* Resource Icons - Minimal Style */}}
+{{- define "resource-icons-minimal" -}}
+    <span class="timeline-minimal-resources">
+        {{- if .Params.presentation }}[P]{{ end -}}
+        {{- if .Params.whitepaper }}[W]{{ end -}}
+        {{- if .Params.Source }}[S]{{ end -}}
+        {{- if .Params.video }}[V]{{ end -}}
+    </span>
+{{- end -}}

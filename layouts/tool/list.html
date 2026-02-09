@@ -9,25 +9,26 @@
 
 {{if not .IsHome }}
 <center>
-  <div class="card">
-  {{ $imgpath := path.Join "static" "tool" $name_of_tool }}
-  {{ $jpgpath := printf ".jpg" | printf "%s%s" $imgpath  }}
-  {{ $pngpath := printf ".png" | printf "%s%s" $imgpath }}
-  {{ $jpegpath := printf ".jpeg" | printf "%s%s" $imgpath }}
-  {{ $jfifpath := printf ".jfif" | printf "%s%s" $imgpath }}
+  <div class="card" style="position: relative;">
+  {{ partial "share.html" . }}
+  {{ $logoSVG := "" }}
   {{ $photopath := "" }}
-  {{ if fileExists $jpgpath }}
-    {{ $photopath = printf ".jpg" | printf "%s%s" $name_of_tool | printf "%s%s" "/tool/" |  printf "%s" }}
-  {{ else if fileExists $pngpath }}
-    {{ $photopath = printf ".png" | printf "%s%s" $name_of_tool | printf "%s%s" "/tool/" |  printf "%s" }}
-  {{ else if fileExists $jpegpath }}
-    {{ $photopath = printf ".jpeg" | printf "%s%s" $name_of_tool | printf "%s%s" "/tool/" |  printf "%s" }}
-  {{ else if fileExists $jfifpath }}
-    {{ $photopath = printf ".jfif" | printf "%s%s" $name_of_tool | printf "%s%s" "/tool/" |  printf "%s" }}
+  {{ range $ext := slice ".svg" ".jpg" ".png" ".jpeg" ".jfif" ".gif" }}
+    {{ with resources.Get (path.Join "tool" (printf "%s%s" $name_of_tool $ext)) }}
+      {{ if eq $ext ".svg" }}
+        {{ $logoSVG = . }}
+      {{ else }}
+        {{ $photopath = .RelPermalink }}
+      {{ end }}
+      {{ break }}
+    {{ end }}
   {{ end }}
   <div class="container">
-  {{ if $photopath }}
-    <img class="confphoto" src="{{ lower $photopath }}" alt="Avatar">
+  {{ if $logoSVG }}
+    <span class="confphoto confphoto-svg no-invert{{ with .Params.logo_bg }} logo-bg-{{ . }}{{ end }}" aria-label="{{ .Title }} logo">{{ $logoSVG.Content | safeHTML }}</span>
+    <br />
+  {{ else if $photopath }}
+    <img class="confphoto no-invert{{ with .Params.logo_bg }} logo-bg-{{ . }}{{ end }}" src="{{ $photopath }}" alt="{{ .Title }} logo">
     <br />
   {{ end }}
     <br />
@@ -97,44 +98,6 @@
 <div class="listing">
   <h2>List of Sessions</h2>
   <hr/>
-  
-  
-
-{{ range .Pages.GroupByParam "type"}}
-  <center class="type-key"><b>---- {{ .Key | humanize | title }} ----</b></center>
-  {{ range .Pages.GroupByDate "2006" }}
-    <center class="year-key"><b>----  {{ .Key }} ----</b></center>
-    <ul>
-      {{ range .Pages }}
-        <li>
-          <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-          <a href="/conference/{{ lower .Params.conference |  urlize }}">{{ .Params.conference | humanize | title }}</a>
-          {{ partial "subconference.html" . }}
-          :  <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a> - 
-          {{ range .Params.hacker }}
-            <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
-          {{ end }} 
-          {{ range .Params.morehackers }}
-           <u>{{ . | humanize | title }}</u>
-          {{ end }}
-          {{if .Params.presentation }}
-          <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/presentation.svg" style="width:15px;padding-left:2px;"></a>
-          {{ end }}
-          {{if .Params.whitepaper }}
-          <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/whitepaper.svg" style="width:15px;padding-left:2px;"></a>
-          {{ end }}
-          {{if .Params.Source }}
-          <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/code.svg" style="width:15px;padding-left:2px;"></a>
-          {{ end }}
-          {{if .Params.video }}
-          <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow"><img src="/fontawesome/video.svg" style="width:15px;padding-left:2px;"></a>
-          {{ end }}
-        </li>
-      {{ end }}
-    </ul>
-  {{ end }}
-  <hr />
-{{ end }}
-
+  {{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "cards" "GroupByType" true "ShowConference" true "ShowHackers" true "ShowType" false) }}
 </div>
 {{ partial "footer.html" . }}

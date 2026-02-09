@@ -4,53 +4,157 @@
 <h1>{{ .Title | markdownify | humanize | title }}</h1>
 {{ end }}
 
-{{ .Content  }}
+{{ .Content }}
+<!-- Primary entries: exclude panel type -->
+{{- $primaryEntries := 0 -}}
+{{- range where .Site.RegularPages "Section" "!=" "" -}}
+  {{- $t := .Params.type | default "" | lower | strings.TrimSpace -}}
+  {{- if ne $t "panel" -}}
+    {{- $primaryEntries = add $primaryEntries 1 -}}
+  {{- end -}}
+{{- end -}}
 
-<div><u>This site currently lists <b>{{ len (where .Site.RegularPages "Section" "!=" "") }}</b> entries by <b>{{ len ($.Site.Taxonomies.hacker) }}</b> unique individuals</u></div>
+<!-- Primary hackers: only those with at least one non-panel entry -->
+{{- $primaryHackerData := slice -}}
+{{- range $name, $taxonomy := $.Site.Taxonomies.hacker -}}
+  {{- $primaryCount := 0 -}}
+  {{- range $taxonomy.Pages -}}
+    {{- $t := .Params.type | default "" | lower | strings.TrimSpace -}}
+    {{- if ne $t "panel" -}}
+      {{- $primaryCount = add $primaryCount 1 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if gt $primaryCount 0 -}}
+    {{- $primaryHackerData = $primaryHackerData | append (dict "name" $name "count" $primaryCount "taxonomy" $taxonomy) -}}
+  {{- end -}}
+{{- end -}}
+{{- $primaryHackerData = sort $primaryHackerData "count" "desc" -}}
+{{- $primaryHackers := len $primaryHackerData -}}
 
-<div>
-    As of Now I have  details from : 
-<br />
-<b>Conferences</b>: {{ range $name, $taxonomy := $.Site.Taxonomies.conference.ByCount }}
-    <a href="/conference/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
-{{- end }}.<br />
-<b>Awards</b>: {{ range $name, $taxonomy := $.Site.Taxonomies.award.ByCount }}
-    <a href="/award/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
-{{- end }}<br /><br />
-Refer <a href="/roadmap">roadmap</a> for further plans.
+<!-- Stats: focus areas and tags for grid -->
+{{- $focusPages := where $.Site.Pages "Section" "focus" -}}
+{{- $focusPages = where $focusPages ".Params.focus_key" "!=" nil -}}
+{{- $totalFocusAreas := len $focusPages -}}
+{{- $totalTags := len $.Site.Taxonomies.tag -}}
+
+<!-- Stats: talks, books, tools (unique), award entries for second row -->
+{{- $talkCount := 0 -}}
+{{- $totalAwardEntries := 0 -}}
+{{- range $name, $taxonomy := $.Site.Taxonomies.type -}}
+  {{- $n := $name | lower | strings.TrimSpace -}}
+  {{- if eq $n "talk" -}}
+    {{- $talkCount = len $taxonomy.Pages -}}
+  {{- else if eq $n "award" -}}
+    {{- $totalAwardEntries = len $taxonomy.Pages -}}
+  {{- end -}}
+{{- end -}}
+{{- $totalBooks := len (where .Site.RegularPages "Type" "book") -}}
+{{- $totalTools := len $.Site.Taxonomies.tool -}}
+
+<!-- Stats Grid - Row 1: Overview (only show when count > 0) -->
+<div class="stats-grid stats-grid-4">
+  {{ if gt $primaryEntries 0 }}
+  <a href="/timeline/" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $primaryEntries }}</div>
+    <div class="stat-card-label">Total Entries</div>
+  </a>
+  {{ end }}
+  {{ if gt $primaryHackers 0 }}
+  <a href="#hacker-cloud" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $primaryHackers }}</div>
+    <div class="stat-card-label">Hackers</div>
+  </a>
+  {{ end }}
+  {{ if gt $totalFocusAreas 0 }}
+  <a href="/focus/" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $totalFocusAreas }}</div>
+    <div class="stat-card-label">Focus Areas</div>
+  </a>
+  {{ end }}
+  {{ if gt $totalTags 0 }}
+  <a href="/tag/" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $totalTags }}</div>
+    <div class="stat-card-label">Tags</div>
+  </a>
+  {{ end }}
 </div>
 
-<h1><u>Hackers of India</u></h1>
+<!-- Stats Grid - Row 2: Talks, Books, Tools, Awards (only show when count > 0) -->
+<div class="stats-grid stats-grid-4 stats-grid-types" style="margin-top:0.5rem;">
+  {{ if gt $talkCount 0 }}
+  <a href="/type/talk/" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $talkCount }}</div>
+    <div class="stat-card-label">Talks</div>
+  </a>
+  {{ end }}
+  {{ if gt $totalBooks 0 }}
+  <a href="/book/" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $totalBooks }}</div>
+    <div class="stat-card-label">Books</div>
+  </a>
+  {{ end }}
+  {{ if gt $totalTools 0 }}
+  <a href="/tool/" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $totalTools }}</div>
+    <div class="stat-card-label">Tools</div>
+  </a>
+  {{ end }}
+  {{ if gt $totalAwardEntries 0 }}
+  <a href="/award/" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $totalAwardEntries }}</div>
+    <div class="stat-card-label">Awards</div>
+  </a>
+  {{ end }}
+</div>
 
-{{ if not (eq (len $.Site.Taxonomies.hacker) 0) }}
+<!-- Conferences Covered -->
+<div class="conference-summary">
+  <b>Conferences Covered</b>:
+  {{ range $index, $taxonomy := $.Site.Taxonomies.conference.ByCount -}}
+    {{- if $index }}, {{ end -}}
+    <a href="/conference/{{ $taxonomy.Name | urlize }}">{{ $taxonomy.Name | humanize | title }} ({{ len $taxonomy.Pages }})</a>
+  {{- end }}.
+  <br /><br />
+  See our <a href="/roadmap">roadmap</a> for coverage plans.
+</div>
+
+
+
+<h1 id="hacker-cloud"><u>Hackers of India</u></h1>
+
+<p><em>Counts and order exclude panel discussions. The home page lists talks, books, tools, awards, workshops, keynotes, and tool demos only. Panels remain on individual hacker profiles.</em></p>
+
+
+{{ if gt (len $primaryHackerData) 0 }}
     {{ $fontUnit := "rem" }}
     {{ $largestFontSize := 2.7 }}
     {{ $smallestFontSize := 1.5 }}
+    {{ $maxCount := (index $primaryHackerData 0).count }}
+    {{ $minCount := (index $primaryHackerData (sub (len $primaryHackerData) 1)).count }}
+    {{ $max := add $maxCount 1 }}
+    {{ $min := $minCount }}
     {{ $fontSpread := sub $largestFontSize $smallestFontSize }}
-    {{ $max := add (len (index $.Site.Taxonomies.hacker.ByCount 0).Pages) 1 }}
-    {{ $min := len (index $.Site.Taxonomies.hacker.ByCount.Reverse 0).Pages }}
     {{ $spread := sub $max $min }}
-    {{ $fontStep := div $fontSpread $spread }}
+    {{ $fontStep := cond (gt $spread 0) (div $fontSpread $spread) 0 }}
 
     <div id="tag-cloud">
-        {{ range $name, $taxonomy := $.Site.Taxonomies.hacker.ByCount -}}
-            {{- $currentTagCount := len $taxonomy.Pages -}}
-            {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentTagCount $min) $fontStep) ) -}}
-            {{- $count := len $taxonomy.Pages -}}
-            {{- $weigth := div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
+        {{ range $primaryHackerData -}}
+            {{- $count := .count -}}
+            {{- $weigth := 0.0 -}}
+            {{- if and (gt $max 1) (gt $min 0) -}}
+              {{- $weigth = div (sub (math.Log $count) (math.Log $min)) (sub (math.Log $max) (math.Log $min)) -}}
+            {{- end -}}
             {{- $currentFontSize := (add $smallestFontSize (mul (sub $largestFontSize $smallestFontSize) $weigth) ) -}}
-            <!--Current font size: {{$currentFontSize}}-->
-            <a href="{{ "/hacker/" | relLangURL }}{{ $taxonomy.Name | urlize }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">
-                {{- with $taxonomy.Page -}}
+            <a href="{{ "/hacker/" | relLangURL }}{{ .name | urlize }}/" style="font-size:{{ $currentFontSize }}{{ $fontUnit }};">
+                {{- with .taxonomy.Page -}}
                   {{- .Title -}}
                 {{- else -}}
-                  {{- $taxonomy.Name -}}
+                  {{- .name | humanize | title -}}
                 {{- end -}}
-                {{- if gt ($count) 1 -}}<sub>({{ $count }})</sub>{{- end -}}
-              </a>&nbsp;
+                {{- if gt $count 1 -}}<sub>({{ $count }})</sub>{{- end -}}
+            </a>
         {{- end }}
     </div>
 {{ end }}
-
 
 {{ partial "footer.html" . }}

@@ -1,0 +1,52 @@
+{
+  "twitter": {
+    "name": "Twitter",
+    "icon": "twitter",
+    "url": "https://twitter.com/intent/tweet?url={url}&text={text}"
+  },
+  "linkedin": {
+    "name": "LinkedIn",
+    "icon": "linkedin",
+    "url": "https://www.linkedin.com/shareArticle?mini=true&url={url}&title={title}"
+  },
+  "facebook": {
+    "name": "Facebook",
+    "icon": "facebook",
+    "url": "https://www.facebook.com/sharer/sharer.php?u={url}"
+  },
+  "reddit": {
+    "name": "Reddit",
+    "icon": "reddit",
+    "url": "https://reddit.com/submit?url={url}&title={text}"
+  },
+  "hackernews": {
+    "name": "Hacker News",
+    "icon": "hackernews",
+    "url": "https://news.ycombinator.com/submitlink?u={url}&t={text}"
+  },
+  "email": {
+    "name": "Email",
+    "icon": "email",
+    "url": "mailto:?subject={title}&body={text} {url}"
+  },
+  "whatsapp": {
+    "name": "WhatsApp",
+    "icon": "whatsapp",
+    "url": "https://api.whatsapp.com/send?text={text} {url}"
+  },
+  "telegram": {
+    "name": "Telegram",
+    "icon": "telegram",
+    "url": "https://t.me/share/url?url={url}&text={text}"
+  },
+  "mastodon": {
+    "name": "Mastodon",
+    "icon": "mastodon",
+    "url": "https://mastodonshare.com/?text={text}&url={url}"
+  },
+  "bluesky": {
+    "name": "Bluesky",
+    "icon": "bluesky",
+    "url": "https://bsky.app/intent/compose?text={text} {url}"
+  }
+}

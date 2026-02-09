@@ -1,0 +1,480 @@
+{{ partial "header.html" . }}
+
+<div class="page-header">
+    <h1>{{ .Title }}</h1>
+    <p class="page-description">Compare different info-box styles to find the best fit</p>
+</div>
+
+<div class="page-content">
+    {{ .Content }}
+    
+    <!-- Sample Data -->
+    {{- $sampleActivities := dict "talk" 12 "panel" 5 "tool_demo" 5 -}}
+    {{- $sampleTools := slice "ANDROID TAMER" "MORF" "SCROUNGER" -}}
+    {{- $sampleCollaborators := slice (dict "name" "john_doe" "count" 4) (dict "name" "jane_smith" "count" 3) (dict "name" "bob_wilson" "count" 2) -}}
+    {{- $sampleTopics := slice (dict "tag" "devsecops" "name" "DevSecOps" "count" 4) (dict "tag" "mobile-security" "name" "Mobile Security" "count" 3) (dict "tag" "android-security" "name" "Android Security" "count" 2) -}}
+
+    <hr>
+
+    <!-- Style 1: Current Card Grid -->
+    <section class="style-demo">
+        <h2>Style 1: Card Grid (Current)</h2>
+        <p class="style-description">Cards with icons, grid layout, left border accent</p>
+        
+        <div class="info-box">
+            <div class="info-box-item">
+                <h4>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M0 96C0 60.7 28.7 32 64 32H448c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zm64 0v64h64V96H64zm384 0H192v64H448V96zM64 224v64h64V224H64zm384 0H192v64H448V224zM64 352v64h64V352H64zm384 0H192v64H448V352z"/></svg>
+                    Activities
+                </h4>
+                <div class="info-content">
+                    <span>Talk (12)</span> &bull; <span>Panel (5)</span> &bull; <span>Tool Demo (5)</span>
+                </div>
+            </div>
+            <div class="info-box-item">
+                <h4>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4h54.1l109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109V124c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3l-45.3-45.3L19.9 396.1z"/></svg>
+                    Tools
+                </h4>
+                <div class="info-content">
+                    <a href="#">ANDROID TAMER</a>
+                    <a href="#">MORF</a>
+                    <a href="#">SCROUNGER</a>
+                </div>
+            </div>
+            <div class="info-box-item">
+                <h4>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor"><path d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"/></svg>
+                    Collaborators
+                </h4>
+                <div class="info-content">
+                    <a href="#">John Doe (4)</a>
+                    <a href="#">Jane Smith (3)</a>
+                    <a href="#">Bob Wilson (2)</a>
+                </div>
+            </div>
+            <div class="info-box-item">
+                <h4>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M345 39.1L472.8 168.4c52.4 53 52.4 138.2 0 191.2L360.8 472.9c-9.3 9.4-24.5 9.5-33.9 .2s-9.5-24.5-.2-33.9L438.6 325.9c33.9-34.3 33.9-89.4 0-123.7L310.9 72.9c-9.3-9.4-9.2-24.6 .2-33.9s24.6-9.2 33.9 .2zM0 229.5V80C0 53.5 21.5 32 48 32H197.5c17 0 33.3 6.7 45.3 18.7l168 168c25 25 25 65.5 0 90.5L277.3 442.7c-25 25-65.5 25-90.5 0l-168-168C6.7 262.7 0 246.5 0 229.5zM144 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+                    Focus Areas
+                </h4>
+                <div class="info-content">
+                    <a href="#">DevSecOps (4)</a>
+                    <a href="#">Mobile Security (3)</a>
+                    <a href="#">Android Security (2)</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- Style 2: Simple Inline -->
+    <section class="style-demo">
+        <h2>Style 2: Simple Inline (Original)</h2>
+        <p class="style-description">Compact paragraphs with bold labels, minimal styling</p>
+        
+        <div class="info-box-simple">
+            <p><strong>Activities:</strong> Talk - 12; Panel - 5; Tool Demo - 5</p>
+            <p><strong>Tools Contributed or Authored:</strong> <a href="#">ANDROID TAMER</a> <a href="#">MORF</a> <a href="#">SCROUNGER</a></p>
+            <p><strong>Common Collaborators:</strong> <a href="#">John Doe (4)</a> <a href="#">Jane Smith (3)</a> <a href="#">Bob Wilson (2)</a></p>
+            <p><strong>Focus Areas:</strong> <a href="#">DevSecOps (4)</a> <a href="#">Mobile Security (3)</a> <a href="#">Android Security (2)</a></p>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- Style 3: Horizontal Pills -->
+    <section class="style-demo">
+        <h2>Style 3: Horizontal Pills</h2>
+        <p class="style-description">Single row with pill-shaped sections</p>
+        
+        <div class="info-box-pills">
+            <div class="info-pill">
+                <span class="pill-label">Activities</span>
+                <span class="pill-content">Talk (12) &bull; Panel (5) &bull; Tool Demo (5)</span>
+            </div>
+            <div class="info-pill">
+                <span class="pill-label">Tools</span>
+                <span class="pill-content"><a href="#">ANDROID TAMER</a> <a href="#">MORF</a> <a href="#">SCROUNGER</a></span>
+            </div>
+            <div class="info-pill">
+                <span class="pill-label">Collaborators</span>
+                <span class="pill-content"><a href="#">John Doe (4)</a> <a href="#">Jane Smith (3)</a></span>
+            </div>
+            <div class="info-pill">
+                <span class="pill-label">Focus Areas</span>
+                <span class="pill-content"><a href="#">DevSecOps (4)</a> <a href="#">Mobile Security (3)</a></span>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- Style 4: Compact Table -->
+    <section class="style-demo">
+        <h2>Style 4: Compact Table</h2>
+        <p class="style-description">Two-column table layout, clean and organized</p>
+        
+        <div class="info-box-table">
+            <table>
+                <tr>
+                    <th>Activities</th>
+                    <td>Talk (12) &bull; Panel (5) &bull; Tool Demo (5)</td>
+                </tr>
+                <tr>
+                    <th>Tools</th>
+                    <td><a href="#">ANDROID TAMER</a> &bull; <a href="#">MORF</a> &bull; <a href="#">SCROUNGER</a></td>
+                </tr>
+                <tr>
+                    <th>Collaborators</th>
+                    <td><a href="#">John Doe (4)</a> &bull; <a href="#">Jane Smith (3)</a> &bull; <a href="#">Bob Wilson (2)</a></td>
+                </tr>
+                <tr>
+                    <th>Focus Areas</th>
+                    <td><a href="#">DevSecOps (4)</a> &bull; <a href="#">Mobile Security (3)</a> &bull; <a href="#">Android Security (2)</a></td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- Style 5: Tags Cloud -->
+    <section class="style-demo">
+        <h2>Style 5: Tags/Badges</h2>
+        <p class="style-description">Everything as clickable badges/tags</p>
+        
+        <div class="info-box-tags">
+            <div class="tag-group">
+                <span class="tag-group-label">Activities:</span>
+                <span class="tag tag-activity">Talk (12)</span>
+                <span class="tag tag-activity">Panel (5)</span>
+                <span class="tag tag-activity">Tool Demo (5)</span>
+            </div>
+            <div class="tag-group">
+                <span class="tag-group-label">Tools:</span>
+                <a href="#" class="tag tag-tool">ANDROID TAMER</a>
+                <a href="#" class="tag tag-tool">MORF</a>
+                <a href="#" class="tag tag-tool">SCROUNGER</a>
+            </div>
+            <div class="tag-group">
+                <span class="tag-group-label">Collaborators:</span>
+                <a href="#" class="tag tag-collab">John Doe (4)</a>
+                <a href="#" class="tag tag-collab">Jane Smith (3)</a>
+                <a href="#" class="tag tag-collab">Bob Wilson (2)</a>
+            </div>
+            <div class="tag-group">
+                <span class="tag-group-label">Focus Areas:</span>
+                <a href="#" class="tag tag-focus">DevSecOps (4)</a>
+                <a href="#" class="tag tag-focus">Mobile Security (3)</a>
+                <a href="#" class="tag tag-focus">Android Security (2)</a>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- Style 6: Minimal List -->
+    <section class="style-demo">
+        <h2>Style 6: Minimal List</h2>
+        <p class="style-description">Clean vertical list with subtle separators</p>
+        
+        <div class="info-box-minimal">
+            <div class="minimal-row">
+                <span class="minimal-label">Activities</span>
+                <span class="minimal-value">Talk (12), Panel (5), Tool Demo (5)</span>
+            </div>
+            <div class="minimal-row">
+                <span class="minimal-label">Tools</span>
+                <span class="minimal-value"><a href="#">ANDROID TAMER</a>, <a href="#">MORF</a>, <a href="#">SCROUNGER</a></span>
+            </div>
+            <div class="minimal-row">
+                <span class="minimal-label">Collaborators</span>
+                <span class="minimal-value"><a href="#">John Doe (4)</a>, <a href="#">Jane Smith (3)</a>, <a href="#">Bob Wilson (2)</a></span>
+            </div>
+            <div class="minimal-row">
+                <span class="minimal-label">Focus Areas</span>
+                <span class="minimal-value"><a href="#">DevSecOps (4)</a>, <a href="#">Mobile Security (3)</a>, <a href="#">Android Security (2)</a></span>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- Style 7: Stats Bar -->
+    <section class="style-demo">
+        <h2>Style 7: Stats Bar</h2>
+        <p class="style-description">Horizontal stats with numbers prominently displayed</p>
+        
+        <div class="info-box-stats">
+            <div class="stat-item">
+                <div class="stat-number">22</div>
+                <div class="stat-label">Total Activities</div>
+                <div class="stat-detail">12 talks, 5 panels, 5 demos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Tools Created</div>
+                <div class="stat-detail"><a href="#">ANDROID TAMER</a>, <a href="#">MORF</a>, <a href="#">SCROUNGER</a></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Collaborators</div>
+                <div class="stat-detail"><a href="#">John Doe</a>, <a href="#">Jane Smith</a>, <a href="#">Bob Wilson</a></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Focus Areas</div>
+                <div class="stat-detail"><a href="#">DevSecOps</a>, <a href="#">Mobile</a>, <a href="#">Android</a></div>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- Style 8: Accordion/Expandable -->
+    <section class="style-demo">
+        <h2>Style 8: Single Line Summary</h2>
+        <p class="style-description">Ultra-compact single line with key stats</p>
+        
+        <div class="info-box-oneline">
+            <span class="oneline-stat"><strong>22</strong> activities</span>
+            <span class="oneline-sep">&bull;</span>
+            <span class="oneline-stat"><strong>3</strong> tools</span>
+            <span class="oneline-sep">&bull;</span>
+            <span class="oneline-stat"><strong>3</strong> collaborators</span>
+            <span class="oneline-sep">&bull;</span>
+            <span class="oneline-stat"><strong>3</strong> focus areas</span>
+        </div>
+    </section>
+
+</div>
+
+<style>
+/* Style 2: Simple Inline */
+.info-box-simple {
+    background-color: var(--color-info-bg);
+    border-left: 4px solid var(--color-info-border);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+    border-radius: var(--radius-sm);
+}
+.info-box-simple p {
+    margin: var(--spacing-sm) 0;
+}
+.info-box-simple a {
+    margin-right: var(--spacing-sm);
+}
+
+/* Style 3: Horizontal Pills */
+.info-box-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+}
+.info-pill {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    padding: 6px 12px;
+}
+.pill-label {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+.pill-content {
+    font-size: 0.9rem;
+}
+.pill-content a {
+    margin-right: var(--spacing-xs);
+}
+
+/* Style 4: Compact Table */
+.info-box-table {
+    margin: var(--spacing-lg) 0;
+}
+.info-box-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.info-box-table th {
+    text-align: left;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-info-bg);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    width: 140px;
+    border-bottom: 1px solid var(--color-border);
+}
+.info-box-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Style 5: Tags/Badges */
+.info-box-tags {
+    padding: var(--spacing-md) 0;
+}
+.tag-group {
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+.tag-group-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-right: var(--spacing-sm);
+    min-width: 100px;
+}
+.tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+.tag-activity {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+.tag-tool {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+.tag-collab {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+.tag-focus {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+/* Style 6: Minimal List */
+.info-box-minimal {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin: var(--spacing-lg) 0;
+}
+.minimal-row {
+    display: flex;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+}
+.minimal-row:last-child {
+    border-bottom: none;
+}
+.minimal-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    width: 120px;
+    flex-shrink: 0;
+}
+.minimal-value {
+    flex: 1;
+}
+.minimal-value a {
+    margin-right: var(--spacing-xs);
+}
+
+/* Style 7: Stats Bar */
+.info-box-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg) 0;
+}
+.stat-item {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: var(--color-info-bg);
+    border-radius: var(--radius-md);
+}
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+.stat-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-xs);
+}
+.stat-detail {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+.stat-detail a {
+    color: var(--color-link);
+}
+
+/* Style 8: One Line */
+.info-box-oneline {
+    background: var(--color-info-bg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    margin: var(--spacing-lg) 0;
+}
+.oneline-stat {
+    font-size: 0.95rem;
+}
+.oneline-stat strong {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+}
+.oneline-sep {
+    margin: 0 var(--spacing-md);
+    color: var(--color-text-muted);
+}
+
+/* Demo page styling */
+.style-demo {
+    margin: var(--spacing-xl) 0;
+}
+.style-demo h2 {
+    margin-bottom: var(--spacing-xs);
+}
+.style-description {
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Dark mode adjustments for tags */
+@media (prefers-color-scheme: dark) {
+    .tag-activity {
+        background: #1e3a5f;
+        color: #90caf9;
+    }
+    .tag-tool {
+        background: #4a1a5e;
+        color: #ce93d8;
+    }
+    .tag-collab {
+        background: #1b4332;
+        color: #a5d6a7;
+    }
+    .tag-focus {
+        background: #4a2c00;
+        color: #ffcc80;
+    }
+}
+</style>
+
+{{ partial "footer.html" . }}

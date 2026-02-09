@@ -1,0 +1,42 @@
+{{/*
+    Partial: entry-item.html
+    Purpose: Render a single entry (talk, panel, workshop, etc.) consistently across the site
+    Usage: {{ partial "entry-item.html" . }}
+*/}}
+<li>
+    <span class="date">{{ .Date.Format "2006/01/02" }}</span>
+    <a href="/type/{{ .Params.type | urlize}}/" class="entry-type">{{ .Params.type | humanize | title }}</a> : 
+    <a href="/conference/{{ lower .Params.conference |  urlize }}" class="entry-conference">{{ .Params.conference | humanize | title }}</a> : 
+    <a href="{{ .RelPermalink }}" class="entry-title">{{ .Title | markdownify }}</a> - 
+    {{ range $index, $hacker := .Params.hacker }}
+        {{- if gt $index 0 }}, {{ end -}}
+        <a href="/hacker/{{ . }}/" class="entry-hacker">{{ . | humanize | title }}</a>
+    {{ end }}
+    {{ range .Params.morehackers }}
+        <u>{{ . | humanize | title }}</u>
+    {{ end }}
+    {{/* Resource Links */}}
+    <span class="entry-resources">
+        {{if .Params.presentation }}
+            <a href="{{ .Params.presentation }}" target="_blank" rel="noreferrer noopener nofollow" class="resource-link" title="Presentation">
+                <img src="/fontawesome/presentation.svg" class="icon-inline" alt="Presentation">
+            </a>
+        {{ end }}
+        {{if .Params.whitepaper }}
+            <a href="{{ .Params.whitepaper }}" target="_blank" rel="noreferrer noopener nofollow" class="resource-link" title="Whitepaper">
+                <img src="/fontawesome/whitepaper.svg" class="icon-inline" alt="Whitepaper">
+            </a>
+        {{ end }}
+        {{if .Params.Source }}
+            <a href="{{ .Params.Source }}" target="_blank" rel="noreferrer noopener nofollow" class="resource-link" title="Source Code">
+                <img src="/fontawesome/code.svg" class="icon-inline" alt="Source Code">
+            </a>
+        {{ end }}
+        {{if .Params.video }}
+            <a href="{{ .Params.video }}" target="_blank" rel="noreferrer noopener nofollow" class="resource-link" title="Video">
+                <img src="/fontawesome/video.svg" class="icon-inline" alt="Video">
+            </a>
+        {{ end }}
+    </span>
+</li>
+

@@ -1,0 +1,86 @@
+{{/*
+    Partial: award-cards.html
+    Renders award entries as cards: trophy icon, hacker name(s), awarded entry (title link), awarded year.
+    If len(Pages) >= MinEntriesForYearNav (default 20), shows "Jump to year" and groups by year.
+*/}}
+{{- $pages := .Pages -}}
+{{- $context := .Context -}}
+{{- $minForYearNav := .MinEntriesForYearNav | default 20 -}}
+{{- $totalEntries := len $pages -}}
+{{- $groupByYear := ge $totalEntries $minForYearNav -}}
+{{- $yearGroups := $pages.GroupByDate "2006" -}}
+
+{{- if $groupByYear -}}
+<nav class="year-navigation" aria-label="Jump to year">
+  <span class="year-nav-label">Jump to:</span>
+  {{- range $i, $group := $yearGroups -}}
+    {{- if $i }} | {{ end -}}
+    <a href="#year-{{ .Key }}">{{ .Key }} ({{ len .Pages }})</a>
+  {{- end -}}
+</nav>
+{{- end -}}
+
+{{- if $groupByYear -}}
+  {{- range $yearGroups -}}
+    <div class="timeline-cards-year" id="year-{{ .Key }}">{{ .Key }}</div>
+    <div class="timeline-cards-grid award-cards-grid">
+      {{- range .Pages -}}
+        <div class="timeline-card award-card">
+          <div class="award-card-trophy">
+            <img src="/fontawesome/award.svg" class="award-icon" alt="Award" width="32" height="32">
+          </div>
+          {{- if .Params.hacker -}}
+            <div class="timeline-card-hackers award-card-hackers">
+              {{- range $i, $h := .Params.hacker -}}
+                {{- if $i }}, {{ end -}}
+                <a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>
+              {{- end -}}
+            </div>
+          {{- end -}}
+          {{- if .Params.morehackers -}}
+            {{- range .Params.morehackers -}}
+              {{- $nm := trim . " " -}}
+              {{- if ne $nm "" -}}
+                , <span>{{ . | humanize | title }}</span>
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+          <h3 class="timeline-card-title award-card-title">
+            <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+          </h3>
+          <div class="timeline-card-date award-card-year">{{ .Date.Year }}</div>
+        </div>
+      {{- end -}}
+    </div>
+  {{- end -}}
+{{- else -}}
+  <div class="timeline-cards-grid award-cards-grid">
+    {{- range $pages -}}
+      <div class="timeline-card award-card">
+        <div class="award-card-trophy">
+          <img src="/fontawesome/award.svg" class="award-icon" alt="Award" width="32" height="32">
+        </div>
+        {{- if .Params.hacker -}}
+          <div class="timeline-card-hackers award-card-hackers">
+            {{- range $i, $h := .Params.hacker -}}
+              {{- if $i }}, {{ end -}}
+              <a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>
+            {{- end -}}
+          </div>
+        {{- end -}}
+        {{- if .Params.morehackers -}}
+          {{- range .Params.morehackers -}}
+            {{- $nm := trim . " " -}}
+            {{- if ne $nm "" -}}
+              , <span>{{ . | humanize | title }}</span>
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+        <h3 class="timeline-card-title award-card-title">
+          <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+        </h3>
+        <div class="timeline-card-date award-card-year">{{ .Date.Year }}</div>
+      </div>
+    {{- end -}}
+  </div>
+{{- end -}}

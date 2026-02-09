@@ -55,7 +55,7 @@
   {{ if gt (len $hackerCountSorted) 0 }}
   <div style="text-align: center; margin-bottom: 20px;">
       <h3>Hacker Cloud (by talk count)</h3>
-      <div id="hacker-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+      <div id="hacker-cloud">
           {{ range $h := $hackerCountSorted }}
               {{ $count := $h.Value }}
               {{ $currentFontSize := add $smallestFontSize (mul (sub $count $min) $fontStep) }}

@@ -14,8 +14,13 @@
 {{- $hackerFirstTalk := now -}}
 {{- $hackerLastTalk := time "1970-01-01" -}}
 
-<!-- Load focus area data from JSON file -->
-{{- $focusAreaConfig := index $.Site.Data "focus-areas" -}}
+<!-- Load focus area data from content files -->
+{{- $focusAreaPages := where $.Site.Pages "Section" "focus" -}}
+{{- $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil -}}
+{{- $focusAreaConfig := dict -}}
+{{- range $focusAreaPages -}}
+  {{- $focusAreaConfig = merge $focusAreaConfig (dict .Params.focus_key (dict "name" .Title "color" .Params.color "icon" .Params.icon "tags" .Params.related_tags)) -}}
+{{- end -}}
 
 <!-- Single pass data extraction for better performance -->
 {{- range .Pages -}}
@@ -69,85 +74,81 @@
     {{- end -}}
   {{- end -}}
 
-  <!-- Focus Area Timeline Data -->
+  <!-- Focus Area Timeline Data - count each page only once per focus area -->
   {{- if .Params.tag -}}
+    {{- $pageFocusAreas := slice -}}
+    {{- /* First pass: find all unique focus areas for this page */ -}}
     {{- range .Params.tag -}}
       {{- $tag := . | lower -}}
-      {{- /* Find which focus area this tag belongs to using data file */ -}}
-      {{- $matchingFocusArea := "" -}}
       {{- if $focusAreaConfig -}}
-        {{- range $areaKey, $areaData := $focusAreaConfig.focus_areas -}}
-          {{- if in $areaData.tags $tag -}}
-            {{- $matchingFocusArea = $areaKey -}}
-            {{- break -}}
+        {{- range $areaKey, $areaData := $focusAreaConfig -}}
+          {{- if and (in $areaData.tags $tag) (not (in $pageFocusAreas $areaKey)) -}}
+            {{- $pageFocusAreas = $pageFocusAreas | append $areaKey -}}
           {{- end -}}
         {{- end -}}
       {{- end -}}
-      
-      {{- if $matchingFocusArea -}}
-        {{- $existingData := index $focusAreaData $matchingFocusArea -}}
-        {{- if not $existingData -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig.focus_areas $matchingFocusArea).name "color" (index $focusAreaConfig.focus_areas $matchingFocusArea).color)) -}}
-        {{- else if eq (printf "%T" $existingData) "map[string]interface {}" -}}
-          {{- $firstTalk := $existingData.first_talk -}}
-          {{- $lastTalk := $existingData.last_talk -}}
-          {{- if $talkDate.Before $firstTalk -}}
-            {{- $firstTalk = $talkDate -}}
-          {{- end -}}
-          {{- if $talkDate.After $lastTalk -}}
-            {{- $lastTalk = $talkDate -}}
-          {{- end -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk "name" $existingData.name "color" $existingData.color)) -}}
-        {{- else -}}
-          {{- /* Reset if existing data is not a dictionary */ -}}
-          {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig.focus_areas $matchingFocusArea).name "color" (index $focusAreaConfig.focus_areas $matchingFocusArea).color)) -}}
+    {{- end -}}
+    {{- /* Second pass: increment count once per focus area for this page */ -}}
+    {{- range $pageFocusAreas -}}
+      {{- $matchingFocusArea := . -}}
+      {{- $existingData := index $focusAreaData $matchingFocusArea -}}
+      {{- if not $existingData -}}
+        {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig $matchingFocusArea).name "color" (index $focusAreaConfig $matchingFocusArea).color)) -}}
+      {{- else if eq (printf "%T" $existingData) "map[string]interface {}" -}}
+        {{- $firstTalk := $existingData.first_talk -}}
+        {{- $lastTalk := $existingData.last_talk -}}
+        {{- if $talkDate.Before $firstTalk -}}
+          {{- $firstTalk = $talkDate -}}
         {{- end -}}
+        {{- if $talkDate.After $lastTalk -}}
+          {{- $lastTalk = $talkDate -}}
+        {{- end -}}
+        {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk "name" $existingData.name "color" $existingData.color)) -}}
+      {{- else -}}
+        {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig $matchingFocusArea).name "color" (index $focusAreaConfig $matchingFocusArea).color)) -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
 
 <!-- Profile Header Section -->
-<center>
-  <div class="card">
-    {{- $imgBasePath := path.Join "static" "hacker" $hacker -}}
-    {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
-    {{- $photopath := "" -}}
-    
-    {{- range $ext := $extensions -}}
-      {{- if (fileExists (print $imgBasePath $ext)) -}}
-        {{- $photopath = print "/hacker/" $hacker $ext -}}
-        {{- break -}}
+<div class="profile-header">
+  {{ partial "share.html" . }}
+  {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
+  {{- $photopath := "" -}}
+  {{- range $ext := $extensions -}}
+    {{- with resources.Get (path.Join "hacker" (printf "%s%s" $hacker $ext)) -}}
+      {{- $img := . -}}
+      {{- if ne $ext ".svg" -}}
+        {{- with try (.Fill "400x400 Center q100") -}}
+          {{- if not .Err -}}
+            {{- $img = .Value -}}
+          {{- end -}}
+        {{- end -}}
       {{- end -}}
+      {{- $photopath = $img.RelPermalink -}}
+      {{- break -}}
     {{- end -}}
+  {{- end -}}
 
-    {{- if $photopath }}
-      <img class="profilephoto" src="{{ $photopath }}" alt="Profile photo of {{ .Title | title }}">
-    {{ end }}
+  {{- if $photopath }}
+    <img class="profile-image" src="{{ $photopath }}" alt="Profile photo of {{ .Title | title }}">
+  {{ end }}
 
-    <div class="container">
-      <h2><b>{{ .Title | markdownify | title }}</b></h2>
-      <p>{{ partial "social.html" . }}</p>
-
-      {{ if gt (len $videoParams) 0 }}
-        <a href="https://www.youtube.com/watch_videos?video_ids={{ delimit $videoParams "," }}" target="_blank" rel="noreferrer noopener">Dynamic Video Playlist</a>
-      {{ end }}
+  <div class="profile-info">
+    <h1>{{ .Title | markdownify | title }}</h1>
+    <div class="profile-links">
+      {{ partial "social.html" . }}
     </div>
+    {{ if gt (len $videoParams) 0 }}
+      <div class="mt-3">
+        <a href="https://www.youtube.com/watch_videos?video_ids={{ delimit $videoParams "," }}" target="_blank" rel="noreferrer noopener">📹 Dynamic Video Playlist</a>
+      </div>
+    {{ end }}
   </div>
-</center>
+</div>
 
-<!-- Activities Summary -->
-{{- if len $categoryCounts -}}
-  <hr />
-  <section aria-labelledby="activities-heading">
-    <b>Activities:</b> 
-      {{- range $category, $count := $categoryCounts -}}
-        {{ $category | humanize | title }} - {{ $count }};
-      {{- end -}}
-  </section>
-{{ end }}
-
-<!-- Tools Section -->
+<!-- Prepare unique tools list -->
 {{- $uniqueTools := slice -}}
 {{- range $tools -}}
   {{- if not (in $uniqueTools .) -}}
@@ -155,17 +156,7 @@
   {{- end -}}
 {{- end -}}
 
-{{ if len $uniqueTools }}
-  <hr />
-  <section aria-labelledby="tools-heading">
-    <b id="tools-heading">Tools Contributed or Authored: </b>
-      {{- range $uniqueTools -}}
-        <strong><a href="/tool/{{ . | urlize }}">{{ . }}</a></strong>&nbsp;
-      {{- end -}}
-  </section>
-{{ end }}
-
-<!-- Collaborators Section -->
+<!-- Prepare collaborators list -->
 {{- $commonCollaborators := slice -}}
 {{- range $name, $count := $collaborators -}}
   {{- if gt $count 1 -}}
@@ -173,15 +164,83 @@
   {{- end -}}
 {{- end -}}
 
-{{ if gt (len $commonCollaborators) 0 }}
-  <hr />
-  <section aria-labelledby="collaborators-heading">
-    <b id="collaborators-heading">Common Collaborators:</b>&nbsp;
-      {{- range (sort $commonCollaborators "count" "desc") -}}
-        <a href="/hacker/{{ .name }}"><strong>{{ .name | humanize | title }}({{ .count }})</strong></a>;
-      {{- end -}}
-  </section>
-{{ end }}
+<!-- Prepare common topics list (tags with 3+ talks) -->
+{{- $commonTags := slice -}}
+{{- range $tag, $data := $focusAreaData -}}
+  {{- if and (eq (printf "%T" $data) "map[string]interface {}") (gt $data.count 2) -}}
+    {{- $commonTags = $commonTags | append (dict "tag" $tag "count" $data.count "name" $data.name) -}}
+  {{- end -}}
+{{- end -}}
+{{- $commonTags = sort $commonTags "count" "desc" -}}
+
+<!-- Activities Summary - Stat Boxes -->
+{{- $normalizedCounts := dict -}}
+{{- range $category, $count := $categoryCounts -}}
+    {{- $normalizedType := $category | lower | strings.TrimSpace -}}
+    {{- if eq $normalizedType "tool demo" -}}
+        {{- $normalizedType = "tooldemo" -}}
+    {{- end -}}
+    {{- if not (isset $normalizedCounts $normalizedType) -}}
+        {{- $normalizedCounts = merge $normalizedCounts (dict $normalizedType $count) -}}
+    {{- else -}}
+        {{- $existingCount := index $normalizedCounts $normalizedType -}}
+        {{- $normalizedCounts = merge $normalizedCounts (dict $normalizedType (add $existingCount $count)) -}}
+    {{- end -}}
+{{- end -}}
+
+<div class="stats-grid">
+    {{ with index $normalizedCounts "talk" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Talks</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "tooldemo" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Tool Demos</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "workshop" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Workshops</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "panel" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Panels</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "keynote" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Keynotes</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "book" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Books</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "award" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Awards</div>
+    </div>
+    {{ end }}
+    {{ with index $normalizedCounts "article" }}
+    <div class="stat-card">
+        <div class="stat-card-number">{{ . }}</div>
+        <div class="stat-card-label">Articles</div>
+    </div>
+    {{ end }}
+</div>
+
+<!-- Tools, Collaborators, Topics -->
+{{ partial "infobox-view.html" (dict "Tools" $uniqueTools "Collaborators" $commonCollaborators "Topics" $commonTags "Style" "table") }}
 
 <!-- Timeline Section -->
 {{- $timelineYears := add (sub $hackerLastTalk.Year $hackerFirstTalk.Year) 1 -}}
@@ -197,47 +256,28 @@
 
   {{ if and (gt (len $topFocusAreas) 0) (gt $timelineYears 3) }}
     <hr />
-    <details style="margin: 20px 0;">
-      <summary style="cursor: pointer; font-weight: bold; color: #007bff; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
-        Experimental Timeline
-      </summary>
-
-      <!-- Common Topics -->
-      {{- $commonTags := slice -}}
-      {{- range $tag, $data := $focusAreaData -}}
-        {{- if and (eq (printf "%T" $data) "map[string]interface {}") (gt $data.count 2) -}}
-          {{- $commonTags = $commonTags | append (dict "tag" $tag "count" $data.count) -}}
-        {{- end -}}
-      {{- end -}}
-
-      {{ if gt (len $commonTags) 0 }}
-        <section aria-labelledby="topics-heading">
-          <b id="topics-heading">Common Topics (3+ talks): </b>
-            {{- range (sort $commonTags "count" "desc") -}}
-              <a href="/tag/{{ .tag | urlize }}/"><strong>{{ .tag | humanize | title }}({{ .count }})</strong></a>;
-            {{- end -}}
-        </section>
-      {{ end }}
+    <section class="experimental-timeline">
+      <h3 class="experimental-timeline-header">Timeline<sup><span class="experimental-label">(*Experimental)</span></sup></h3>
 
       <!-- Timeline Visualization -->
       {{ if gt (len $topFocusAreas) 0 }}
-        <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #007bff;">
-          <div style="margin-bottom: 16px;">
+        <div class="timeline-container">
+          <div>
             <!-- Year markers and 25% intervals -->
-            <div style="position: relative; height: 20px; margin-bottom: 8px;">
+            <div class="timeline-year-markers">
               {{- $startYear := $hackerFirstTalk.Year -}}
               {{- $endYear := $hackerLastTalk.Year -}}
               {{- range $year := seq $startYear $endYear -}}
                 {{- $yearPct := mul (div (sub $year $startYear | float) $timelineYears) 100.0 -}}
-                <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 0; font-size: 10px; color: #666; transform: translateX(-50%);">
+                <div class="timeline-year-label" style="left: {{ printf "%.2f" $yearPct }}%;">
                   {{ $year }}
                 </div>
-                <div style="position: absolute; left: {{ printf "%.2f" $yearPct }}%; top: 12px; width: 1px; height: 8px; background: #ccc;"></div>
+                <div class="timeline-year-tick" style="left: {{ printf "%.2f" $yearPct }}%;"></div>
               {{- end -}}
               <!-- 25% interval markers -->
               {{- range $i := seq 1 3 -}}
                 {{- $pct := mul $i 25.0 -}}
-                <div style="position: absolute; left: {{ printf "%.2f" $pct }}%; top: 12px; width: 1px; height: 4px; background: #999;"></div>
+                <div class="timeline-interval-tick" style="left: {{ printf "%.2f" $pct }}%;"></div>
               {{- end -}}
             </div>
             
@@ -252,11 +292,11 @@
               {{- $startPct := mul (div (sub $faFirst.Year $hackerFirstTalk.Year | float) $timelineYears) 100.0 -}}
               {{- $endPct := mul (div (add (sub $faLast.Year $hackerFirstTalk.Year) 1 | float) $timelineYears) 100.0 -}}
               {{- $widthPct := sub $endPct $startPct -}}
-              <div style="position: relative; height: 20px; margin-bottom: 8px;">
-                <div style="position: absolute; left: 0; top: 4px; height: 12px; background: #e9ecef; border-radius: 6px; width: 100%;"></div>
-                <div style="position: absolute; left: {{ printf "%.2f" $startPct }}%; top: 4px; height: 12px; width: {{ printf "%.2f" $widthPct }}%; background: {{ $data.color }}; border-radius: 6px; position: relative;">
-                  <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); text-align: center; width: 100%;">
-                    <a href="/focusarea/{{ $fa.tag | urlize }}/" style="color: white; text-decoration: none;">{{ $data.name }}</a>
+              <div class="timeline-focus-area">
+                <div class="timeline-focus-background"></div>
+                <div class="timeline-focus-bar" title="{{ $data.name }} ({{ $faFirst.Year }}-{{ $faLast.Year }})" style="left: {{ printf "%.2f" $startPct }}%; width: {{ printf "%.2f" $widthPct }}%; background: {{ $data.color }};">
+                  <div class="timeline-focus-label">
+                    <a href="/focus/{{ $fa.tag | urlize }}/">{{ $data.name }}</a>
                   </div>
                 </div>
               </div>
@@ -264,59 +304,13 @@
           </div>
         </div>
       {{ end }}
-    </details>
+    </section>
   {{ end }}
 {{ end }}
 <!-- Hacktivity Timeline -->
-<hr />  
-<h1>Hacktivity</h1>
-<hr />
-
-{{ range .Pages.GroupByDate "2006" }}
-  <section aria-labelledby="year-{{ .Key }}-heading">
-    <h4 id="year-{{ .Key }}-heading" class="year-key" style="text-align: center;"><strong>---- {{ .Key }} ----</strong></h4>
-    <ul>
-      {{ range .Pages }}
-        <li>
-          <span class="date">{{ .Date.Format "2006/01/02" }}</span>
-          <a href="/type/{{ .Params.type | urlize }}/">{{ .Params.type | humanize | title }}</a> :
-          <a class="tagtypelink" href="/{{ cond .Params.award (printf "award/%s" .Params.award) (cond .Params.publisher (printf "publisher/%s" .Params.publisher) (printf "conference/%s" .Params.conference)) | lower | urlize }}">{{ cond .Params.award .Params.award (cond .Params.publisher .Params.publisher .Params.conference) | humanize | title }}</a>{{ partial "subconference.html" . }}
-          : <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
-          {{- $totalHackers := 0 -}}
-          {{- if .Params.hacker -}}
-            {{- $totalHackers = add $totalHackers (len .Params.hacker) -}}
-          {{- end -}}
-          {{- if .Params.morehackers -}}
-            {{- $totalHackers = add $totalHackers (len .Params.morehackers) -}}
-          {{- end -}}
-          
-          {{- if gt $totalHackers 1 -}}
-           &nbsp;-&nbsp;
-            {{- if .Params.hacker -}}
-              {{- range .Params.hacker -}}
-                  <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>&nbsp;
-              {{- end -}}
-            {{- end -}}
-            {{- if .Params.morehackers -}}
-              {{- range .Params.morehackers -}}
-                <u>{{- . | humanize | title -}}</u>&nbsp;
-              {{- end -}}
-            {{- end -}}
-          {{- end -}}
-          {{- $paramValue := .Params -}}
-          {{- range (slice "presentation" "whitepaper" "Source" "video") -}}
-            {{- $type := . -}}
-            {{- $val := index $paramValue $type -}}
-            {{- with $val -}}
-              <a class="fa-icon-set" href="{{ . }}" target="_blank" rel="noreferrer noopener nofollow" aria-label="{{ $type | title }}">
-                <img src="/fontawesome/{{ $type | lower }}.svg" style="width:15px; padding-left:2px;" alt="{{ $type | title }} icon">
-              </a>
-            {{- end -}}
-          {{- end -}}
-        </li>
-      {{ end }}
-    </ul>
-  </section>
-{{ end }}
+<section>
+  <h2>Hacktivity</h2>
+  {{ partial "timeline-view.html" (dict "Pages" .Pages "Context" . "Style" "visual" "ShowConference" true "ShowHackers" true "ShowType" true "ShowFocusArea" true "CurrentHacker" $hacker) }}
+</section>
 
 {{ partial "footer.html" . }}

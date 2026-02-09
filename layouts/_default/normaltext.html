@@ -1,12 +1,18 @@
 {{ partial "header.html" . }}
 
-<main>
+<!-- Page Header -->
+<div class="page-header">
+    <h1>{{ .Title | markdownify }}</h1>
+    {{ if .Description }}
+    <p class="page-description">{{ .Description }}</p>
+    {{ end }}
+</div>
 
-{{ with .Content }}
-<div class="clear"></div>
-  {{- . -}}
-{{ end }}
-
-</main>
+<!-- Page Content -->
+<div class="page-content">
+    {{ with .Content }}
+    {{- . -}}
+    {{ end }}
+</div>
 
 {{ partial "footer.html" . }}

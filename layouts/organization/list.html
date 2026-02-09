@@ -1,11 +1,11 @@
 {{ if $.Site.Params.experimental_mode }}
   {{ partial "header.html" . }}
 
-  <div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;">
-      <h4 style="margin: 0; color: #856404;">
+  <div class="notice warning">
+      <h4 class="notice-title">
           <strong>🧪 Experimental Feature</strong>
       </h4>
-      <p style="margin: 10px 0 0 0; color: #856404;">
+      <p>
           Organization-based content organization is an experimental feature. This page and its functionality may change as we refine the organization taxonomy.
       </p>
   </div>
@@ -65,10 +65,10 @@
   {{ if gt (len $hackerCountSorted) 0 }}
   <h2>Hackers from {{ .Title | humanize | title }}</h2>
 
-  <div id="hacker-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+  <div id="tag-cloud">
       {{ range $hackerCountSorted }}
           {{ $currentFontSize := add $smallestFontSize (mul (sub .Value $min) $fontStep) }}
-          <a href="/hacker/{{ .Key }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}}">{{ .Name }}{{ if gt .Value 1 }}<sub>({{ .Value }})</sub>{{ end }}</a>&nbsp;
+          <a href="/hacker/{{ .Key }}/" style="font-size:{{$currentFontSize}}{{$fontUnit}};">{{ .Name }}{{ if gt .Value 1 }}<sub>({{ .Value }})</sub>{{ end }}</a>
       {{ end }}
   </div>
   {{ end }}

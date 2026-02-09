@@ -6,6 +6,7 @@
 {{ $show_presentation_details := "Yes" }}
 {{ $show_book_details := "Yes" }}
 {{ $show_tool_content := "Yes" }}
+{{ $show_talks_without_tags := "Yes" }}
 
 {{/* Define pages variable for use in multiple sections */}}
 {{ $pages := .Site.RegularPages }}
@@ -24,6 +25,9 @@
   {{ if eq $show_tool_content "Yes" }}
     <a href="#tools">Tools</a>
   {{ end }}
+  {{ if eq $show_talks_without_tags "Yes" }}
+    <a href="#talks-without-tags">Talks Without Tags</a>
+  {{ end }}
 </div>
 
 {{ if eq $show_personal_details "Yes" }}
@@ -39,10 +43,10 @@
   {{ $isimportant := "N" }}
   {{ $whatismissing := ""}}
 
-  {{ $jpgpath := printf ".jpg" | printf "%s%s" .Name | printf "%s%s" "static/hacker/" |  printf "%s" }}
-  {{ $pngpath := printf ".png" | printf "%s%s" .Name | printf "%s%s" "static/hacker/" |  printf "%s" }}
-  {{ $jpegpath := printf ".jpeg" | printf "%s%s" .Name | printf "%s%s" "static/hacker/" |  printf "%s" }}
-  {{ $jfifpath := printf ".jfif" | printf "%s%s" .Name | printf "%s%s" "static/hacker/" | printf "%s" }}
+  {{ $jpgpath := printf ".jpg" | printf "%s%s" .Name | printf "%s%s" "assets/hacker/" |  printf "%s" }}
+  {{ $pngpath := printf ".png" | printf "%s%s" .Name | printf "%s%s" "assets/hacker/" |  printf "%s" }}
+  {{ $jpegpath := printf ".jpeg" | printf "%s%s" .Name | printf "%s%s" "assets/hacker/" |  printf "%s" }}
+  {{ $jfifpath := printf ".jfif" | printf "%s%s" .Name | printf "%s%s" "assets/hacker/" | printf "%s" }}
   {{ $photopath := "" }}
   {{ if fileExists $jpgpath }}
     {{ $photopath = "a" }}
@@ -191,7 +195,10 @@
   {{ if eq $isimportant "Y" }}
     <tr>
     <td>{{ $count }}</td>
-    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>
+      <a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a>
+      {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
+    </td>
     <td>{{ $whatismissing }}</td>
     </tr>
     {{ $count = add $count 1 }}
@@ -247,7 +254,10 @@
   {{ if eq $isimportant "Y" }}
     <tr>
     <td>{{ $count }}</td>
-    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>
+      <a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a>
+      {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
+    </td>
     <td>{{ $whatismissing }}</td>
     </tr>
     {{ $count = add $count 1 }}
@@ -337,7 +347,10 @@
   {{ if eq $isimportant "Y" }}
     <tr>
     <td>{{ $count }}</td>
-    <td><a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a></td>
+    <td>
+      <a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a>
+      {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
+    </td>
     <td>{{ $whatismissing }}</td>
     </tr>
     {{ $count = add $count 1 }}
@@ -404,6 +417,45 @@
       </tr>
       {{ $count = add $count 1 }}
     {{ end }}
+  {{ end }}
+{{ end }}
+</table>
+{{ end }}
+
+{{ if eq $show_talks_without_tags "Yes" }}
+<h1 id="talks-without-tags">Talks Without Tags</h1>
+<table>
+<tr>
+<th>S.No</th>
+<th> Name of Entry </th>
+<th> Conference </th>
+<th> Year </th>
+</tr>
+{{ $count := 1 }}
+{{ range (where $pages "Type" "talk") }}
+  {{ $hasTags := false }}
+  
+  {{/* Check if tags field exists and has content */}}
+  {{ if .Params.tag }}
+    {{ range .Params.tag }}
+      {{ if . }}
+        {{ $hasTags = true }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  
+  {{/* Only show if no tags or empty tags */}}
+  {{ if not $hasTags }}
+    <tr>
+    <td>{{ $count }}</td>
+    <td>
+      <a href="{{ .Permalink }}" target="_blank">{{ .Date.Format "2006/01/02" }} : {{ .Params.conference | humanize | title  }} : {{ .Type | humanize | title  }} : {{ .Name | humanize | title  }}</a>
+      {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
+    </td>
+    <td>{{ .Params.conference | humanize | title  }}</td>
+    <td>{{ .Params.year }}</td>
+    </tr>
+    {{ $count = add $count 1 }}
   {{ end }}
 {{ end }}
 </table>

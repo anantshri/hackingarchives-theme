@@ -11,7 +11,7 @@
         {{ $spread := sub $max $min }}
         {{ $fontStep := div $fontSpread $spread }}
 
-        <div id="tag-cloud" style="padding: 5px 15px; line-height: 1.5; word-spacing: 10px">
+        <div id="tag-cloud">
             {{ range $name, $taxonomy := $.Site.Taxonomies.tag.ByCount -}}
                 {{- $currentTagCount := len $taxonomy.Pages -}}
                 {{- $currentFontSize := (add $smallestFontSize (mul (sub $currentTagCount $min) $fontStep) ) -}}

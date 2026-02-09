@@ -1,5 +1,70 @@
 {{ partial "header.html" . }}
 
-404 NOT FOUND
+<div class="error-page">
+  <h1>404 - Page Not Found</h1>
+  
+  <p class="error-message">
+    The page you're looking for doesn't exist or may have been moved.
+  </p>
+
+  <div class="error-suggestions">
+    <h2>Here's what you can explore:</h2>
+    
+    <div class="stats-grid stats-grid-4">
+      <a href="/" class="stat-card stat-card-link">
+        <div class="stat-card-number">🏠</div>
+        <div class="stat-card-label">Home</div>
+      </a>
+      
+      <a href="/hacker/" class="stat-card stat-card-link">
+        <div class="stat-card-number">{{ len $.Site.Taxonomies.hacker }}</div>
+        <div class="stat-card-label">Hackers</div>
+      </a>
+      
+      <a href="/timeline/" class="stat-card stat-card-link">
+        <div class="stat-card-number">📅</div>
+        <div class="stat-card-label">Timeline</div>
+      </a>
+      
+      <a href="/focus/" class="stat-card stat-card-link">
+        <div class="stat-card-number">🎯</div>
+        <div class="stat-card-label">Focus Areas</div>
+      </a>
+    </div>
+
+    <div class="stats-grid">
+      <a href="/conference/" class="stat-card stat-card-link">
+        <div class="stat-card-number">{{ len $.Site.Taxonomies.conference }}</div>
+        <div class="stat-card-label">Conferences</div>
+      </a>
+      
+      <a href="/tag/" class="stat-card stat-card-link">
+        <div class="stat-card-number">{{ len $.Site.Taxonomies.tag }}</div>
+        <div class="stat-card-label">Tags</div>
+      </a>
+      
+      <a href="/tool/" class="stat-card stat-card-link">
+        <div class="stat-card-number">🔧</div>
+        <div class="stat-card-label">Tools</div>
+      </a>
+      
+      <a href="/book/" class="stat-card stat-card-link">
+        <div class="stat-card-number">📚</div>
+        <div class="stat-card-label">Books</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="error-help">
+    <p>
+      <strong>Looking for a specific hacker or talk?</strong><br>
+      Try browsing by <a href="/conference/">conference</a>, <a href="/tag/">topic tag</a>, or <a href="/focus/">focus area</a>.
+    </p>
+    <p>
+      <strong>Think something is missing?</strong><br>
+      Check our <a href="/roadmap/">roadmap</a> or <a href="/contribute/">contribute</a> to add new entries.
+    </p>
+  </div>
+</div>
 
 {{ partial "footer.html" . }}
