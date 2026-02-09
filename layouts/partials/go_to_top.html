@@ -1,23 +1,4 @@
-<!-- Go to top: shown after ~3.5 viewport heights of scroll -->
-<a href="#" id="go-to-top" class="go-to-top" aria-label="Go to top">
+<!-- Go to top: CSS-only, always visible, smooth scroll via scroll-behavior -->
+<a href="#top" class="go-to-top" aria-label="Go to top">
   <span class="go-to-top-icon" aria-hidden="true">↑</span>
 </a>
-<script>
-(function () {
-  var btn = document.getElementById('go-to-top');
-  if (!btn) return;
-  var threshold = 3.5; // show after ~3.5 screens
-  function update() {
-    var vh = window.innerHeight;
-    var show = window.scrollY >= vh * threshold;
-    btn.classList.toggle('is-visible', show);
-  }
-  btn.addEventListener('click', function (e) {
-    e.preventDefault();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-  window.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  update();
-})();
-</script>

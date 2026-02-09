@@ -4113,7 +4113,7 @@ body:has(.theme-toggle-checkbox:checked) .entry-award-badge .award-icon-header {
 }
 
 /* ========================================
-   Go to top (shown after ~3.5 viewport heights)
+   Go to top (CSS-only, always visible)
    ======================================== */
 .go-to-top {
   position: fixed;
@@ -4132,21 +4132,13 @@ body:has(.theme-toggle-checkbox:checked) .entry-award-badge .award-icon-header {
   border-radius: 50%;
   box-shadow: var(--shadow-md);
   text-decoration: none;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(0.5rem);
-  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.15s ease;
+  opacity: 1;
+  transition: background-color 0.15s ease;
 }
 
 .go-to-top:hover {
   background: var(--color-accent-hover);
   color: var(--color-card-bg);
-}
-
-.go-to-top.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
 }
 
 .go-to-top-icon {
