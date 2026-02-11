@@ -35,18 +35,20 @@
 {{- $hackerList = sort $hackerList "title" "asc" -}}
 {{- $totalHackers := len $hackerList -}}
 
-{{- /* Letters that have at least one hacker */ -}}
+{{- /* Letters that have at least one hacker + per-letter counts */ -}}
 {{- $lettersWithHackers := slice -}}
+{{- $letterCounts := dict -}}
 {{- range $hackerList -}}
   {{- $letter := substr .title 0 1 | upper -}}
   {{- if and $letter (not (in $lettersWithHackers $letter)) -}}
     {{- $lettersWithHackers = $lettersWithHackers | append $letter -}}
   {{- end -}}
+  {{- if $letter -}}
+    {{- $letterCounts = merge $letterCounts (dict $letter (add (index $letterCounts $letter | default 0) 1)) -}}
+  {{- end -}}
 {{- end -}}
 
 <div class="hacker-directory">
-  <h1>{{ .Title | markdownify }}</h1>
-  <p class="hacker-directory-total"><strong>{{ $totalHackers }}</strong> hackers</p>
 
   {{- /* A–Z quick nav */ -}}
   <nav class="alpha-nav" aria-label="Jump to letter">
@@ -54,10 +56,11 @@
     {{- range $letters -}}
       {{- $letter := . -}}
       {{- $hasHackers := in $lettersWithHackers $letter -}}
+      {{- $count := index $letterCounts $letter | default 0 -}}
       {{- if $hasHackers -}}
-        <a href="#letter-{{ $letter }}">{{ $letter }}</a>
+        <a href="#letter-{{ $letter }}">{{ $letter }}<span class="alpha-nav-count">({{ $count }})</span></a>
       {{- else -}}
-        <span class="alpha-nav-empty" aria-hidden="true">{{ $letter }}</span>
+        <span class="alpha-nav-empty" aria-hidden="true">{{ $letter }}(0)</span>
       {{- end -}}
     {{- end -}}
   </nav>
