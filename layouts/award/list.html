@@ -12,9 +12,21 @@
 <center>
   <div class="card">
   <div class="container">
+  {{- $term := .Data.Term -}}
+  {{- $awardPhoto := "" -}}
+  {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" -}}
+    {{- with resources.Get (path.Join "award" (printf "%s%s" $term $ext)) -}}
+      {{- $awardPhoto = .RelPermalink -}}
+      {{- break -}}
+    {{- end -}}
+  {{- end -}}
+  {{ if $awardPhoto }}
+    <img class="confphoto no-invert" src="{{ $awardPhoto }}" alt="{{ .Title }}">
+  {{ else }}
   <span class="confphoto confphoto-svg no-invert" aria-label="{{ .Title }} award">
     <img src="/fontawesome/award.svg" alt="Award" class="award-header-icon" width="80" height="80">
   </span>
+  {{ end }}
   <br />
   <h2><b>{{ .Title | markdownify | humanize | title }}</b></h2>
   <p>

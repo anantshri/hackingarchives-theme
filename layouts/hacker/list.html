@@ -7,10 +7,12 @@
 
 <!-- Initialize data structures once -->
 {{- $videoParams := slice -}}
-{{- $categoryCounts := dict -}}
+{{- $countScratch := newScratch -}}
 {{- $tools := slice -}}
-{{- $collaborators := dict -}}
-{{- $focusAreaData := dict -}}
+{{- $collabScratch := newScratch -}}
+{{- $collabNames := slice -}}
+{{- $faScratch := newScratch -}}
+{{- $faNames := slice -}}
 {{- $hackerFirstTalk := now -}}
 {{- $hackerLastTalk := time "1970-01-01" -}}
 
@@ -48,10 +50,14 @@
     {{- end -}}
   {{- end -}}
 
-  <!-- Session Type Count -->
+  <!-- Session Type Count (normalize to lowercase, merge "tool demo" → "tooldemo") -->
   {{- $category := .Params.type -}}
   {{- if $category -}}
-    {{- $categoryCounts = merge $categoryCounts (dict $category (add (index $categoryCounts $category | default 0) 1)) -}}
+    {{- $normalizedType := $category | lower | strings.TrimSpace -}}
+    {{- if eq $normalizedType "tool demo" -}}
+      {{- $normalizedType = "tooldemo" -}}
+    {{- end -}}
+    {{- $countScratch.Add $normalizedType 1 -}}
   {{- end -}}
 
   <!-- Tools Section -->
@@ -64,17 +70,20 @@
     {{- end -}}
   {{- end -}}
 
-  <!-- Collaborator Section -->
+  <!-- Collaborator Section (using Scratch.Add for reliable counting) -->
   {{- if .Params.hacker -}}
     {{- range .Params.hacker -}}
       {{- $collab := . | lower -}}
       {{- if and (ne $collab $hacker) (ne $collab "") -}}
-        {{- $collaborators = merge $collaborators (dict $collab (add (index $collaborators $collab | default 0) 1)) -}}
+        {{- if not (in $collabNames $collab) -}}
+          {{- $collabNames = $collabNames | append $collab -}}
+        {{- end -}}
+        {{- $collabScratch.Add $collab 1 -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
 
-  <!-- Focus Area Timeline Data - count each page only once per focus area -->
+  <!-- Focus Area Timeline Data - count each page only once per focus area (using Scratch for reliable counting) -->
   {{- if .Params.tag -}}
     {{- $pageFocusAreas := slice -}}
     {{- /* First pass: find all unique focus areas for this page */ -}}
@@ -91,21 +100,17 @@
     {{- /* Second pass: increment count once per focus area for this page */ -}}
     {{- range $pageFocusAreas -}}
       {{- $matchingFocusArea := . -}}
-      {{- $existingData := index $focusAreaData $matchingFocusArea -}}
-      {{- if not $existingData -}}
-        {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig $matchingFocusArea).name "color" (index $focusAreaConfig $matchingFocusArea).color)) -}}
-      {{- else if eq (printf "%T" $existingData) "map[string]interface {}" -}}
-        {{- $firstTalk := $existingData.first_talk -}}
-        {{- $lastTalk := $existingData.last_talk -}}
-        {{- if $talkDate.Before $firstTalk -}}
-          {{- $firstTalk = $talkDate -}}
-        {{- end -}}
-        {{- if $talkDate.After $lastTalk -}}
-          {{- $lastTalk = $talkDate -}}
-        {{- end -}}
-        {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" (add $existingData.count 1) "first_talk" $firstTalk "last_talk" $lastTalk "name" $existingData.name "color" $existingData.color)) -}}
-      {{- else -}}
-        {{- $focusAreaData = merge $focusAreaData (dict $matchingFocusArea (dict "count" 1 "first_talk" $talkDate "last_talk" $talkDate "name" (index $focusAreaConfig $matchingFocusArea).name "color" (index $focusAreaConfig $matchingFocusArea).color)) -}}
+      {{- if not (in $faNames $matchingFocusArea) -}}
+        {{- $faNames = $faNames | append $matchingFocusArea -}}
+      {{- end -}}
+      {{- $faScratch.Add (printf "count_%s" $matchingFocusArea) 1 -}}
+      {{- $currentFirst := $faScratch.Get (printf "first_%s" $matchingFocusArea) -}}
+      {{- if or (not $currentFirst) ($talkDate.Before $currentFirst) -}}
+        {{- $faScratch.Set (printf "first_%s" $matchingFocusArea) $talkDate -}}
+      {{- end -}}
+      {{- $currentLast := $faScratch.Get (printf "last_%s" $matchingFocusArea) -}}
+      {{- if or (not $currentLast) ($talkDate.After $currentLast) -}}
+        {{- $faScratch.Set (printf "last_%s" $matchingFocusArea) $talkDate -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -156,15 +161,25 @@
   {{- end -}}
 {{- end -}}
 
-<!-- Prepare collaborators list -->
+<!-- Prepare collaborators list (from Scratch-based counts) -->
 {{- $commonCollaborators := slice -}}
-{{- range $name, $count := $collaborators -}}
+{{- range $collabNames -}}
+  {{- $count := $collabScratch.Get . | default 0 -}}
   {{- if gt $count 1 -}}
-    {{- $commonCollaborators = $commonCollaborators | append (dict "name" $name "count" $count) -}}
+    {{- $commonCollaborators = $commonCollaborators | append (dict "name" . "count" $count) -}}
   {{- end -}}
 {{- end -}}
 
-<!-- Prepare common topics list (tags with 3+ talks) -->
+<!-- Prepare common topics list (tags with 3+ talks, from Scratch-based counts) -->
+{{- $focusAreaData := dict -}}
+{{- range $faNames -}}
+  {{- $areaKey := . -}}
+  {{- $count := $faScratch.Get (printf "count_%s" $areaKey) | default 0 -}}
+  {{- if gt $count 0 -}}
+    {{- $areaConfig := index $focusAreaConfig $areaKey -}}
+    {{- $focusAreaData = merge $focusAreaData (dict $areaKey (dict "count" $count "first_talk" ($faScratch.Get (printf "first_%s" $areaKey)) "last_talk" ($faScratch.Get (printf "last_%s" $areaKey)) "name" $areaConfig.name "color" $areaConfig.color)) -}}
+  {{- end -}}
+{{- end -}}
 {{- $commonTags := slice -}}
 {{- range $tag, $data := $focusAreaData -}}
   {{- if and (eq (printf "%T" $data) "map[string]interface {}") (gt $data.count 2) -}}
@@ -173,65 +188,51 @@
 {{- end -}}
 {{- $commonTags = sort $commonTags "count" "desc" -}}
 
-<!-- Activities Summary - Stat Boxes -->
-{{- $normalizedCounts := dict -}}
-{{- range $category, $count := $categoryCounts -}}
-    {{- $normalizedType := $category | lower | strings.TrimSpace -}}
-    {{- if eq $normalizedType "tool demo" -}}
-        {{- $normalizedType = "tooldemo" -}}
-    {{- end -}}
-    {{- if not (isset $normalizedCounts $normalizedType) -}}
-        {{- $normalizedCounts = merge $normalizedCounts (dict $normalizedType $count) -}}
-    {{- else -}}
-        {{- $existingCount := index $normalizedCounts $normalizedType -}}
-        {{- $normalizedCounts = merge $normalizedCounts (dict $normalizedType (add $existingCount $count)) -}}
-    {{- end -}}
-{{- end -}}
-
+<!-- Activities Summary - Stat Boxes (counts accumulated via Scratch.Add for correctness) -->
 <div class="stats-grid">
-    {{ with index $normalizedCounts "talk" }}
+    {{ with $countScratch.Get "talk" }}
     <div class="stat-card">
         <div class="stat-card-number">{{ . }}</div>
         <div class="stat-card-label">Talks</div>
     </div>
     {{ end }}
-    {{ with index $normalizedCounts "tooldemo" }}
+    {{ with $countScratch.Get "tooldemo" }}
     <div class="stat-card">
         <div class="stat-card-number">{{ . }}</div>
         <div class="stat-card-label">Tool Demos</div>
     </div>
     {{ end }}
-    {{ with index $normalizedCounts "workshop" }}
+    {{ with $countScratch.Get "workshop" }}
     <div class="stat-card">
         <div class="stat-card-number">{{ . }}</div>
         <div class="stat-card-label">Workshops</div>
     </div>
     {{ end }}
-    {{ with index $normalizedCounts "panel" }}
+    {{ with $countScratch.Get "panel" }}
     <div class="stat-card">
         <div class="stat-card-number">{{ . }}</div>
         <div class="stat-card-label">Panels</div>
     </div>
     {{ end }}
-    {{ with index $normalizedCounts "keynote" }}
+    {{ with $countScratch.Get "keynote" }}
     <div class="stat-card">
         <div class="stat-card-number">{{ . }}</div>
         <div class="stat-card-label">Keynotes</div>
     </div>
     {{ end }}
-    {{ with index $normalizedCounts "book" }}
+    {{ with $countScratch.Get "book" }}
     <div class="stat-card">
         <div class="stat-card-number">{{ . }}</div>
         <div class="stat-card-label">Books</div>
     </div>
     {{ end }}
-    {{ with index $normalizedCounts "award" }}
+    {{ with $countScratch.Get "award" }}
     <div class="stat-card">
         <div class="stat-card-number">{{ . }}</div>
         <div class="stat-card-label">Awards</div>
     </div>
     {{ end }}
-    {{ with index $normalizedCounts "article" }}
+    {{ with $countScratch.Get "article" }}
     <div class="stat-card">
         <div class="stat-card-number">{{ . }}</div>
         <div class="stat-card-label">Articles</div>

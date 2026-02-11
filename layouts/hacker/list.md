@@ -16,25 +16,16 @@
     {{- break -}}
   {{- end -}}
 {{- end -}}
-{{- /* --- Stats Computation --- */ -}}
-{{- $categoryCounts := dict -}}
+{{- /* --- Stats Computation (using Scratch.Add for reliable counting) --- */ -}}
+{{- $countScratch := newScratch -}}
 {{- range .Pages -}}
   {{- $category := .Params.type -}}
   {{- if $category -}}
-    {{- $categoryCounts = merge $categoryCounts (dict $category (add (index $categoryCounts $category | default 0) 1)) -}}
-  {{- end -}}
-{{- end -}}
-{{- $normalizedCounts := dict -}}
-{{- range $category, $count := $categoryCounts -}}
-  {{- $normalizedType := $category | lower | strings.TrimSpace -}}
-  {{- if eq $normalizedType "tool demo" -}}
-    {{- $normalizedType = "tooldemo" -}}
-  {{- end -}}
-  {{- if not (isset $normalizedCounts $normalizedType) -}}
-    {{- $normalizedCounts = merge $normalizedCounts (dict $normalizedType $count) -}}
-  {{- else -}}
-    {{- $existingCount := index $normalizedCounts $normalizedType -}}
-    {{- $normalizedCounts = merge $normalizedCounts (dict $normalizedType (add $existingCount $count)) -}}
+    {{- $normalizedType := $category | lower | strings.TrimSpace -}}
+    {{- if eq $normalizedType "tool demo" -}}
+      {{- $normalizedType = "tooldemo" -}}
+    {{- end -}}
+    {{- $countScratch.Add $normalizedType 1 -}}
   {{- end -}}
 {{- end -}}
 # {{ .Title }}
@@ -47,21 +38,21 @@
 {{ end }}{{ if .Params.github }}GitHub: {{ .Params.github }}
 {{ end }}
 ## Stats
-{{ with index $normalizedCounts "talk" }}
+{{ with $countScratch.Get "talk" }}
 - Talks: {{ . }}
-{{ end }}{{ with index $normalizedCounts "tooldemo" -}}
+{{ end }}{{ with $countScratch.Get "tooldemo" -}}
 - Tool Demos: {{ . }}
-{{ end }}{{ with index $normalizedCounts "workshop" -}}
+{{ end }}{{ with $countScratch.Get "workshop" -}}
 - Workshops: {{ . }}
-{{ end }}{{ with index $normalizedCounts "panel" -}}
+{{ end }}{{ with $countScratch.Get "panel" -}}
 - Panels: {{ . }}
-{{ end }}{{ with index $normalizedCounts "keynote" -}}
+{{ end }}{{ with $countScratch.Get "keynote" -}}
 - Keynotes: {{ . }}
-{{ end }}{{ with index $normalizedCounts "book" -}}
+{{ end }}{{ with $countScratch.Get "book" -}}
 - Books: {{ . }}
-{{ end }}{{ with index $normalizedCounts "award" -}}
+{{ end }}{{ with $countScratch.Get "award" -}}
 - Awards: {{ . }}
-{{ end }}{{ with index $normalizedCounts "article" -}}
+{{ end }}{{ with $countScratch.Get "article" -}}
 - Articles: {{ . }}
 {{ end }}
 {{- if .Pages }}

@@ -1,12 +1,134 @@
-<!DOCTYPE html>
-<html lang="{{ .Site.Language.Lang }}">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url={{ "/" | absURL }}">
-  <link rel="canonical" href="{{ "/" | absURL }}">
-  <title>Redirecting to Home</title>
-</head>
-<body>
-  <p>Redirecting to <a href="{{ "/" | absURL }}">home page</a>...</p>
-</body>
-</html>
+{{ partial "header.html" . }}
+
+{{- /* Build sorted hacker list with counts by type */ -}}
+{{- $hackerList := slice -}}
+{{- $typeOrder := slice "talk" "tooldemo" "workshop" "panel" "keynote" "book" "award" "article" -}}
+{{- $typeLabels := dict "talk" "Talks" "tooldemo" "Tool Demos" "workshop" "Workshops" "panel" "Panels" "keynote" "Keynotes" "book" "Books" "award" "Awards" "article" "Articles" -}}
+{{- range $name, $taxonomy := $.Site.Taxonomies.hacker -}}
+  {{- $s := newScratch -}}
+  {{- range $taxonomy.Pages -}}
+    {{- $rawType := .Params.type | default "talk" | lower | strings.TrimSpace -}}
+    {{- $t := $rawType -}}
+    {{- if eq $t "tool demo" -}}
+      {{- $t = "tooldemo" -}}
+    {{- end -}}
+    {{- $s.Add $t 1 -}}
+  {{- end -}}
+  {{- $counts := dict
+    "talk" ($s.Get "talk" | default 0)
+    "tooldemo" ($s.Get "tooldemo" | default 0)
+    "workshop" ($s.Get "workshop" | default 0)
+    "panel" ($s.Get "panel" | default 0)
+    "keynote" ($s.Get "keynote" | default 0)
+    "book" ($s.Get "book" | default 0)
+    "award" ($s.Get "award" | default 0)
+    "article" ($s.Get "article" | default 0)
+  -}}
+  {{- $title := "" -}}
+  {{- with $taxonomy.Page -}}
+    {{- $title = .Title -}}
+  {{- else -}}
+    {{- $title = $name | humanize | title -}}
+  {{- end -}}
+  {{- $hackerList = $hackerList | append (dict "name" $name "taxonomy" $taxonomy "counts" $counts "title" $title) -}}
+{{- end -}}
+{{- $hackerList = sort $hackerList "title" "asc" -}}
+{{- $totalHackers := len $hackerList -}}
+
+{{- /* Letters that have at least one hacker */ -}}
+{{- $lettersWithHackers := slice -}}
+{{- range $hackerList -}}
+  {{- $letter := substr .title 0 1 | upper -}}
+  {{- if and $letter (not (in $lettersWithHackers $letter)) -}}
+    {{- $lettersWithHackers = $lettersWithHackers | append $letter -}}
+  {{- end -}}
+{{- end -}}
+
+<div class="hacker-directory">
+  <h1>{{ .Title | markdownify }}</h1>
+  <p class="hacker-directory-total"><strong>{{ $totalHackers }}</strong> hackers</p>
+
+  {{- /* A–Z quick nav */ -}}
+  <nav class="alpha-nav" aria-label="Jump to letter">
+    {{- $letters := split "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "" -}}
+    {{- range $letters -}}
+      {{- $letter := . -}}
+      {{- $hasHackers := in $lettersWithHackers $letter -}}
+      {{- if $hasHackers -}}
+        <a href="#letter-{{ $letter }}">{{ $letter }}</a>
+      {{- else -}}
+        <span class="alpha-nav-empty" aria-hidden="true">{{ $letter }}</span>
+      {{- end -}}
+    {{- end -}}
+  </nav>
+
+  {{- /* Letter sections */ -}}
+  {{- $letters := split "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "" -}}
+  {{- range $letters -}}
+    {{- $letter := . -}}
+    {{- $inLetter := slice -}}
+    {{- range $hackerList -}}
+      {{- if eq (substr .title 0 1 | upper) $letter -}}
+        {{- $inLetter = $inLetter | append . -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if gt (len $inLetter) 0 -}}
+      <section class="letter-section" id="letter-{{ $letter }}">
+        <h2 class="letter-heading">{{ $letter }}</h2>
+        <div class="hacker-directory-grid">
+          {{- range $inLetter -}}
+            {{- $hackerName := .name -}}
+            {{- $displayTitle := .title -}}
+            {{- $counts := .counts -}}
+            {{- $extensions := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
+            {{- $photopath := "" -}}
+            {{- range $ext := $extensions -}}
+              {{- with resources.Get (path.Join "hacker" (printf "%s%s" $hackerName $ext)) -}}
+                {{- $img := . -}}
+                {{- if ne $ext ".svg" -}}
+                  {{- with try (.Fill "80x80 Center q85") -}}
+                    {{- if not .Err -}}
+                      {{- $img = .Value -}}
+                    {{- end -}}
+                  {{- end -}}
+                {{- end -}}
+                {{- $photopath = $img.RelPermalink -}}
+                {{- break -}}
+              {{- end -}}
+            {{- end -}}
+
+            <a href="/hacker/{{ $hackerName | urlize }}/" class="hacker-card">
+              <div class="hacker-card-photo-wrap">
+                {{- if $photopath -}}
+                  <img class="hacker-card-photo" src="{{ $photopath }}" alt="" loading="lazy" width="80" height="80">
+                {{- else -}}
+                  <span class="hacker-card-placeholder" aria-hidden="true">{{ substr $displayTitle 0 1 | upper }}</span>
+                {{- end -}}
+              </div>
+              <div class="hacker-card-info">
+                <span class="hacker-card-name">{{ $displayTitle }}</span>
+                <span class="hacker-card-stats">
+                  {{- $statParts := slice -}}
+                  {{- range $typeKey := $typeOrder -}}
+                    {{- $label := index $typeLabels $typeKey -}}
+                    {{- $n := index $counts $typeKey | default 0 -}}
+                    {{- if and $label (gt $n 0) -}}
+                      {{- $statParts = $statParts | append (printf "%d %s" $n $label) -}}
+                    {{- end -}}
+                  {{- end -}}
+                  {{- if gt (len $statParts) 0 -}}
+                    {{- delimit $statParts " · " -}}
+                  {{- else -}}
+                    —
+                  {{- end -}}
+                </span>
+              </div>
+            </a>
+          {{- end -}}
+        </div>
+      </section>
+    {{- end -}}
+  {{- end -}}
+</div>
+
+{{ partial "footer.html" . }}

@@ -439,7 +439,11 @@
     {{- end -}}
     {{- $moreHackerCount := 0 -}}
     {{- if $page.Params.morehackers -}}
-        {{- $moreHackerCount = len $page.Params.morehackers -}}
+        {{- range $page.Params.morehackers -}}
+            {{- if ne (trim . " ") "" -}}
+                {{- $moreHackerCount = add $moreHackerCount 1 -}}
+            {{- end -}}
+        {{- end -}}
     {{- end -}}
     {{- $totalHackers := add $hackerCount $moreHackerCount -}}
     
@@ -461,7 +465,9 @@
                 <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
             {{- end -}}
             {{- range $page.Params.morehackers -}}
-                , <u>{{ . | humanize | title }}</u>
+                {{- if ne (trim . " ") "" -}}
+                    , <u>{{ . | humanize | title }}</u>
+                {{- end -}}
             {{- end -}}
         </span>
     {{- end -}}
@@ -478,7 +484,11 @@
     {{- end -}}
     {{- $moreHackerCount := 0 -}}
     {{- if $page.Params.morehackers -}}
-        {{- $moreHackerCount = len $page.Params.morehackers -}}
+        {{- range $page.Params.morehackers -}}
+            {{- if ne (trim . " ") "" -}}
+                {{- $moreHackerCount = add $moreHackerCount 1 -}}
+            {{- end -}}
+        {{- end -}}
     {{- end -}}
     {{- $totalHackers := add $hackerCount $moreHackerCount -}}
     
@@ -499,7 +509,9 @@
                 <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
             {{- end -}}
             {{- range $page.Params.morehackers -}}
-                , <u>{{ . | humanize | title }}</u>
+                {{- if ne (trim . " ") "" -}}
+                    , <u>{{ . | humanize | title }}</u>
+                {{- end -}}
             {{- end -}}
         </span>
     {{- end -}}
