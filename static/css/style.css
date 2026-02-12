@@ -4729,6 +4729,8 @@ body.dark .profile-header .share-box .share-box-icon-img {
 .hacker-directory {
   max-width: var(--max-width);
   margin: 0 auto;
+  padding: 0 var(--spacing-sm);
+  box-sizing: border-box;
 }
 
 .hacker-directory-total {
@@ -4803,6 +4805,8 @@ body.dark .profile-header .share-box .share-box-icon-img {
 
 .letter-section {
   margin-bottom: var(--spacing-2xl);
+  /* Leave room for sticky header + A-Z nav when scrolling to #letter-X */
+  scroll-margin-top: calc(var(--header-height, 70px) + 4rem);
 }
 
 .letter-section:target .letter-heading {
@@ -4897,34 +4901,100 @@ body.dark .profile-header .share-box .share-box-icon-img {
 }
 
 @media (max-width: 768px) {
+  .hacker-directory {
+    padding: 0 var(--spacing-md);
+  }
+
+  /* A–Z nav: horizontal scroll so it doesn’t wrap and eat the screen */
+  .alpha-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: var(--spacing-sm);
+    margin-left: calc(-1 * var(--spacing-md));
+    margin-right: calc(-1 * var(--spacing-md));
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .alpha-nav a,
+  .alpha-nav-empty {
+    flex-shrink: 0;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.9rem;
+  }
+
+  /* Extra scroll margin on mobile for sticky header + nav row */
+  .letter-section {
+    scroll-margin-top: calc(var(--header-height, 70px) + 3.5rem);
+  }
+
+  /* Single column on phones and narrow viewports (≤768px) */
   .hacker-directory-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .hacker-card {
+    min-height: 0;
+    padding: var(--spacing-md);
   }
 }
 
 @media (max-width: 480px) {
+  .hacker-directory {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .alpha-nav {
+    margin-left: calc(-1 * var(--spacing-sm));
+    margin-right: calc(-1 * var(--spacing-sm));
+  }
+
+  .alpha-nav a,
+  .alpha-nav-empty {
+    min-width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .letter-heading {
+    font-size: 1.25rem;
+  }
+
   .hacker-directory-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
   }
 
   .hacker-card {
-    min-height: 88px;
-    padding: var(--spacing-sm);
+    min-height: 80px;
+    padding: var(--spacing-md);
     gap: var(--spacing-sm);
   }
 
   .hacker-card-photo-wrap {
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
   }
 
   .hacker-card-photo {
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
   }
 
   .hacker-card-placeholder {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
+  }
+
+  .hacker-card-name {
+    font-size: 0.95rem;
+  }
+
+  .hacker-card-stats {
+    font-size: 0.75rem;
   }
 }
