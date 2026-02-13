@@ -41,7 +41,7 @@
       {{- end -}}
       {{- $conf := .Params.conference | default "" | humanize | title -}}
       {{- if and (gt (len $speakers) 0) (ne $conf "") -}}
-        {{- $seoDescription = printf "%s - %s by %s at %s (%d)." ($entryType | title) .Title (delimit $speakers ", ") $conf (.Params.year | default .Date.Year) -}}
+        {{- $seoDescription = printf "%s - %s by %s at %s (%d)." ($entryType | title) .Title (delimit $speakers ", ") $conf .Date.Year -}}
       {{- else if gt (len $speakers) 0 -}}
         {{- $seoDescription = printf "%s by %s - Security research presented on Hacking Archives of India." .Title (delimit $speakers ", ") -}}
       {{- end -}}
