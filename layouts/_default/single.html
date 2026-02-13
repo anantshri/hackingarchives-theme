@@ -3,7 +3,6 @@
 <!-- Entry Header -->
 <div class="entry-header">
     <div class="entry-actions">
-        {{ partial "share.html" . }}
         {{ $params := .Site.Params.helpwanted }}
         {{ $hasForm := and $params $params.form_url }}
         {{ $correctLink := "/contribute/" }}
@@ -16,6 +15,7 @@
         <a href="{{ $correctLink }}" class="entry-correct-link" target="_blank" rel="noopener" title="Suggest a correction or update">
             <img src="/fontawesome/edit.svg" alt="" class="entry-correct-icon">
         </a>
+        {{ partial "share.html" . }}
     </div>
 
     <!-- Award: trophy + link to award page (like tool links) -->
