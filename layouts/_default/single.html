@@ -86,16 +86,22 @@
 {{ $hasForm := and $params $params.form_url }}
 {{ $entryType := .Params.type | default "" | lower | strings.TrimSpace }}
 {{ $isPanel := eq $entryType "panel" }}
+{{ $isArsenal := or (eq $entryType "tool demo") (eq $entryType "arsenal") }}
 {{ $needHelp := false }}
-{{ if $isPanel }}
+{{ if $isArsenal }}
+  {{ if not .Params.source }}{{ $needHelp = true }}{{ end }}
+{{ else if $isPanel }}
   {{ if not .Params.video }}{{ $needHelp = true }}{{ end }}
 {{ else }}
   {{ if and (not .Params.presentation) (not .Params.video) }}{{ $needHelp = true }}{{ end }}
 {{ end }}
 {{ if $needHelp }}
   {{ $whatismissing := "" }}
-  {{ if not $isPanel }}{{ if not .Params.presentation }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
-  {{ if not .Params.video }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Video" $whatismissing }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
+  {{ if not $isArsenal }}
+    {{ if not $isPanel }}{{ if not .Params.presentation }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
+    {{ if not .Params.video }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Video" $whatismissing }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
+  {{ end }}
+  {{ if $isArsenal }}{{ if not .Params.source }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Source Code" $whatismissing }}{{ else }}{{ $whatismissing = "Source Code" }}{{ end }}{{ end }}{{ end }}
   {{ if not .Params.conf_link }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Conference Link" $whatismissing }}{{ else }}{{ $whatismissing = "Conference Link" }}{{ end }}{{ end }}
   {{ $submitLink := "/contribute/#details-needed" }}
   {{ if $hasForm }}
