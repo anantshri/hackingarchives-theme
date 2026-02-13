@@ -2,8 +2,21 @@
 
 <!-- Entry Header -->
 <div class="entry-header">
-    {{ partial "share.html" . }}
-
+    <div class="entry-actions">
+        {{ partial "share.html" . }}
+        {{ $params := .Site.Params.helpwanted }}
+        {{ $hasForm := and $params $params.form_url }}
+        {{ $correctLink := "/contribute/" }}
+        {{ if $hasForm }}
+          {{ $correctLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s"
+              $params.form_url $params.field_title (.Title | urlquery)
+              $params.field_url (.Permalink | urlquery)
+              $params.field_missing ("Correction / Update" | urlquery) }}
+        {{ end }}
+        <a href="{{ $correctLink }}" class="entry-correct-link" target="_blank" rel="noopener" title="Suggest a correction or update">
+            <img src="/fontawesome/edit.svg" alt="" class="entry-correct-icon">
+        </a>
+    </div>
 
     <!-- Award: trophy + link to award page (like tool links) -->
     {{ $entryType := .Params.type | default "" | lower | strings.TrimSpace }}
@@ -68,6 +81,38 @@
 
   </div>
 </div>
+
+{{ $params := .Site.Params.helpwanted }}
+{{ $hasForm := and $params $params.form_url }}
+{{ $entryType := .Params.type | default "" | lower | strings.TrimSpace }}
+{{ $isPanel := eq $entryType "panel" }}
+{{ $needHelp := false }}
+{{ if $isPanel }}
+  {{ if not .Params.video }}{{ $needHelp = true }}{{ end }}
+{{ else }}
+  {{ if and (not .Params.presentation) (not .Params.video) }}{{ $needHelp = true }}{{ end }}
+{{ end }}
+{{ if $needHelp }}
+  {{ $whatismissing := "" }}
+  {{ if not $isPanel }}{{ if not .Params.presentation }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
+  {{ if not .Params.video }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Video" $whatismissing }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
+  {{ if not .Params.conf_link }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Conference Link" $whatismissing }}{{ else }}{{ $whatismissing = "Conference Link" }}{{ end }}{{ end }}
+  {{ $submitLink := "/contribute/#details-needed" }}
+  {{ if $hasForm }}
+    {{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s"
+        $params.form_url $params.field_title (.Title | urlquery)
+        $params.field_url (.Permalink | urlquery)
+        $params.field_missing ($whatismissing | urlquery) }}
+  {{ end }}
+  <div class="entry-needhelp">
+    <img src="/fontawesome/info.svg" alt="" class="entry-needhelp-icon">
+    <div class="entry-needhelp-text">
+      <strong>We need help to complete this entry!</strong>
+      <span>Missing: {{ $whatismissing }}</span>
+    </div>
+    <a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a>
+  </div>
+{{ end }}
 
 <div class="entry-content">
   <!-- Tags (Experimental) -->

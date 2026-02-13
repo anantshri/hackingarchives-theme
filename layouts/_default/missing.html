@@ -157,12 +157,15 @@
 {{ range (where $pages "Type" "talk") }}
   {{ $isimportant := "N" }}
   {{ $whatismissing := ""}}
+  {{ $isPanel := eq (.Params.type | default "" | lower | strings.TrimSpace) "panel" }}
 
-  {{ if (not .Params.presentation) }}
-    {{ if $whatismissing }}
-      {{ $whatismissing = $whatismissing | printf "%s, presentation" }}
-    {{ else }}
-      {{ $whatismissing = "presentation" }}
+  {{ if not $isPanel }}
+    {{ if (not .Params.presentation) }}
+      {{ if $whatismissing }}
+        {{ $whatismissing = $whatismissing | printf "%s, presentation" }}
+      {{ else }}
+        {{ $whatismissing = "presentation" }}
+      {{ end }}
     {{ end }}
   {{ end }}
 
@@ -182,13 +185,19 @@
     {{ end }}
   {{ end }}
 
-  {{ if eq $aggressive_check "Yes" }}
-    {{ if not .Params.presentation }}
+  {{ if $isPanel }}
+    {{ if not .Params.video }}
       {{ $isimportant = "Y" }}
     {{ end }}
   {{ else }}
-    {{ if and (not .Params.presentation) (not .Params.video) }}
-      {{ $isimportant = "Y" }}
+    {{ if eq $aggressive_check "Yes" }}
+      {{ if not .Params.presentation }}
+        {{ $isimportant = "Y" }}
+      {{ end }}
+    {{ else }}
+      {{ if and (not .Params.presentation) (not .Params.video) }}
+        {{ $isimportant = "Y" }}
+      {{ end }}
     {{ end }}
   {{ end }}
 

@@ -12,10 +12,15 @@
 
 {{ range (where $pages "Type" "talk") }}
   {{ $need := false }}
-  {{ if eq $aggressive_check "Yes" }}
-    {{ if not .Params.presentation }}{{ $need = true }}{{ end }}
+  {{ $isPanel := eq (.Params.type | default "" | lower | strings.TrimSpace) "panel" }}
+  {{ if $isPanel }}
+    {{ if not .Params.video }}{{ $need = true }}{{ end }}
   {{ else }}
-    {{ if and (not .Params.presentation) (not .Params.video) }}{{ $need = true }}{{ end }}
+    {{ if eq $aggressive_check "Yes" }}
+      {{ if not .Params.presentation }}{{ $need = true }}{{ end }}
+    {{ else }}
+      {{ if and (not .Params.presentation) (not .Params.video) }}{{ $need = true }}{{ end }}
+    {{ end }}
   {{ end }}
   {{ if $need }}{{ $talksCount = add $talksCount 1 }}{{ end }}
 {{ end }}
@@ -79,10 +84,15 @@
     {{ range (where $pages "Type" "talk") }}
       {{ $isimportant := "N" }}
       {{ $whatismissing := ""}}
-      {{ if (not .Params.presentation) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, presentation" }}{{ else }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
+      {{ $isPanel := eq (.Params.type | default "" | lower | strings.TrimSpace) "panel" }}
+      {{ if not $isPanel }}{{ if (not .Params.presentation) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, presentation" }}{{ else }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}{{ end }}
       {{ if (not .Params.conf_link) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Conference Link" }}{{ else }}{{ $whatismissing = "Conference Link" }}{{ end }}{{ end }}
       {{ if (not .Params.video) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Video" }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
-      {{ if eq $aggressive_check "Yes" }}{{ if not .Params.presentation }}{{ $isimportant = "Y" }}{{ end }}{{ else }}{{ if and (not .Params.presentation) (not .Params.video) }}{{ $isimportant = "Y" }}{{ end }}{{ end }}
+      {{ if $isPanel }}
+        {{ if not .Params.video }}{{ $isimportant = "Y" }}{{ end }}
+      {{ else }}
+        {{ if eq $aggressive_check "Yes" }}{{ if not .Params.presentation }}{{ $isimportant = "Y" }}{{ end }}{{ else }}{{ if and (not .Params.presentation) (not .Params.video) }}{{ $isimportant = "Y" }}{{ end }}{{ end }}
+      {{ end }}
 
       {{ if eq $isimportant "Y" }}
         {{ $submitLink := "/contribute/#details-needed" }}

@@ -4437,6 +4437,88 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
     z-index: 100;
 }
 
+/* Entry header: share + correction button wrapper */
+.entry-actions {
+    position: absolute;
+    top: var(--spacing-md, 1rem);
+    right: var(--spacing-md, 1rem);
+    z-index: 100;
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.entry-actions .share-box {
+    position: static;
+}
+
+.entry-correct-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-md, 0.5rem);
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    flex-shrink: 0;
+}
+
+.entry-correct-link:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.entry-correct-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    opacity: 0.95;
+}
+
+.entry-header .entry-correct-icon {
+    filter: brightness(0) invert(1);
+}
+
+/* Entry need-help banner (below header when video + presentation missing) */
+.entry-needhelp {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin: 0 var(--spacing-xl) var(--spacing-2xl);
+    background: var(--color-background-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--color-link);
+}
+
+.entry-needhelp-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+    opacity: 0.9;
+}
+
+.entry-needhelp-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.entry-needhelp-text strong {
+    color: var(--color-text);
+}
+
+.entry-needhelp-text span {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+}
+
 /* Clickable share trigger (summary) - no disclosure triangle */
 .share-box-trigger {
     display: inline-flex;
@@ -4545,9 +4627,25 @@ body:has(.theme-toggle-checkbox:checked) .entry-header {
         top: 0.5rem;
         right: 0.5rem;
     }
+    .entry-actions {
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+    .entry-needhelp {
+        margin-left: var(--spacing-md);
+        margin-right: var(--spacing-md);
+    }
     .share-box-trigger {
         width: 2.35rem;
         height: 2.35rem;
+    }
+    .entry-correct-link {
+        width: 2.35rem;
+        height: 2.35rem;
+    }
+    .entry-correct-icon {
+        width: 1.25rem;
+        height: 1.25rem;
     }
     .share-box .share-box-icon-img {
         width: 1.25rem;
@@ -4658,6 +4756,14 @@ body:has(.theme-toggle-checkbox:checked) .profile-header .share-box .share-box-i
     .entry-header .share-box .share-icon-text {
         color: var(--color-text, #c9d1c5);
     }
+    .entry-header .entry-correct-link {
+        background-color: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .entry-header .entry-correct-link:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
 }
 
 body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-box-trigger {
@@ -4691,6 +4797,16 @@ body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-icon {
 
 body:has(.theme-toggle-checkbox:checked) .entry-header .share-box .share-icon-text {
     color: var(--color-text, #c9d1c5);
+}
+
+body:has(.theme-toggle-checkbox:checked) .entry-header .entry-correct-link {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+body:has(.theme-toggle-checkbox:checked) .entry-header .entry-correct-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Legacy body.dark support */
