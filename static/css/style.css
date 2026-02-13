@@ -5000,7 +5000,24 @@ body.dark .profile-header .share-box .share-box-icon-img {
 }
 
 /* ========================================
-   Help Wanted page
+   Contribute page (includes Details needed)
+   ======================================== */
+.contribute-intro {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.contribute-details-needed {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.contribute-details-needed .helpwanted-section {
+  margin-bottom: var(--spacing-2xl);
+}
+
+/* ========================================
+   Help Wanted / Details needed blocks
    ======================================== */
 .helpwanted-hero {
   max-width: var(--max-width);

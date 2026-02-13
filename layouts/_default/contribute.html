@@ -1,0 +1,187 @@
+{{ partial "header.html" . }}
+
+{{ $aggressive_check := "No" }}
+{{ $pages := .Site.RegularPages }}
+{{ $params := .Site.Params.helpwanted }}
+{{ $hasForm := and $params $params.form_url }}
+
+{{/* Precompute counts for stats (public crowdsourcing only) */}}
+{{ $talksCount := 0 }}
+{{ $toolDemosCount := 0 }}
+{{ $toolContentCount := 0 }}
+
+{{ range (where $pages "Type" "talk") }}
+  {{ $need := false }}
+  {{ if eq $aggressive_check "Yes" }}
+    {{ if not .Params.presentation }}{{ $need = true }}{{ end }}
+  {{ else }}
+    {{ if and (not .Params.presentation) (not .Params.video) }}{{ $need = true }}{{ end }}
+  {{ end }}
+  {{ if $need }}{{ $talksCount = add $talksCount 1 }}{{ end }}
+{{ end }}
+
+{{ range (where $pages "Type" "Tool Demo") }}
+  {{ if not .Params.source }}{{ $toolDemosCount = add $toolDemosCount 1 }}{{ end }}
+{{ end }}
+
+{{ with .Site.GetPage "section" "tool" }}
+  {{ range .Pages }}
+    {{ $content := .Content | replaceRE "\\s+" "" }}
+    {{ $has_links := or .Params.github .Params.gitlab .Params.bitbucket .Params.download .Params.home }}
+    {{ if or (eq $content "") (not $has_links) }}
+      {{ $toolContentCount = add $toolContentCount 1 }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1>{{ .Title | markdownify }}</h1>
+  {{ if .Description }}
+  <p class="page-description">{{ .Description }}</p>
+  {{ end }}
+</div>
+
+<!-- Intro (from page content) -->
+<div class="page-content contribute-intro">
+  {{ .Content }}
+</div>
+
+<!-- Details needed: missing entries (help-wanted content) -->
+<section class="contribute-details-needed" id="details-needed">
+  <h2>Details needed</h2>
+  <div class="helpwanted-hero">
+    <p class="helpwanted-intro">Many entries are missing links to videos, slides, or source code. Pick an entry below and use <strong>I can help!</strong> to send us the data. We’ll credit you on our <a href="/about/#supporters">Supporters</a> list.</p>
+    <div class="helpwanted-stats">
+    <div class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $talksCount }}</span> talks need video/slides</div>
+    <div class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $toolDemosCount }}</span> tool demos need source</div>
+    <div class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $toolContentCount }}</span> tools need content/links</div>
+    </div>
+  </div>
+
+  <nav class="helpwanted-nav" aria-label="Details needed sections">
+    <a href="#presentation-details">Talks &amp; demos</a>
+    <a href="#tools">Tools</a>
+  </nav>
+
+  <!-- Talks -->
+  <div class="helpwanted-section" id="presentation-details">
+    <h3 id="talks">Talks missing video or slides <span class="helpwanted-count">({{ $talksCount }})</span></h3>
+    {{ if gt $talksCount 0 }}
+    <details open class="helpwanted-details">
+      <summary>Show list</summary>
+      <div class="helpwanted-table-wrap">
+        <table class="helpwanted-table">
+          <thead>
+            <tr><th>Entry</th><th>Hacker</th><th>Missing</th><th></th></tr>
+          </thead>
+          <tbody>
+    {{ range (where $pages "Type" "talk") }}
+      {{ $isimportant := "N" }}
+      {{ $whatismissing := ""}}
+      {{ if (not .Params.presentation) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, presentation" }}{{ else }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
+      {{ if (not .Params.conf_link) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Conference Link" }}{{ else }}{{ $whatismissing = "Conference Link" }}{{ end }}{{ end }}
+      {{ if (not .Params.video) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Video" }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
+      {{ if eq $aggressive_check "Yes" }}{{ if not .Params.presentation }}{{ $isimportant = "Y" }}{{ end }}{{ else }}{{ if and (not .Params.presentation) (not .Params.video) }}{{ $isimportant = "Y" }}{{ end }}{{ end }}
+
+      {{ if eq $isimportant "Y" }}
+        {{ $submitLink := "/contribute/#details-needed" }}
+        {{ if $hasForm }}
+          {{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s" $params.form_url $params.field_title (.Title | urlquery) $params.field_url (.Permalink | urlquery) $params.field_missing ($whatismissing | urlquery) }}
+        {{ end }}
+            <tr>
+              <td><a href="{{ .Permalink }}">{{ .Date.Format "2006/01/02" }} · {{ .Params.conference | humanize | title }} · {{ .Title }}</a></td>
+              <td>{{ range $i, $h := .Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end }}</td>
+              <td><span class="helpwanted-badges">{{ $whatismissing }}</span></td>
+              <td><a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a></td>
+            </tr>
+      {{ end }}
+    {{ end }}
+          </tbody>
+        </table>
+      </div>
+    </details>
+    {{ else }}
+    <p class="helpwanted-empty">None right now. Thanks to everyone who contributed!</p>
+    {{ end }}
+
+    <h3 id="tool-demos">Tool demos missing source <span class="helpwanted-count">({{ $toolDemosCount }})</span></h3>
+    {{ if gt $toolDemosCount 0 }}
+    <details class="helpwanted-details">
+      <summary>Show list</summary>
+      <div class="helpwanted-table-wrap">
+        <table class="helpwanted-table">
+          <thead>
+            <tr><th>Entry</th><th>Hacker</th><th>Missing</th><th></th></tr>
+          </thead>
+          <tbody>
+    {{ range (where $pages "Type" "Tool Demo") }}
+      {{ $isimportant := "N" }}
+      {{ $whatismissing := ""}}
+      {{ if (not .Params.presentation) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, presentation" }}{{ else }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
+      {{ if (not .Params.conf_link) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Conference Link" }}{{ else }}{{ $whatismissing = "Conference Link" }}{{ end }}{{ end }}
+      {{ if (not .Params.video) }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Video" }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
+      {{ if not .Params.source }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Source Code" }}{{ else }}{{ $whatismissing = "Source Code" }}{{ end }}{{ $isimportant = "Y" }}{{ end }}
+
+      {{ if eq $isimportant "Y" }}
+        {{ $submitLink := "/contribute/#details-needed" }}
+        {{ if $hasForm }}{{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s" $params.form_url $params.field_title (.Title | urlquery) $params.field_url (.Permalink | urlquery) $params.field_missing ($whatismissing | urlquery) }}{{ end }}
+            <tr>
+              <td><a href="{{ .Permalink }}">{{ .Date.Format "2006/01/02" }} · {{ .Params.conference | humanize | title }} · {{ .Title }}</a></td>
+              <td>{{ range $i, $h := .Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end }}</td>
+              <td><span class="helpwanted-badges">{{ $whatismissing }}</span></td>
+              <td><a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a></td>
+            </tr>
+      {{ end }}
+    {{ end }}
+          </tbody>
+        </table>
+      </div>
+    </details>
+    {{ else }}
+    <p class="helpwanted-empty">None right now.</p>
+    {{ end }}
+  </div>
+
+  <!-- Tools -->
+  <div class="helpwanted-section" id="tools">
+    <h3>Tools missing content or links <span class="helpwanted-count">({{ $toolContentCount }})</span></h3>
+    {{ if gt $toolContentCount 0 }}
+    <details class="helpwanted-details">
+      <summary>Show list</summary>
+      <div class="helpwanted-table-wrap">
+        <table class="helpwanted-table">
+          <thead>
+            <tr><th>Tool</th><th>Hacker</th><th>Missing</th><th></th></tr>
+          </thead>
+          <tbody>
+    {{ with .Site.GetPage "section" "tool" }}
+      {{ range .Pages }}
+        {{ $whatismissing := ""}}
+        {{ $content := .Content | replaceRE "\\s+" "" }}
+        {{ if eq $content "" }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Content" }}{{ else }}{{ $whatismissing = "Content" }}{{ end }}{{ end }}
+        {{ $has_links := or .Params.github .Params.gitlab .Params.bitbucket .Params.download .Params.home }}
+        {{ if not $has_links }}{{ if $whatismissing }}{{ $whatismissing = $whatismissing | printf "%s, Links" }}{{ else }}{{ $whatismissing = "Links (github/gitlab/download/home)" }}{{ end }}{{ end }}
+        {{ if or (eq $content "") (not $has_links) }}
+          {{ $submitLink := "/contribute/#details-needed" }}
+          {{ if $hasForm }}{{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s" $params.form_url $params.field_title (.Title | urlquery) $params.field_url (.Permalink | urlquery) $params.field_missing ($whatismissing | urlquery) }}{{ end }}
+            <tr>
+              <td><a href="{{ .Permalink }}">{{ .Title }}</a></td>
+              <td>{{ range $i, $h := .Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end }}</td>
+              <td><span class="helpwanted-badges">{{ $whatismissing }}</span></td>
+              <td><a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a></td>
+            </tr>
+        {{ end }}
+      {{ end }}
+    {{ end }}
+          </tbody>
+        </table>
+      </div>
+    </details>
+    {{ else }}
+    <p class="helpwanted-empty">None right now.</p>
+    {{ end }}
+  </div>
+</section>
+
+{{ partial "footer.html" . }}
