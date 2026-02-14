@@ -85,15 +85,18 @@
 {{ $params := .Site.Params.helpwanted }}
 {{ $hasForm := and $params $params.form_url }}
 {{ $entryType := .Params.type | default "" | lower | strings.TrimSpace }}
+{{ $isEntry := or (eq $entryType "talk") (eq $entryType "workshop") (eq $entryType "arsenal") (eq $entryType "tool demo") (eq $entryType "panel") (eq $entryType "keynote") (eq $entryType "award") }}
 {{ $isPanel := eq $entryType "panel" }}
 {{ $isArsenal := or (eq $entryType "tool demo") (eq $entryType "arsenal") }}
 {{ $needHelp := false }}
-{{ if $isArsenal }}
-  {{ if not .Params.source }}{{ $needHelp = true }}{{ end }}
-{{ else if $isPanel }}
-  {{ if not .Params.video }}{{ $needHelp = true }}{{ end }}
-{{ else }}
-  {{ if and (not .Params.presentation) (not .Params.video) }}{{ $needHelp = true }}{{ end }}
+{{ if $isEntry }}
+  {{ if $isArsenal }}
+    {{ if not .Params.source }}{{ $needHelp = true }}{{ end }}
+  {{ else if $isPanel }}
+    {{ if not .Params.video }}{{ $needHelp = true }}{{ end }}
+  {{ else }}
+    {{ if and (not .Params.presentation) (not .Params.video) }}{{ $needHelp = true }}{{ end }}
+  {{ end }}
 {{ end }}
 {{ if $needHelp }}
   {{ $whatismissing := "" }}
@@ -121,59 +124,55 @@
 {{ end }}
 
 <div class="entry-content">
-  <!-- Tags (Experimental) -->
-  {{ if $.Site.Params.experimental_mode }}
-    {{ if .Params.tag }}
-      {{ $hasValidTags := false }}
+  <!-- Tags -->
+  {{ if .Params.tag }}
+    {{ $hasValidTags := false }}
+    {{ range .Params.tag }}
+      {{ if and . (ne . "") }}
+        {{ $hasValidTags = true }}
+      {{ end }}
+    {{ end }}
+    {{ if $hasValidTags }}
+    <div class="entry-tags">
       {{ range .Params.tag }}
         {{ if and . (ne . "") }}
-          {{ $hasValidTags = true }}
+          <a href="/tag/{{ . }}" class="tag-link">#{{ . }}</a>
         {{ end }}
       {{ end }}
-      {{ if $hasValidTags }}
-      <div class="entry-tags">
-        {{ range .Params.tag }}
-          {{ if and . (ne . "") }}
-            <a href="/tag/{{ . }}" class="tag-link" target="_blank" rel="noreferrer noopener nofollow">#{{ . }}</a>
-          {{ end }}
+    </div>
+    {{ end }}
+  {{ end }}
+  
+  <!-- Focus Areas Section -->
+  {{ if .Params.tag }}
+    {{/* Load all focus area pages */}}
+    {{ $focusAreaPages := where $.Site.Pages "Section" "focus" }}
+    {{ $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil }}
+    
+    {{/* Find matching focus areas */}}
+    {{ $matchingFocusAreas := slice }}
+    {{ range $focusAreaPages }}
+      {{ $focusArea := . }}
+      {{ $hasMatch := false }}
+      {{ range $focusArea.Params.related_tags }}
+        {{ $relatedTag := . }}
+        {{ if in $.Params.tag $relatedTag }}
+          {{ $hasMatch = true }}
         {{ end }}
-      </div>
+      {{ end }}
+      {{ if $hasMatch }}
+        {{ $matchingFocusAreas = $matchingFocusAreas | append $focusArea }}
       {{ end }}
     {{ end }}
     
-    <!-- Focus Areas Section -->
-    {{ if .Params.tag }}
-      {{/* Load all focus area pages */}}
-      {{ $focusAreaPages := where $.Site.Pages "Section" "focus" }}
-      {{ $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil }}
-      
-      {{/* Find matching focus areas */}}
-      {{ $matchingFocusAreas := slice }}
-      {{ range $focusAreaPages }}
-        {{ $focusArea := . }}
-        {{ $hasMatch := false }}
-        {{ range $focusArea.Params.related_tags }}
-          {{ $relatedTag := . }}
-          {{ if in $.Params.tag $relatedTag }}
-            {{ $hasMatch = true }}
-          {{ end }}
-        {{ end }}
-        {{ if $hasMatch }}
-          {{ $matchingFocusAreas = $matchingFocusAreas | append $focusArea }}
-        {{ end }}
+    {{ if gt (len $matchingFocusAreas) 0 }}
+    <div class="entry-focus-areas">
+      <strong>Focus Areas:</strong>
+      {{ range $index, $fa := $matchingFocusAreas }}
+        {{- if gt $index 0 }}, {{ end -}}
+        <a href="{{ $fa.RelPermalink }}">{{ $fa.Params.icon }} {{ $fa.Title }}</a>
       {{ end }}
-      
-      {{ if gt (len $matchingFocusAreas) 0 }}
-      <div class="entry-focus-areas">
-        <strong>Focus Areas:</strong>
-        {{ range $index, $fa := $matchingFocusAreas }}
-          {{- if gt $index 0 }}, {{ end -}}
-          <a href="{{ $fa.RelPermalink }}">
-            <i class="fas fa-{{ $fa.Params.icon }}"></i> {{ $fa.Title }}
-          </a>
-        {{ end }}
-      </div>
-      {{ end }}
+    </div>
     {{ end }}
   {{ end }}
 
@@ -270,9 +269,12 @@
   {{ $file_path := printf ".md.txt.txt" | printf "%s%s" $newPath | printf "%s%s" "transcribe/summary_transcribe_" | printf "%s"}}
   {{ if fileExists $file_path }}
   <section class="info-box ai-summary-box">
-    <h3>AI Generated Summary <small><a href="/ai_experiements/">(may contain errors)</a></small></h3>
+    <h3>AI Generated Summary</h3>
     <div class="ai-summary-body">
       {{ readFile $file_path | markdownify }}
+    </div>
+    <div class="ai-summary-disclaimer">
+      <small><strong>Disclaimer:</strong> This summary was auto-generated from the video transcript using AI and may contain inaccuracies. It is intended as a quick overview — always refer to the original talk for authoritative content. <a href="/ai_experiements/">Learn more about our AI experiments</a>.</small>
     </div>
   </section>
   {{ end }}
