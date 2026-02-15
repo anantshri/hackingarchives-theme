@@ -47,15 +47,24 @@
     {{/* Find logo path - $name is the conference key */}}
     {{ $confName := $name }}
     {{ $photopath := "" }}
-    {{ range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" }}
+    {{ range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" }}
       {{ with resources.Get (path.Join "conference" (printf "%s%s" $confName $ext)) }}
         {{ $photopath = .RelPermalink }}
         {{ break }}
       {{ end }}
     {{ end }}
     
+    {{/* Look up logo_bg from the conference _index.md page */}}
+    {{ $logoBg := "" }}
+    {{ $confPage := $.Site.GetPage (printf "/conference/%s" $confName) }}
+    {{ with $confPage }}
+      {{ with .Params.logo_bg }}
+        {{ $logoBg = . }}
+      {{ end }}
+    {{ end }}
+    
     {{/* Add to conferences array */}}
-    {{ $conf := dict "name" $confName "title" ($name | humanize | title) "count" $count "firstDate" $firstDate "lastDate" $lastDate "timeframeDays" $timeframeDays "photopath" $photopath "url" (printf "/conference/%s/" ($name | urlize)) }}
+    {{ $conf := dict "name" $confName "title" ($name | humanize | title) "count" $count "firstDate" $firstDate "lastDate" $lastDate "timeframeDays" $timeframeDays "photopath" $photopath "logoBg" $logoBg "url" (printf "/conference/%s/" ($name | urlize)) }}
     {{ $conferences = $conferences | append $conf }}
     {{ end }}
 {{ end }}
@@ -69,7 +78,7 @@
     <a href="{{ .url }}" class="conference-card conference-card-link">
         <div class="conference-card-logo">
             {{ if .photopath }}
-                <img src="{{ .photopath }}" alt="{{ .title }}" class="conference-card-logo-img">
+                <img src="{{ .photopath }}" alt="{{ .title }}" class="conference-card-logo-img{{ with .logoBg }} logo-bg-{{ . }}{{ end }}">
             {{ else }}
                 <span class="conference-card-logo-placeholder" aria-hidden="true">&#127919;</span>
             {{ end }}
