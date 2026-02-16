@@ -5268,6 +5268,18 @@ body.dark .profile-header .share-box .share-box-icon-img {
   color: var(--color-text-light);
 }
 
+a.helpwanted-stat {
+  text-decoration: none;
+  color: var(--color-text-light);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.helpwanted-stat:hover {
+  background: var(--color-background-hover, var(--color-background-alt));
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  text-decoration: underline;
+}
+
 .helpwanted-stat-num {
   font-weight: 700;
   color: var(--color-accent);

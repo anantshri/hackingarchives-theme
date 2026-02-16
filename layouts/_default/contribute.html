@@ -58,21 +58,22 @@
   <div class="helpwanted-hero">
     <p class="helpwanted-intro">Many entries are missing links to videos, slides, or source code. Pick an entry below and use <strong>I can help!</strong> to send us the data. We’ll credit you on our <a href="/about/#supporters">Supporters</a> list.</p>
     <div class="helpwanted-stats">
-    <div class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $talksCount }}</span> talks need video/slides</div>
-    <div class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $toolDemosCount }}</span> tool demos need source</div>
-    <div class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $toolContentCount }}</span> tools need content/links</div>
+    {{ if gt $talksCount 0 }}<a href="#talks" class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $talksCount }}</span> talks need video/slides</a>{{ end }}
+    {{ if gt $toolDemosCount 0 }}<a href="#tool-demos" class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $toolDemosCount }}</span> tool demos need source</a>{{ end }}
+    {{ if gt $toolContentCount 0 }}<a href="#tools" class="helpwanted-stat"><span class="helpwanted-stat-num">{{ $toolContentCount }}</span> tools need content/links</a>{{ end }}
     </div>
   </div>
 
   <nav class="helpwanted-nav" aria-label="Details needed sections">
-    <a href="#presentation-details">Talks &amp; demos</a>
-    <a href="#tools">Tools</a>
+    {{ if or (gt $talksCount 0) (gt $toolDemosCount 0) }}<a href="#presentation-details">Talks &amp; demos</a>{{ end }}
+    {{ if gt $toolContentCount 0 }}<a href="#tools">Tools</a>{{ end }}
   </nav>
 
-  <!-- Talks -->
+  <!-- Talks & Tool Demos -->
+  {{ if or (gt $talksCount 0) (gt $toolDemosCount 0) }}
   <div class="helpwanted-section" id="presentation-details">
-    <h3 id="talks">Talks missing video or slides <span class="helpwanted-count">({{ $talksCount }})</span></h3>
     {{ if gt $talksCount 0 }}
+    <h3 id="talks">Talks missing video or slides <span class="helpwanted-count">({{ $talksCount }})</span></h3>
     <details open class="helpwanted-details">
       <summary>Show list</summary>
       <div class="helpwanted-table-wrap">
@@ -111,12 +112,10 @@
         </table>
       </div>
     </details>
-    {{ else }}
-    <p class="helpwanted-empty">None right now. Thanks to everyone who contributed!</p>
     {{ end }}
 
-    <h3 id="tool-demos">Tool demos missing source <span class="helpwanted-count">({{ $toolDemosCount }})</span></h3>
     {{ if gt $toolDemosCount 0 }}
+    <h3 id="tool-demos">Tool demos missing source <span class="helpwanted-count">({{ $toolDemosCount }})</span></h3>
     <details class="helpwanted-details">
       <summary>Show list</summary>
       <div class="helpwanted-table-wrap">
@@ -148,15 +147,14 @@
         </table>
       </div>
     </details>
-    {{ else }}
-    <p class="helpwanted-empty">None right now.</p>
     {{ end }}
   </div>
+  {{ end }}
 
   <!-- Tools -->
+  {{ if gt $toolContentCount 0 }}
   <div class="helpwanted-section" id="tools">
     <h3>Tools missing content or links <span class="helpwanted-count">({{ $toolContentCount }})</span></h3>
-    {{ if gt $toolContentCount 0 }}
     <details class="helpwanted-details">
       <summary>Show list</summary>
       <div class="helpwanted-table-wrap">
@@ -175,9 +173,22 @@
         {{ if or (eq $content "") (not $has_links) }}
           {{ $submitLink := "/contribute/#details-needed" }}
           {{ if $hasForm }}{{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s" $params.form_url $params.field_title (.Title | urlquery) $params.field_url (.Permalink | urlquery) $params.field_missing ($whatismissing | urlquery) }}{{ end }}
+          {{/* Look up hackers from taxonomy: find all talks/arsenal entries tagged with this tool */}}
+          {{ $toolKey := path.Base (strings.TrimSuffix "/" .RelPermalink) }}
+          {{ $toolHackers := slice }}
+          {{ with index $.Site.Taxonomies.tools $toolKey }}
+            {{ range .Pages }}
+              {{ with .Params.hacker }}
+                {{ range . }}
+                  {{ $toolHackers = $toolHackers | append . }}
+                {{ end }}
+              {{ end }}
+            {{ end }}
+          {{ end }}
+          {{ $toolHackers = uniq (sort $toolHackers) }}
             <tr>
               <td><a href="{{ .Permalink }}">{{ .Title }}</a></td>
-              <td>{{ range $i, $h := .Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end }}</td>
+              <td>{{ range $i, $h := $toolHackers }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ replace ($h | humanize | title) " 1" "" }}</a>{{ end }}</td>
               <td><span class="helpwanted-badges">{{ $whatismissing }}</span></td>
               <td><a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a></td>
             </tr>
@@ -188,10 +199,8 @@
         </table>
       </div>
     </details>
-    {{ else }}
-    <p class="helpwanted-empty">None right now.</p>
-    {{ end }}
   </div>
+  {{ end }}
 </section>
 
 {{ partial "footer.html" . }}
