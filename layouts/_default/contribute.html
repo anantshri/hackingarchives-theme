@@ -176,7 +176,7 @@
           {{/* Look up hackers from taxonomy: find all talks/arsenal entries tagged with this tool */}}
           {{ $toolKey := path.Base (strings.TrimSuffix "/" .RelPermalink) }}
           {{ $toolHackers := slice }}
-          {{ with index $.Site.Taxonomies.tools $toolKey }}
+          {{ with index $.Site.Taxonomies.tool $toolKey }}
             {{ range .Pages }}
               {{ with .Params.hacker }}
                 {{ range . }}
