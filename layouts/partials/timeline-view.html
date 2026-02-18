@@ -305,15 +305,15 @@
             {{- end -}}
             
             {{- if and $showConference $page.Params.conference -}}
-                <a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a>{{ partial "subconference.html" $page }}:
+                <a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a>{{ partial "subconference.html" $page }} :{{" "}}
             {{- end -}}
             
             {{- if $page.Params.Publisher -}}
-                {{ $page.Params.Publisher | humanize | title }}:
+                {{ $page.Params.Publisher | humanize | title }} :{{" "}}
             {{- end -}}
             
             {{- if $page.Params.award -}}
-                <a href="/award/{{ $page.Params.award | urlize }}">{{ $page.Params.award | humanize | title }}</a>:
+                <a href="/award/{{ $page.Params.award | urlize }}">{{ $page.Params.award | humanize | title }}</a> :{{" "}}
             {{- end -}}
             
             <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
@@ -459,7 +459,7 @@
     
     {{- if and $shouldShowHackers (gt $totalHackers 0) -}}
         <span class="timeline-hackers">
-            - 
+            -{{" "}}
             {{- range $index, $hacker := $page.Params.hacker -}}
                 {{- if gt $index 0 }}, {{ end -}}
                 <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>

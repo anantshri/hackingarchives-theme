@@ -31,11 +31,11 @@
 {{- $primaryHackerData = sort $primaryHackerData "count" "desc" -}}
 {{- $primaryHackers := len $primaryHackerData -}}
 
-<!-- Stats: focus areas and tags for grid -->
+<!-- Stats: focus areas and conferences for grid -->
 {{- $focusPages := where $.Site.Pages "Section" "focus" -}}
 {{- $focusPages = where $focusPages ".Params.focus_key" "!=" nil -}}
 {{- $totalFocusAreas := len $focusPages -}}
-{{- $totalTags := len $.Site.Taxonomies.tag -}}
+{{- $totalConferences := len $.Site.Taxonomies.conference -}}
 
 <!-- Stats: talks, books, tools (unique), award entries for second row -->
 {{- $talkCount := 0 -}}
@@ -71,10 +71,10 @@
     <div class="stat-card-label">Focus Areas</div>
   </a>
   {{ end }}
-  {{ if gt $totalTags 0 }}
-  <a href="/tag/" class="stat-card stat-card-link">
-    <div class="stat-card-number">{{ $totalTags }}</div>
-    <div class="stat-card-label">Tags</div>
+  {{ if gt $totalConferences 0 }}
+  <a href="/conference/" class="stat-card stat-card-link">
+    <div class="stat-card-number">{{ $totalConferences }}</div>
+    <div class="stat-card-label">Conferences</div>
   </a>
   {{ end }}
 </div>
