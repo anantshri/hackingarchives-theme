@@ -88,9 +88,12 @@
 {{ $isEntry := or (eq $entryType "talk") (eq $entryType "workshop") (eq $entryType "arsenal") (eq $entryType "tool demo") (eq $entryType "panel") (eq $entryType "keynote") (eq $entryType "award") }}
 {{ $isPanel := eq $entryType "panel" }}
 {{ $isArsenal := or (eq $entryType "tool demo") (eq $entryType "arsenal") }}
+{{ $isAward := eq $entryType "award" }}
 {{ $needHelp := false }}
 {{ if $isEntry }}
-  {{ if $isArsenal }}
+  {{ if $isAward }}
+    {{ if not .Params.conf_link }}{{ $needHelp = true }}{{ end }}
+  {{ else if $isArsenal }}
     {{ if not .Params.source }}{{ $needHelp = true }}{{ end }}
   {{ else if $isPanel }}
     {{ if not .Params.video }}{{ $needHelp = true }}{{ end }}
@@ -100,12 +103,16 @@
 {{ end }}
 {{ if $needHelp }}
   {{ $whatismissing := "" }}
-  {{ if not $isArsenal }}
-    {{ if not $isPanel }}{{ if not .Params.presentation }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
-    {{ if not .Params.video }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Video" $whatismissing }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
+  {{ if $isAward }}
+    {{ if not .Params.conf_link }}{{ $whatismissing = "Official Website" }}{{ end }}
+  {{ else }}
+    {{ if not $isArsenal }}
+      {{ if not $isPanel }}{{ if not .Params.presentation }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
+      {{ if not .Params.video }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Video" $whatismissing }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
+    {{ end }}
+    {{ if $isArsenal }}{{ if not .Params.source }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Source Code" $whatismissing }}{{ else }}{{ $whatismissing = "Source Code" }}{{ end }}{{ end }}{{ end }}
+    {{ if not .Params.conf_link }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Conference Link" $whatismissing }}{{ else }}{{ $whatismissing = "Conference Link" }}{{ end }}{{ end }}
   {{ end }}
-  {{ if $isArsenal }}{{ if not .Params.source }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Source Code" $whatismissing }}{{ else }}{{ $whatismissing = "Source Code" }}{{ end }}{{ end }}{{ end }}
-  {{ if not .Params.conf_link }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Conference Link" $whatismissing }}{{ else }}{{ $whatismissing = "Conference Link" }}{{ end }}{{ end }}
   {{ $submitLink := "/contribute/#details-needed" }}
   {{ if $hasForm }}
     {{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s"
