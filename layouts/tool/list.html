@@ -1,10 +1,21 @@
 {{ partial "header.html" . }}
 {{ $hacker_names := slice }}
 {{ $unique_hacker_names := slice }}
+{{ $morehacker_names := slice }}
+{{ $unique_morehacker_names := slice }}
 {{ range .Pages }}
   {{ $hacker_names = $hacker_names | append .Params.hacker }}
+  {{ if .Params.morehackers }}
+    {{ range .Params.morehackers }}
+      {{ $nm := trim . " " }}
+      {{ if ne $nm "" }}
+        {{ $morehacker_names = $morehacker_names | append . }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
 {{ end }}
 {{ $unique_hacker_names = uniq (sort $hacker_names) }}
+{{ $unique_morehacker_names = uniq (sort $morehacker_names) }}
 {{ $name_of_tool := urlize .Data.Term }}
 
 {{if not .IsHome }}
@@ -41,6 +52,9 @@
       {{ if eq $sorted_params_hacker $unique_hacker_names }} 
         {{ range $unique_hacker_names }}
           <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+        {{ end }}
+        {{ range $unique_morehacker_names }}
+          <b><u>{{ replace (. | humanize | title) " 1" " " }}</u></b>&nbsp;
         {{ end }} 
       {{ else }}
         {{ range $sorted_params_hacker }}
@@ -49,11 +63,17 @@
         <br />
         {{ range $unique_hacker_names }}
           <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+        {{ end }}
+        {{ range $unique_morehacker_names }}
+          <b><u>{{ replace (. | humanize | title) " 1" " " }}</u></b>&nbsp;
         {{ end }} 
       {{ end }}
   {{ else }}
       {{ range $unique_hacker_names }}
         <b><a href="/hacker/{{ . }}/">{{ replace (. | humanize | title) " 1" " " }}</a></b>&nbsp;
+      {{ end }}
+      {{ range $unique_morehacker_names }}
+        <b><u>{{ replace (. | humanize | title) " 1" " " }}</u></b>&nbsp;
       {{ end }} 
   {{ end  }}
       </p>

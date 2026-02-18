@@ -352,6 +352,12 @@
                 {{- range $page.Params.hacker -}}
                     <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
                 {{- end -}}
+                {{- range $page.Params.morehackers -}}
+                    {{- $nm := trim . " " -}}
+                    {{- if ne $nm "" -}}
+                        <u>{{ . | humanize | title }}</u>
+                    {{- end -}}
+                {{- end -}}
             </div>
         {{- end -}}
         <div class="timeline-card-resources">
@@ -384,6 +390,12 @@
         {{- if $showHackers -}}
             <td class="col-speakers">
                 {{- range $i, $h := $page.Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end -}}
+                {{- range $page.Params.morehackers -}}
+                    {{- $nm := trim . " " -}}
+                    {{- if ne $nm "" -}}
+                        , <u>{{ . | humanize | title }}</u>
+                    {{- end -}}
+                {{- end -}}
             </td>
         {{- end -}}
         {{- if $showTags -}}
