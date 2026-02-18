@@ -1,12 +1,23 @@
 {{ $count := 1 }}
 {{ $aggressive_check := "No" }}
 
-{{/* Section Toggle Variables */}}
-{{ $show_personal_details := "Yes" }}
+{{/* Section Toggle Variables — set to "Yes" to re-enable */}}
+{{ $show_personal_details := "No" }}
 {{ $show_presentation_details := "Yes" }}
-{{ $show_book_details := "Yes" }}
-{{ $show_tool_content := "Yes" }}
-{{ $show_talks_without_tags := "Yes" }}
+{{ $show_book_details := "No" }}
+{{ $show_tool_content := "No" }}
+{{ $show_talks_without_tags := "No" }}
+
+{{/* Conference Filter Variables
+     $exclude_conferences — talks from these conferences are hidden (blocklist)
+     $only_conferences    — when non-empty, ONLY talks from these conferences are shown (allowlist)
+     If both are set, the allowlist is applied first, then the blocklist removes from the result. */}}
+{{ $exclude_conferences := slice "c0c0n" "nullcon" "groundzerosummit" "owaspappsecindia" "clubhack" "securitybyte" "malcon" }}
+{{ $only_conferences := slice }}
+
+{{/* "I can help!" form link (reuses [params.helpwanted] from config.toml) */}}
+{{ $params := .Site.Params.helpwanted }}
+{{ $hasForm := and $params $params.form_url }}
 
 {{/* Define pages variable for use in multiple sections */}}
 {{ $pages := .Site.RegularPages }}
@@ -147,14 +158,25 @@
 <h1 id="presentation-details">Presentation Details</h1>
 
 <h2 id="talks">Talks</h2>
-<table>
+<table class="helpwanted-table">
 <tr>
 <th>S.No</th>
-<th> Name of Entry </th>
-<th> What is missing</th>
+<th>Name of Entry</th>
+<th>What is missing</th>
+<th></th>
 </tr>    
 {{ $count := 1 }}
 {{ range (where $pages "Type" "talk") }}
+  {{ $conf_allowed := true }}
+  {{ if gt (len $only_conferences) 0 }}
+    {{ if not (in $only_conferences .Params.conference) }}
+      {{ $conf_allowed = false }}
+    {{ end }}
+  {{ end }}
+  {{ if in $exclude_conferences .Params.conference }}
+    {{ $conf_allowed = false }}
+  {{ end }}
+  {{ if $conf_allowed }}
   {{ $isimportant := "N" }}
   {{ $whatismissing := ""}}
   {{ $isPanel := eq (.Params.type | default "" | lower | strings.TrimSpace) "panel" }}
@@ -202,6 +224,10 @@
   {{ end }}
 
   {{ if eq $isimportant "Y" }}
+    {{ $submitLink := "/contribute/#details-needed" }}
+    {{ if $hasForm }}
+      {{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s" $params.form_url $params.field_title (.Title | urlquery) $params.field_url (.Permalink | urlquery) $params.field_missing ($whatismissing | urlquery) }}
+    {{ end }}
     <tr>
     <td>{{ $count }}</td>
     <td>
@@ -209,21 +235,34 @@
       {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
     </td>
     <td>{{ $whatismissing }}</td>
+    <td><a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a></td>
     </tr>
     {{ $count = add $count 1 }}
+  {{ end }}
   {{ end }}
 {{ end }}
 </table>
 
 <h2 id="tool-demos">Tool Demos</h2>
-<table>
+<table class="helpwanted-table">
 <tr>
 <th>S.No</th>
-<th> Name of Entry </th>
-<th> What is missing</th>
+<th>Name of Entry</th>
+<th>What is missing</th>
+<th></th>
 </tr>    
 {{ $count := 1 }}
 {{ range (where $pages "Type" "Tool Demo") }}
+  {{ $conf_allowed := true }}
+  {{ if gt (len $only_conferences) 0 }}
+    {{ if not (in $only_conferences .Params.conference) }}
+      {{ $conf_allowed = false }}
+    {{ end }}
+  {{ end }}
+  {{ if in $exclude_conferences .Params.conference }}
+    {{ $conf_allowed = false }}
+  {{ end }}
+  {{ if $conf_allowed }}
   {{ $isimportant := "N" }}
   {{ $whatismissing := ""}}
 
@@ -261,6 +300,10 @@
   {{ end }}
 
   {{ if eq $isimportant "Y" }}
+    {{ $submitLink := "/contribute/#details-needed" }}
+    {{ if $hasForm }}
+      {{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s" $params.form_url $params.field_title (.Title | urlquery) $params.field_url (.Permalink | urlquery) $params.field_missing ($whatismissing | urlquery) }}
+    {{ end }}
     <tr>
     <td>{{ $count }}</td>
     <td>
@@ -268,8 +311,10 @@
       {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
     </td>
     <td>{{ $whatismissing }}</td>
+    <td><a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a></td>
     </tr>
     {{ $count = add $count 1 }}
+  {{ end }}
   {{ end }}
 {{ end }}
 </table>
@@ -309,14 +354,25 @@
 <h1 id="tools">Tools</h1>
 
 <h2 id="tool-demos-section">Tool Demos</h2>
-<table>
+<table class="helpwanted-table">
 <tr>
 <th>S.No</th>
-<th> Name of Entry </th>
-<th> What is missing</th>
+<th>Name of Entry</th>
+<th>What is missing</th>
+<th></th>
 </tr>    
 {{ $count := 1 }}
 {{ range (where $pages "Type" "Tool Demo") }}
+  {{ $conf_allowed := true }}
+  {{ if gt (len $only_conferences) 0 }}
+    {{ if not (in $only_conferences .Params.conference) }}
+      {{ $conf_allowed = false }}
+    {{ end }}
+  {{ end }}
+  {{ if in $exclude_conferences .Params.conference }}
+    {{ $conf_allowed = false }}
+  {{ end }}
+  {{ if $conf_allowed }}
   {{ $isimportant := "N" }}
   {{ $whatismissing := ""}}
 
@@ -354,6 +410,10 @@
   {{ end }}
 
   {{ if eq $isimportant "Y" }}
+    {{ $submitLink := "/contribute/#details-needed" }}
+    {{ if $hasForm }}
+      {{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s" $params.form_url $params.field_title (.Title | urlquery) $params.field_url (.Permalink | urlquery) $params.field_missing ($whatismissing | urlquery) }}
+    {{ end }}
     <tr>
     <td>{{ $count }}</td>
     <td>
@@ -361,18 +421,21 @@
       {{ if .Params.conf_link }} <a href="{{ .Params.conf_link }}" target="_blank" rel="noopener" title="Official conference page" aria-label="Official conference page"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>{{ end }}
     </td>
     <td>{{ $whatismissing }}</td>
+    <td><a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a></td>
     </tr>
     {{ $count = add $count 1 }}
+  {{ end }}
   {{ end }}
 {{ end }}
 </table>
 
 <h2 id="tool-content">Tool Content</h2>
-<table>
+<table class="helpwanted-table">
 <tr>
 <th>S.No</th>
-<th> Name of Entry </th>
-<th> What is missing</th>
+<th>Name of Entry</th>
+<th>What is missing</th>
+<th></th>
 </tr>
 {{ $count := 1 }}
 {{ with .Site.GetPage "section" "tool" }}
@@ -419,10 +482,15 @@
     {{ end }}
 
     {{ if eq $isimportant "Y" }}
+      {{ $submitLink := "/contribute/#details-needed" }}
+      {{ if $hasForm }}
+        {{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s" $params.form_url $params.field_title (.Title | urlquery) $params.field_url (.Permalink | urlquery) $params.field_missing ($whatismissing | urlquery) }}
+      {{ end }}
       <tr>
       <td>{{ $count }}</td>
       <td><a href="{{ .Permalink }}" target="_blank">{{ .Title }}</a></td>
       <td>{{ $whatismissing }}</td>
+      <td><a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a></td>
       </tr>
       {{ $count = add $count 1 }}
     {{ end }}
@@ -442,6 +510,16 @@
 </tr>
 {{ $count := 1 }}
 {{ range (where $pages "Type" "talk") }}
+  {{ $conf_allowed := true }}
+  {{ if gt (len $only_conferences) 0 }}
+    {{ if not (in $only_conferences .Params.conference) }}
+      {{ $conf_allowed = false }}
+    {{ end }}
+  {{ end }}
+  {{ if in $exclude_conferences .Params.conference }}
+    {{ $conf_allowed = false }}
+  {{ end }}
+  {{ if $conf_allowed }}
   {{ $hasTags := false }}
   
   {{/* Check if tags field exists and has content */}}
@@ -465,6 +543,7 @@
     <td>{{ .Date.Year }}</td>
     </tr>
     {{ $count = add $count 1 }}
+  {{ end }}
   {{ end }}
 {{ end }}
 </table>
