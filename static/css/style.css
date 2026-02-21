@@ -828,22 +828,26 @@ blockquote {
 
 /* Logo background variants for transparent images */
 .confphoto.logo-bg-dark,
-.conference-card-logo-img.logo-bg-dark {
+.conference-card-logo-img.logo-bg-dark,
+.tool-icon.logo-bg-dark {
   background-color: #1a1a1a;
 }
 
 .confphoto.logo-bg-light,
-.conference-card-logo-img.logo-bg-light {
+.conference-card-logo-img.logo-bg-light,
+.tool-icon.logo-bg-light {
   background-color: #ffffff;
 }
 
 .confphoto.logo-bg-gray,
-.conference-card-logo-img.logo-bg-gray {
+.conference-card-logo-img.logo-bg-gray,
+.tool-icon.logo-bg-gray {
   background-color: #808080;
 }
 
 .confphoto.logo-bg-transparent,
-.conference-card-logo-img.logo-bg-transparent {
+.conference-card-logo-img.logo-bg-transparent,
+.tool-icon.logo-bg-transparent {
   background-color: transparent;
 }
 
@@ -4136,6 +4140,11 @@ body:has(.theme-toggle-checkbox:checked) .entry-award-badge .award-icon-header {
   height: 20px;
   border-radius: 4px;
   object-fit: contain;
+}
+
+.tool-icon[class*="logo-bg-"] {
+  padding: 2px;
+  box-sizing: content-box;
 }
 
 /* 404 Error Page */

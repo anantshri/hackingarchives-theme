@@ -53,6 +53,12 @@
             {{- range $tools -}}
                 {{- $toolSlug := . | urlize -}}
                 {{- $toolIcon := "" -}}
+                {{- $logoBg := "" -}}
+                {{- with site.GetPage (printf "/tool/%s" $toolSlug) -}}
+                    {{- with .Params.logo_bg -}}
+                        {{- $logoBg = . -}}
+                    {{- end -}}
+                {{- end -}}
                 {{- range $ext := slice ".svg" ".jpg" ".png" ".jpeg" ".jfif" ".gif" -}}
                     {{- with resources.Get (path.Join "tool" (printf "%s%s" $toolSlug $ext)) -}}
                         {{- $img := . -}}
@@ -69,7 +75,7 @@
                 {{- end -}}
                 <a href="/tool/{{ $toolSlug }}" class="tool-link">
                     {{- if $toolIcon -}}
-                    <img src="{{ $toolIcon }}" alt="{{ . }}" class="tool-icon" width="20" height="20" loading="lazy">
+                    <img src="{{ $toolIcon }}" alt="{{ . }}" class="tool-icon{{ with $logoBg }} logo-bg-{{ . }}{{ end }}" width="20" height="20" loading="lazy">
                     {{- end -}}
                     <span>{{ . }}</span>
                 </a>
@@ -222,6 +228,12 @@
                 {{- range $tools -}}
                     {{- $toolSlug := . | urlize -}}
                     {{- $toolIcon := "" -}}
+                    {{- $logoBg := "" -}}
+                    {{- with site.GetPage (printf "/tool/%s" $toolSlug) -}}
+                        {{- with .Params.logo_bg -}}
+                            {{- $logoBg = . -}}
+                        {{- end -}}
+                    {{- end -}}
                     {{- range $ext := slice ".svg" ".jpg" ".png" ".jpeg" ".jfif" ".gif" -}}
                         {{- with resources.Get (path.Join "tool" (printf "%s%s" $toolSlug $ext)) -}}
                             {{- $img := . -}}
@@ -238,7 +250,7 @@
                     {{- end -}}
                     <a href="/tool/{{ $toolSlug }}" class="tool-link">
                         {{- if $toolIcon -}}
-                        <img src="{{ $toolIcon }}" alt="{{ . }}" class="tool-icon" width="20" height="20" loading="lazy">
+                        <img src="{{ $toolIcon }}" alt="{{ . }}" class="tool-icon{{ with $logoBg }} logo-bg-{{ . }}{{ end }}" width="20" height="20" loading="lazy">
                         {{- end -}}
                         <span>{{ . }}</span>
                     </a>
