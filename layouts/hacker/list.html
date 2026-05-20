@@ -11,6 +11,8 @@
 {{- $tools := slice -}}
 {{- $collabScratch := newScratch -}}
 {{- $collabNames := slice -}}
+{{- $confScratch := newScratch -}}
+{{- $confNames := slice -}}
 {{- $faScratch := newScratch -}}
 {{- $faNames := slice -}}
 {{- $hackerFirstTalk := now -}}
@@ -68,6 +70,15 @@
     {{- else if eq (printf "%T" $tool) "[]string" -}}
       {{- $tools = $tools | append (apply $tool "upper" ".") -}}
     {{- end -}}
+  {{- end -}}
+
+  <!-- Conference Section (using Scratch.Add for reliable counting) -->
+  {{- $conf := .Params.conference | lower | strings.TrimSpace -}}
+  {{- if $conf -}}
+    {{- if not (in $confNames $conf) -}}
+      {{- $confNames = $confNames | append $conf -}}
+    {{- end -}}
+    {{- $confScratch.Add $conf 1 -}}
   {{- end -}}
 
   <!-- Collaborator Section (using Scratch.Add for reliable counting) -->
@@ -161,6 +172,39 @@
   {{- end -}}
 {{- end -}}
 
+<!-- Prepare unique conferences list (from Scratch-based counts) -->
+{{- $uniqueConferences := slice -}}
+{{- range $confNames -}}
+  {{- $slug := . -}}
+  {{- $count := $confScratch.Get $slug | default 0 -}}
+  {{- $title := $slug | humanize | title -}}
+  {{- $logoBg := "" -}}
+  {{- $photopath := "" -}}
+  {{- with site.GetPage (printf "/conference/%s" $slug) -}}
+    {{- $title = .Title -}}
+    {{- with .Params.logo_bg -}}
+      {{- $logoBg = . -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $title = replaceRE `(?i)\s+Conference$` "" $title -}}
+  {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
+    {{- with resources.Get (path.Join "conference" (printf "%s%s" $slug $ext)) -}}
+      {{- $img := . -}}
+      {{- if and (ne $ext ".svg") (ne $ext ".gif") -}}
+        {{- with try (.Resize "48x48 q100") -}}
+          {{- if not .Err -}}
+            {{- $img = .Value -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $photopath = $img.RelPermalink -}}
+      {{- break -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $uniqueConferences = $uniqueConferences | append (dict "slug" $slug "title" $title "count" $count "url" (printf "/conference/%s/" ($slug | urlize)) "photopath" $photopath "logoBg" $logoBg) -}}
+{{- end -}}
+{{- $uniqueConferences = sort $uniqueConferences "count" "desc" -}}
+
 <!-- Prepare collaborators list (from Scratch-based counts) -->
 {{- $commonCollaborators := slice -}}
 {{- range $collabNames -}}
@@ -241,7 +285,7 @@
 </div>
 
 <!-- Tools, Collaborators, Topics -->
-{{ partial "infobox-view.html" (dict "Tools" $uniqueTools "Collaborators" $commonCollaborators "Topics" $commonTags "Style" "table") }}
+{{ partial "infobox-view.html" (dict "Tools" $uniqueTools "Conferences" $uniqueConferences "Collaborators" $commonCollaborators "Topics" $commonTags "Style" "table") }}
 
 <!-- Timeline Section -->
 {{- $timelineYears := add (sub $hackerLastTalk.Year $hackerFirstTalk.Year) 1 -}}
