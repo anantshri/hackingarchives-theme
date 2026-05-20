@@ -7,7 +7,7 @@
   <div class="card">
   {{ $term := .Data.Term }}
   {{ $photopath := "" }}
-  {{ range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" }}
+  {{ range $ext := slice ".webp" ".jpg" ".png" ".jpeg" ".jfif" ".svg" }}
     {{ with resources.Get (path.Join "conference" (printf "%s%s" $term $ext)) }}
       {{ $photopath = .RelPermalink }}
       {{ break }}

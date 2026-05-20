@@ -47,7 +47,7 @@
     {{/* Find logo path - $name is the conference key */}}
     {{ $confName := $name }}
     {{ $photopath := "" }}
-    {{ range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" }}
+    {{ range $ext := slice ".webp" ".jpg" ".png" ".jpeg" ".jfif" ".svg" }}
       {{ with resources.Get (path.Join "conference" (printf "%s%s" $confName $ext)) }}
         {{ $photopath = .RelPermalink }}
         {{ break }}

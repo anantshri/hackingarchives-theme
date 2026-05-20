@@ -187,7 +187,7 @@
     {{- end -}}
   {{- end -}}
   {{- $title = replaceRE `(?i)\s+Conference$` "" $title -}}
-  {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
+  {{- range $ext := slice ".webp" ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
     {{- with resources.Get (path.Join "conference" (printf "%s%s" $slug $ext)) -}}
       {{- $img := . -}}
       {{- if and (ne $ext ".svg") (ne $ext ".gif") -}}
