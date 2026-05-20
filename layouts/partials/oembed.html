@@ -6,7 +6,7 @@
 {{ $embedURL := urls.Parse $url }}
 {{ $matched := 0 }}
 {{ $data := dict }}
-{{- range .context.Site.Data.oembed }}
+{{- range hugo.Data.oembed }}
   {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
     {{ $matched = 1 }}
     <!-- these below two variables to defined here otherwise cant access them inside with context -->

@@ -220,7 +220,7 @@
   {{ $video_embedable := 0 }}
   {{if .Params.presentation}}
     {{ $embedURL := urls.Parse .Params.presentation }}
-    {{- range $.Site.Data.oembed }}
+    {{- range hugo.Data.oembed }}
       {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
         {{ $presentation_embedable = 1 }}
       {{ end }}
@@ -228,7 +228,7 @@
   {{ end }}
   {{if .Params.video}}
     {{ $embedURL := urls.Parse .Params.video }}
-    {{- range $.Site.Data.oembed }}
+    {{- range hugo.Data.oembed }}
       {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
         {{ $video_embedable = 1 }}
       {{ end }}

@@ -3,12 +3,12 @@
 <div style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">
   <h4>Debug: All Site Data</h4>
   
-  <p><strong>Site.Data type:</strong> {{ printf "%T" $.Site.Data }}</p>
+  <p><strong>hugo.Data type:</strong> {{ printf "%T" hugo.Data }}</p>
   
-  {{ if $.Site.Data }}
+  {{ if hugo.Data }}
     <p><strong>Available data keys:</strong></p>
     <ul>
-      {{- range $key, $value := $.Site.Data -}}
+      {{- range $key, $value := hugo.Data -}}
         <li>{{ $key }}: {{ printf "%T" $value }}</li>
       {{- end -}}
     </ul>

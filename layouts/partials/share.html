@@ -32,7 +32,7 @@
 {{- $services := cond (isset .Params "share_services") $pageServices $globalServices -}}
 
 {{- if $enabled -}}
-  {{- $shareData := .Site.Data.shareservices | default dict -}}
+  {{- $shareData := hugo.Data.shareservices | default dict -}}
   {{- $pageURL := .Permalink -}}
   {{- $pageTitle := .Title -}}
 

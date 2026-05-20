@@ -1,4 +1,4 @@
-{{ $data := .Site.Data.supporters }}
+{{ $data := hugo.Data.supporters }}
 {{ if $data }}
   {{ $sorted := sort $data "contributions" "desc" }}
   <div class="supporters-leaderboard">
