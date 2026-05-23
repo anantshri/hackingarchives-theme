@@ -2,8 +2,21 @@
 
 <!-- Entry Header -->
 <div class="entry-header">
-    {{ partial "share.html" . }}
-
+    <div class="entry-actions">
+        {{ $params := .Site.Params.helpwanted }}
+        {{ $hasForm := and $params $params.form_url }}
+        {{ $correctLink := "/contribute/" }}
+        {{ if $hasForm }}
+          {{ $correctLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s"
+              $params.form_url $params.field_title (.Title | urlquery)
+              $params.field_url (.Permalink | urlquery)
+              $params.field_missing ("Correction / Update" | urlquery) }}
+        {{ end }}
+        <a href="{{ $correctLink }}" class="entry-correct-link" target="_blank" rel="noopener" title="Suggest a correction or update">
+            <img src="/fontawesome/edit.svg" alt="" class="entry-correct-icon">
+        </a>
+        {{ partial "share.html" . }}
+    </div>
 
     <!-- Award: trophy + link to award page (like tool links) -->
     {{ $entryType := .Params.type | default "" | lower | strings.TrimSpace }}
@@ -69,60 +82,104 @@
   </div>
 </div>
 
+{{ $params := .Site.Params.helpwanted }}
+{{ $hasForm := and $params $params.form_url }}
+{{ $entryType := .Params.type | default "" | lower | strings.TrimSpace }}
+{{ $isEntry := or (eq $entryType "talk") (eq $entryType "workshop") (eq $entryType "arsenal") (eq $entryType "tool demo") (eq $entryType "panel") (eq $entryType "keynote") (eq $entryType "award") }}
+{{ $isPanel := eq $entryType "panel" }}
+{{ $isArsenal := or (eq $entryType "tool demo") (eq $entryType "arsenal") }}
+{{ $isAward := eq $entryType "award" }}
+{{ $needHelp := false }}
+{{ if $isEntry }}
+  {{ if $isAward }}
+    {{ if not .Params.conf_link }}{{ $needHelp = true }}{{ end }}
+  {{ else if $isArsenal }}
+    {{ if not .Params.source }}{{ $needHelp = true }}{{ end }}
+  {{ else if $isPanel }}
+    {{ if not .Params.video }}{{ $needHelp = true }}{{ end }}
+  {{ else }}
+    {{ if and (not .Params.presentation) (not .Params.video) }}{{ $needHelp = true }}{{ end }}
+  {{ end }}
+{{ end }}
+{{ if $needHelp }}
+  {{ $whatismissing := "" }}
+  {{ if $isAward }}
+    {{ if not .Params.conf_link }}{{ $whatismissing = "Official Website" }}{{ end }}
+  {{ else }}
+    {{ if not $isArsenal }}
+      {{ if not $isPanel }}{{ if not .Params.presentation }}{{ $whatismissing = "presentation" }}{{ end }}{{ end }}
+      {{ if not .Params.video }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Video" $whatismissing }}{{ else }}{{ $whatismissing = "Video" }}{{ end }}{{ end }}
+    {{ end }}
+    {{ if $isArsenal }}{{ if not .Params.source }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Source Code" $whatismissing }}{{ else }}{{ $whatismissing = "Source Code" }}{{ end }}{{ end }}{{ end }}
+    {{ if not .Params.conf_link }}{{ if $whatismissing }}{{ $whatismissing = printf "%s, Conference Link" $whatismissing }}{{ else }}{{ $whatismissing = "Conference Link" }}{{ end }}{{ end }}
+  {{ end }}
+  {{ $submitLink := "/contribute/#details-needed" }}
+  {{ if $hasForm }}
+    {{ $submitLink = printf "%s?usp=pp_url&%s=%s&%s=%s&%s=%s"
+        $params.form_url $params.field_title (.Title | urlquery)
+        $params.field_url (.Permalink | urlquery)
+        $params.field_missing ($whatismissing | urlquery) }}
+  {{ end }}
+  <div class="entry-needhelp">
+    <img src="/fontawesome/info.svg" alt="" class="entry-needhelp-icon">
+    <div class="entry-needhelp-text">
+      <strong>We need help to complete this entry!</strong>
+      <span>Missing: {{ $whatismissing }}</span>
+    </div>
+    <a href="{{ $submitLink }}" class="helpwanted-btn" target="_blank" rel="noopener">I can help!</a>
+  </div>
+{{ end }}
+
 <div class="entry-content">
-  <!-- Tags (Experimental) -->
-  {{ if $.Site.Params.experimental_mode }}
-    {{ if .Params.tag }}
-      {{ $hasValidTags := false }}
+  <!-- Tags -->
+  {{ if .Params.tag }}
+    {{ $hasValidTags := false }}
+    {{ range .Params.tag }}
+      {{ if and . (ne . "") }}
+        {{ $hasValidTags = true }}
+      {{ end }}
+    {{ end }}
+    {{ if $hasValidTags }}
+    <div class="entry-tags">
       {{ range .Params.tag }}
         {{ if and . (ne . "") }}
-          {{ $hasValidTags = true }}
+          <a href="/tag/{{ . }}" class="tag-link">#{{ . }}</a>
         {{ end }}
       {{ end }}
-      {{ if $hasValidTags }}
-      <div class="entry-tags">
-        {{ range .Params.tag }}
-          {{ if and . (ne . "") }}
-            <a href="/tag/{{ . }}" class="tag-link" target="_blank" rel="noreferrer noopener nofollow">#{{ . }}</a>
-          {{ end }}
+    </div>
+    {{ end }}
+  {{ end }}
+  
+  <!-- Focus Areas Section -->
+  {{ if .Params.tag }}
+    {{/* Load all focus area pages */}}
+    {{ $focusAreaPages := where $.Site.Pages "Section" "focus" }}
+    {{ $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil }}
+    
+    {{/* Find matching focus areas */}}
+    {{ $matchingFocusAreas := slice }}
+    {{ range $focusAreaPages }}
+      {{ $focusArea := . }}
+      {{ $hasMatch := false }}
+      {{ range $focusArea.Params.related_tags }}
+        {{ $relatedTag := . }}
+        {{ if in $.Params.tag $relatedTag }}
+          {{ $hasMatch = true }}
         {{ end }}
-      </div>
+      {{ end }}
+      {{ if $hasMatch }}
+        {{ $matchingFocusAreas = $matchingFocusAreas | append $focusArea }}
       {{ end }}
     {{ end }}
     
-    <!-- Focus Areas Section -->
-    {{ if .Params.tag }}
-      {{/* Load all focus area pages */}}
-      {{ $focusAreaPages := where $.Site.Pages "Section" "focus" }}
-      {{ $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil }}
-      
-      {{/* Find matching focus areas */}}
-      {{ $matchingFocusAreas := slice }}
-      {{ range $focusAreaPages }}
-        {{ $focusArea := . }}
-        {{ $hasMatch := false }}
-        {{ range $focusArea.Params.related_tags }}
-          {{ $relatedTag := . }}
-          {{ if in $.Params.tag $relatedTag }}
-            {{ $hasMatch = true }}
-          {{ end }}
-        {{ end }}
-        {{ if $hasMatch }}
-          {{ $matchingFocusAreas = $matchingFocusAreas | append $focusArea }}
-        {{ end }}
+    {{ if gt (len $matchingFocusAreas) 0 }}
+    <div class="entry-focus-areas">
+      <strong>Focus Areas:</strong>
+      {{ range $index, $fa := $matchingFocusAreas }}
+        {{- if gt $index 0 }}, {{ end -}}
+        <a href="{{ $fa.RelPermalink }}">{{ $fa.Params.icon }} {{ $fa.Title }}</a>
       {{ end }}
-      
-      {{ if gt (len $matchingFocusAreas) 0 }}
-      <div class="entry-focus-areas">
-        <strong>Focus Areas:</strong>
-        {{ range $index, $fa := $matchingFocusAreas }}
-          {{- if gt $index 0 }}, {{ end -}}
-          <a href="{{ $fa.RelPermalink }}">
-            <i class="fas fa-{{ $fa.Params.icon }}"></i> {{ $fa.Title }}
-          </a>
-        {{ end }}
-      </div>
-      {{ end }}
+    </div>
     {{ end }}
   {{ end }}
 
@@ -163,7 +220,7 @@
   {{ $video_embedable := 0 }}
   {{if .Params.presentation}}
     {{ $embedURL := urls.Parse .Params.presentation }}
-    {{- range $.Site.Data.oembed }}
+    {{- range hugo.Data.oembed }}
       {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
         {{ $presentation_embedable = 1 }}
       {{ end }}
@@ -171,7 +228,7 @@
   {{ end }}
   {{if .Params.video}}
     {{ $embedURL := urls.Parse .Params.video }}
-    {{- range $.Site.Data.oembed }}
+    {{- range hugo.Data.oembed }}
       {{- if le 1 ( findRE .pattern $embedURL.Host | len ) }}
         {{ $video_embedable = 1 }}
       {{ end }}
@@ -219,9 +276,12 @@
   {{ $file_path := printf ".md.txt.txt" | printf "%s%s" $newPath | printf "%s%s" "transcribe/summary_transcribe_" | printf "%s"}}
   {{ if fileExists $file_path }}
   <section class="info-box ai-summary-box">
-    <h3>AI Generated Summary <small><a href="/ai_experiements/">(may contain errors)</a></small></h3>
+    <h3>AI Generated Summary</h3>
     <div class="ai-summary-body">
       {{ readFile $file_path | markdownify }}
+    </div>
+    <div class="ai-summary-disclaimer">
+      <small><strong>Disclaimer:</strong> This summary was auto-generated from the video transcript using AI and may contain inaccuracies. It is intended as a quick overview — always refer to the original talk for authoritative content. <a href="/ai_experiements/">Learn more about our AI experiments</a>.</small>
     </div>
   </section>
   {{ end }}

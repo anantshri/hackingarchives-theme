@@ -3,7 +3,7 @@
 By: {{ range $index, $author := .Params.hacker }}{{ if gt $index 0 }}, {{ end }}{{ . | humanize | title }}{{ end }}
 {{ end }}
 {{ if .Params.conference }}Conference: {{ .Params.conference | humanize | title }}{{ end }}
-{{ if .Params.year }}Year: {{ .Params.year }}{{ end }}
+{{ if .Date }}Year: {{ .Date.Year }}{{ end }}
 {{ if .Params.date }}Date: {{ .Date.Format "2006-01-02" }}{{ end }}
 
 {{ if .Params.tag }}Tags: {{ range $index, $tag := .Params.tag }}{{ if gt $index 0 }}, {{ end }}{{ $tag }}{{ end }}{{ end }}

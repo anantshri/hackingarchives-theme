@@ -13,7 +13,9 @@
         <a href="/hacker/{{ . }}/" class="entry-hacker">{{ . | humanize | title }}</a>
     {{ end }}
     {{ range .Params.morehackers }}
+        {{- if ne (trim . " ") "" }}
         <u>{{ . | humanize | title }}</u>
+        {{- end }}
     {{ end }}
     {{/* Resource Links */}}
     <span class="entry-resources">

@@ -1,0 +1,39 @@
+{{ $data := hugo.Data.supporters }}
+{{ if $data }}
+  {{ $sorted := sort $data "contributions" "desc" }}
+  <div class="supporters-leaderboard">
+    <table class="supporters-table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Contributions</th>
+          <th scope="col">Since</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range $i, $s := $sorted }}
+          {{ $rank := add $i 1 }}
+          {{ $rowClass := "" }}
+          {{ if eq $rank 1 }}{{ $rowClass = "supporters-rank-1" }}{{ end }}
+          {{ if eq $rank 2 }}{{ $rowClass = "supporters-rank-2" }}{{ end }}
+          {{ if eq $rank 3 }}{{ $rowClass = "supporters-rank-3" }}{{ end }}
+        <tr class="{{ $rowClass }}">
+          <td class="supporters-rank">{{ $rank }}</td>
+          <td class="supporters-name">
+            {{ if $s.url }}
+              <a href="{{ $s.url }}" target="_blank" rel="noopener">{{ $s.name }}</a>
+            {{ else }}
+              {{ $s.name }}
+            {{ end }}
+          </td>
+          <td class="supporters-count">{{ $s.contributions }}</td>
+          <td class="supporters-since">{{ $s.since }}</td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ else }}
+  <p class="supporters-empty">No supporters yet. Be the first—see <a href="/contribute/#details-needed">Contribute</a>!</p>
+{{ end }}

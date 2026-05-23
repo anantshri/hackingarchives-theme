@@ -305,15 +305,15 @@
             {{- end -}}
             
             {{- if and $showConference $page.Params.conference -}}
-                <a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a>{{ partial "subconference.html" $page }}:
+                <a href="/conference/{{ lower $page.Params.conference | urlize }}">{{ $page.Params.conference | humanize | title }}</a>{{ partial "subconference.html" $page }} :{{" "}}
             {{- end -}}
             
             {{- if $page.Params.Publisher -}}
-                {{ $page.Params.Publisher | humanize | title }}:
+                {{ $page.Params.Publisher | humanize | title }} :{{" "}}
             {{- end -}}
             
             {{- if $page.Params.award -}}
-                <a href="/award/{{ $page.Params.award | urlize }}">{{ $page.Params.award | humanize | title }}</a>:
+                <a href="/award/{{ $page.Params.award | urlize }}">{{ $page.Params.award | humanize | title }}</a> :{{" "}}
             {{- end -}}
             
             <a href="{{ $page.RelPermalink }}">{{ $page.Title | markdownify }}</a>
@@ -352,6 +352,12 @@
                 {{- range $page.Params.hacker -}}
                     <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
                 {{- end -}}
+                {{- range $page.Params.morehackers -}}
+                    {{- $nm := trim . " " -}}
+                    {{- if ne $nm "" -}}
+                        <u>{{ . | humanize | title }}</u>
+                    {{- end -}}
+                {{- end -}}
             </div>
         {{- end -}}
         <div class="timeline-card-resources">
@@ -384,6 +390,12 @@
         {{- if $showHackers -}}
             <td class="col-speakers">
                 {{- range $i, $h := $page.Params.hacker }}{{ if $i }}, {{ end }}<a href="/hacker/{{ $h }}/">{{ $h | humanize | title }}</a>{{ end -}}
+                {{- range $page.Params.morehackers -}}
+                    {{- $nm := trim . " " -}}
+                    {{- if ne $nm "" -}}
+                        , <u>{{ . | humanize | title }}</u>
+                    {{- end -}}
+                {{- end -}}
             </td>
         {{- end -}}
         {{- if $showTags -}}
@@ -439,7 +451,11 @@
     {{- end -}}
     {{- $moreHackerCount := 0 -}}
     {{- if $page.Params.morehackers -}}
-        {{- $moreHackerCount = len $page.Params.morehackers -}}
+        {{- range $page.Params.morehackers -}}
+            {{- if ne (trim . " ") "" -}}
+                {{- $moreHackerCount = add $moreHackerCount 1 -}}
+            {{- end -}}
+        {{- end -}}
     {{- end -}}
     {{- $totalHackers := add $hackerCount $moreHackerCount -}}
     
@@ -455,13 +471,15 @@
     
     {{- if and $shouldShowHackers (gt $totalHackers 0) -}}
         <span class="timeline-hackers">
-            - 
+            -{{" "}}
             {{- range $index, $hacker := $page.Params.hacker -}}
                 {{- if gt $index 0 }}, {{ end -}}
                 <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
             {{- end -}}
             {{- range $page.Params.morehackers -}}
-                , <u>{{ . | humanize | title }}</u>
+                {{- if ne (trim . " ") "" -}}
+                    , <u>{{ . | humanize | title }}</u>
+                {{- end -}}
             {{- end -}}
         </span>
     {{- end -}}
@@ -478,7 +496,11 @@
     {{- end -}}
     {{- $moreHackerCount := 0 -}}
     {{- if $page.Params.morehackers -}}
-        {{- $moreHackerCount = len $page.Params.morehackers -}}
+        {{- range $page.Params.morehackers -}}
+            {{- if ne (trim . " ") "" -}}
+                {{- $moreHackerCount = add $moreHackerCount 1 -}}
+            {{- end -}}
+        {{- end -}}
     {{- end -}}
     {{- $totalHackers := add $hackerCount $moreHackerCount -}}
     
@@ -499,7 +521,9 @@
                 <a href="/hacker/{{ . }}/">{{ . | humanize | title }}</a>
             {{- end -}}
             {{- range $page.Params.morehackers -}}
-                , <u>{{ . | humanize | title }}</u>
+                {{- if ne (trim . " ") "" -}}
+                    , <u>{{ . | humanize | title }}</u>
+                {{- end -}}
             {{- end -}}
         </span>
     {{- end -}}

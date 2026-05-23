@@ -3,11 +3,12 @@
     Purpose: Unified info-box view for displaying hacker summary data
     
     Usage:
-    {{ partial "infobox-view.html" (dict "Activities" $categoryCounts "Tools" $uniqueTools "Collaborators" $commonCollaborators "Topics" $commonTags "Style" "table") }}
+    {{ partial "infobox-view.html" (dict "Activities" $categoryCounts "Tools" $uniqueTools "Conferences" $uniqueConferences "Collaborators" $commonCollaborators "Topics" $commonTags "Style" "table") }}
     
     Parameters:
     - Activities: dict of activity type -> count
     - Tools: slice of tool names
+    - Conferences: slice of dicts with "slug", "title", "count", "url", "photopath", "logoBg"
     - Collaborators: slice of dicts with "name" and "count"
     - Topics: slice of dicts with "tag", "name", and "count"
     - Style: "cards" (default), "simple", "pills", "table", "tags", "minimal", "stats", "oneline"
@@ -15,11 +16,12 @@
 
 {{- $activities := .Activities | default dict -}}
 {{- $tools := .Tools | default slice -}}
+{{- $conferences := .Conferences | default slice -}}
 {{- $collaborators := .Collaborators | default slice -}}
 {{- $topics := .Topics | default slice -}}
 {{- $style := .Style | default "cards" -}}
 
-{{- $hasData := or (len $activities) (len $tools) (gt (len $collaborators) 0) (gt (len $topics) 0) -}}
+{{- $hasData := or (len $activities) (len $tools) (len $conferences) (gt (len $collaborators) 0) (gt (len $topics) 0) -}}
 
 {{- if $hasData -}}
 
@@ -49,9 +51,36 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4h54.1l109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109V124c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3l-45.3-45.3L19.9 396.1z"/></svg>
             Tools
         </h4>
-        <div class="info-content">
+        <div class="info-content tools-with-icons">
             {{- range $tools -}}
-                <a href="/tool/{{ . | urlize }}">{{ . }}</a>
+                {{- $toolSlug := . | urlize -}}
+                {{- $toolIcon := "" -}}
+                {{- $logoBg := "" -}}
+                {{- with site.GetPage (printf "/tool/%s" $toolSlug) -}}
+                    {{- with .Params.logo_bg -}}
+                        {{- $logoBg = . -}}
+                    {{- end -}}
+                {{- end -}}
+                {{- range $ext := slice ".svg" ".jpg" ".png" ".jpeg" ".jfif" ".gif" -}}
+                    {{- with resources.Get (path.Join "tool" (printf "%s%s" $toolSlug $ext)) -}}
+                        {{- $img := . -}}
+                        {{- if and (ne $ext ".svg") (ne $ext ".gif") -}}
+                            {{- with try (.Resize "48x48 q100") -}}
+                                {{- if not .Err -}}
+                                    {{- $img = .Value -}}
+                                {{- end -}}
+                            {{- end -}}
+                        {{- end -}}
+                        {{- $toolIcon = $img.RelPermalink -}}
+                        {{- break -}}
+                    {{- end -}}
+                {{- end -}}
+                <a href="/tool/{{ $toolSlug }}" class="tool-link">
+                    {{- if $toolIcon -}}
+                    <img src="{{ $toolIcon }}" alt="{{ . }}" class="tool-icon{{ with $logoBg }} logo-bg-{{ . }}{{ end }}" width="20" height="20" loading="lazy">
+                    {{- end -}}
+                    <span>{{ . }}</span>
+                </a>
             {{- end -}}
         </div>
     </div>
@@ -77,9 +106,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M345 39.1L472.8 168.4c52.4 53 52.4 138.2 0 191.2L360.8 472.9c-9.3 9.4-24.5 9.5-33.9 .2s-9.5-24.5-.2-33.9L438.6 325.9c33.9-34.3 33.9-89.4 0-123.7L310.9 72.9c-9.3-9.4-9.2-24.6 .2-33.9s24.6-9.2 33.9 .2zM0 229.5V80C0 53.5 21.5 32 48 32H197.5c17 0 33.3 6.7 45.3 18.7l168 168c25 25 25 65.5 0 90.5L277.3 442.7c-25 25-65.5 25-90.5 0l-168-168C6.7 262.7 0 246.5 0 229.5zM144 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
             Focus Areas
         </h4>
-        <div class="info-content">
+        <div class="info-content focus-area-chips">
             {{- range $topics -}}
-                <a href="/focus/{{ .tag | urlize }}/">{{ .name }} ({{ .count }})</a>
+                <a href="/focus/{{ .tag | urlize }}/" class="focus-chip">{{ .name }} <span class="focus-chip-count">{{ .count }}</span></a>
             {{- end -}}
         </div>
     </div>
@@ -197,12 +226,52 @@
         {{- if len $tools -}}
         <tr>
             <th>Tools</th>
-            <td>
-                {{- $first := true -}}
+            <td class="tools-with-icons">
                 {{- range $tools -}}
-                    {{- if not $first }} &bull; {{ end -}}
-                    {{- $first = false -}}
-                    <a href="/tool/{{ . | urlize }}">{{ . }}</a>
+                    {{- $toolSlug := . | urlize -}}
+                    {{- $toolIcon := "" -}}
+                    {{- $logoBg := "" -}}
+                    {{- with site.GetPage (printf "/tool/%s" $toolSlug) -}}
+                        {{- with .Params.logo_bg -}}
+                            {{- $logoBg = . -}}
+                        {{- end -}}
+                    {{- end -}}
+                    {{- range $ext := slice ".svg" ".jpg" ".png" ".jpeg" ".jfif" ".gif" -}}
+                        {{- with resources.Get (path.Join "tool" (printf "%s%s" $toolSlug $ext)) -}}
+                            {{- $img := . -}}
+                            {{- if and (ne $ext ".svg") (ne $ext ".gif") -}}
+                                {{- with try (.Resize "48x48 q100") -}}
+                                    {{- if not .Err -}}
+                                        {{- $img = .Value -}}
+                                    {{- end -}}
+                                {{- end -}}
+                            {{- end -}}
+                            {{- $toolIcon = $img.RelPermalink -}}
+                            {{- break -}}
+                        {{- end -}}
+                    {{- end -}}
+                    <a href="/tool/{{ $toolSlug }}" class="tool-link">
+                        {{- if $toolIcon -}}
+                        <img src="{{ $toolIcon }}" alt="{{ . }}" class="tool-icon{{ with $logoBg }} logo-bg-{{ . }}{{ end }}" width="20" height="20" loading="lazy">
+                        {{- end -}}
+                        <span>{{ . }}</span>
+                    </a>
+                {{- end -}}
+            </td>
+        </tr>
+        {{- end -}}
+        
+        {{- if len $conferences -}}
+        <tr>
+            <th>Conferences</th>
+            <td class="tools-with-icons">
+                {{- range $conferences -}}
+                    <a href="{{ .url }}" class="tool-link">
+                        {{- if .photopath -}}
+                        <img src="{{ .photopath }}" alt="{{ .title }}" class="tool-icon{{ with .logoBg }} logo-bg-{{ . }}{{ end }}" width="20" height="20" loading="lazy">
+                        {{- end -}}
+                        <span>{{ .title }} ({{ .count }})</span>
+                    </a>
                 {{- end -}}
             </td>
         </tr>
@@ -244,12 +313,9 @@
         {{- if gt (len $topics) 0 -}}
         <tr>
             <th>Focus Areas</th>
-            <td>
-                {{- $first := true -}}
+            <td class="focus-area-chips">
                 {{- range $topics -}}
-                    {{- if not $first }} &bull; {{ end -}}
-                    {{- $first = false -}}
-                    <a href="/focus/{{ .tag | urlize }}/">{{ .name }} ({{ .count }})</a>
+                    <a href="/focus/{{ .tag | urlize }}/" class="focus-chip">{{ .name }} <span class="focus-chip-count">{{ .count }}</span></a>
                 {{- end -}}
             </td>
         </tr>
