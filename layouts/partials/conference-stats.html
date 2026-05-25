@@ -1,0 +1,254 @@
+{{/*
+  Conference insights: top speakers by session type and top focus areas.
+
+  Usage:
+    {{ partial "conference-stats.html" (dict "Pages" .Pages "Context" .) }}
+*/}}
+
+{{- $pages := .Pages -}}
+{{- $site := .Context.Site -}}
+
+{{- $talkScratch := newScratch -}}
+{{- $tooldemoScratch := newScratch -}}
+{{- $panelScratch := newScratch -}}
+{{- $talkSpeakers := slice -}}
+{{- $tooldemoSpeakers := slice -}}
+{{- $panelSpeakers := slice -}}
+
+{{- $faScratch := newScratch -}}
+{{- $faNames := slice -}}
+
+{{- $focusAreaPages := where $site.Pages "Section" "focus" -}}
+{{- $focusAreaPages = where $focusAreaPages ".Params.focus_key" "!=" nil -}}
+{{- $focusAreaConfig := dict -}}
+{{- range $focusAreaPages -}}
+  {{- $focusAreaConfig = merge $focusAreaConfig (dict .Params.focus_key (dict "name" .Title "color" .Params.color "icon" .Params.icon "tags" .Params.related_tags)) -}}
+{{- end -}}
+
+{{- range $pages -}}
+  {{- $normalizedType := .Params.type | default "talk" | lower | strings.TrimSpace -}}
+  {{- if eq $normalizedType "tool demo" -}}
+    {{- $normalizedType = "tooldemo" -}}
+  {{- end -}}
+
+  {{- $bucket := "talk" -}}
+  {{- if or (eq $normalizedType "tooldemo") (eq $normalizedType "arsenal") -}}
+    {{- $bucket = "tooldemo" -}}
+  {{- else if eq $normalizedType "panel" -}}
+    {{- $bucket = "panel" -}}
+  {{- end -}}
+
+  {{- if .Params.hacker -}}
+    {{- range .Params.hacker -}}
+      {{- $slug := . | lower | strings.TrimSpace -}}
+      {{- if $slug -}}
+        {{- if eq $bucket "talk" -}}
+          {{- if not (in $talkSpeakers $slug) -}}
+            {{- $talkSpeakers = $talkSpeakers | append $slug -}}
+          {{- end -}}
+          {{- $talkScratch.Add $slug 1 -}}
+        {{- else if eq $bucket "tooldemo" -}}
+          {{- if not (in $tooldemoSpeakers $slug) -}}
+            {{- $tooldemoSpeakers = $tooldemoSpeakers | append $slug -}}
+          {{- end -}}
+          {{- $tooldemoScratch.Add $slug 1 -}}
+        {{- else if eq $bucket "panel" -}}
+          {{- if not (in $panelSpeakers $slug) -}}
+            {{- $panelSpeakers = $panelSpeakers | append $slug -}}
+          {{- end -}}
+          {{- $panelScratch.Add $slug 1 -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if .Params.tag -}}
+    {{- $pageFocusAreas := slice -}}
+    {{- range .Params.tag -}}
+      {{- $tag := . | lower -}}
+      {{- range $areaKey, $areaData := $focusAreaConfig -}}
+        {{- if and (in $areaData.tags $tag) (not (in $pageFocusAreas $areaKey)) -}}
+          {{- $pageFocusAreas = $pageFocusAreas | append $areaKey -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- range $pageFocusAreas -}}
+      {{- if not (in $faNames .) -}}
+        {{- $faNames = $faNames | append . -}}
+      {{- end -}}
+      {{- $faScratch.Add (printf "count_%s" .) 1 -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $topTalkSpeakers := slice -}}
+{{- range $talkSpeakers -}}
+  {{- $count := $talkScratch.Get . | default 0 -}}
+  {{- if gt $count 2 -}}
+    {{- $title := . | humanize | title -}}
+    {{- with $site.GetPage (printf "/hacker/%s" .) -}}
+      {{- $title = .Title -}}
+    {{- end -}}
+    {{- $topTalkSpeakers = $topTalkSpeakers | append (dict "slug" . "count" $count "title" $title) -}}
+  {{- end -}}
+{{- end -}}
+{{- $topTalkSpeakers = first 5 (sort $topTalkSpeakers "count" "desc") -}}
+
+{{- $topTooldemoSpeakers := slice -}}
+{{- range $tooldemoSpeakers -}}
+  {{- $count := $tooldemoScratch.Get . | default 0 -}}
+  {{- if gt $count 2 -}}
+    {{- $title := . | humanize | title -}}
+    {{- with $site.GetPage (printf "/hacker/%s" .) -}}
+      {{- $title = .Title -}}
+    {{- end -}}
+    {{- $topTooldemoSpeakers = $topTooldemoSpeakers | append (dict "slug" . "count" $count "title" $title) -}}
+  {{- end -}}
+{{- end -}}
+{{- $topTooldemoSpeakers = first 5 (sort $topTooldemoSpeakers "count" "desc") -}}
+
+{{- $topPanelSpeakers := slice -}}
+{{- range $panelSpeakers -}}
+  {{- $count := $panelScratch.Get . | default 0 -}}
+  {{- if gt $count 2 -}}
+    {{- $title := . | humanize | title -}}
+    {{- with $site.GetPage (printf "/hacker/%s" .) -}}
+      {{- $title = .Title -}}
+    {{- end -}}
+    {{- $topPanelSpeakers = $topPanelSpeakers | append (dict "slug" . "count" $count "title" $title) -}}
+  {{- end -}}
+{{- end -}}
+{{- $topPanelSpeakers = first 5 (sort $topPanelSpeakers "count" "desc") -}}
+
+{{- $topFocusAreas := slice -}}
+{{- range $faNames -}}
+  {{- $count := $faScratch.Get (printf "count_%s" .) | default 0 -}}
+  {{- if gt $count 2 -}}
+    {{- $areaConfig := index $focusAreaConfig . -}}
+    {{- $topFocusAreas = $topFocusAreas | append (dict "key" . "tag" . "name" $areaConfig.name "icon" $areaConfig.icon "count" $count) -}}
+  {{- end -}}
+{{- end -}}
+{{- $topFocusAreas = first 5 (sort $topFocusAreas "count" "desc") -}}
+
+{{- $hasTalkSpeakers := gt (len $topTalkSpeakers) 0 -}}
+{{- $hasTooldemoSpeakers := gt (len $topTooldemoSpeakers) 0 -}}
+{{- $hasPanelSpeakers := gt (len $topPanelSpeakers) 0 -}}
+{{- $hasFocusAreas := gt (len $topFocusAreas) 0 -}}
+
+{{- if or $hasTalkSpeakers $hasTooldemoSpeakers $hasPanelSpeakers $hasFocusAreas -}}
+<div class="conference-summary">
+  <h2>Conference Insights</h2>
+  <div class="info-box-table">
+    <table>
+      {{- if $hasTalkSpeakers -}}
+      <tr>
+        <th>Top Talk Speakers</th>
+        <td>
+          <div class="collaborators-with-photos">
+          {{- range $topTalkSpeakers -}}
+            {{- $speakerSlug := .slug -}}
+            {{- $photopath := "" -}}
+            {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
+              {{- with resources.Get (path.Join "hacker" (printf "%s%s" $speakerSlug $ext)) -}}
+                {{- $img := . -}}
+                {{- if ne $ext ".svg" -}}
+                  {{- with try (.Resize "48x48 q100") -}}
+                    {{- if not .Err -}}
+                      {{- $img = .Value -}}
+                    {{- end -}}
+                  {{- end -}}
+                {{- end -}}
+                {{- $photopath = $img.RelPermalink -}}
+                {{- break -}}
+              {{- end -}}
+            {{- end -}}
+            <a href="/hacker/{{ .slug }}/" class="collaborator-link">
+              {{- if $photopath -}}<img src="{{ $photopath }}" alt="{{ .title }}" class="collaborator-photo" width="24" height="24" loading="lazy">{{- end -}}
+              <span>{{ .title }} ({{ .count }})</span>
+            </a>
+          {{- end -}}
+          </div>
+        </td>
+      </tr>
+      {{- end -}}
+
+      {{- if $hasTooldemoSpeakers -}}
+      <tr>
+        <th>Top Tool Demo Speakers</th>
+        <td>
+          <div class="collaborators-with-photos">
+          {{- range $topTooldemoSpeakers -}}
+            {{- $speakerSlug := .slug -}}
+            {{- $photopath := "" -}}
+            {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
+              {{- with resources.Get (path.Join "hacker" (printf "%s%s" $speakerSlug $ext)) -}}
+                {{- $img := . -}}
+                {{- if ne $ext ".svg" -}}
+                  {{- with try (.Resize "48x48 q100") -}}
+                    {{- if not .Err -}}
+                      {{- $img = .Value -}}
+                    {{- end -}}
+                  {{- end -}}
+                {{- end -}}
+                {{- $photopath = $img.RelPermalink -}}
+                {{- break -}}
+              {{- end -}}
+            {{- end -}}
+            <a href="/hacker/{{ .slug }}/" class="collaborator-link">
+              {{- if $photopath -}}<img src="{{ $photopath }}" alt="{{ .title }}" class="collaborator-photo" width="24" height="24" loading="lazy">{{- end -}}
+              <span>{{ .title }} ({{ .count }})</span>
+            </a>
+          {{- end -}}
+          </div>
+        </td>
+      </tr>
+      {{- end -}}
+
+      {{- if $hasPanelSpeakers -}}
+      <tr>
+        <th>Top Panel Speakers</th>
+        <td>
+          <div class="collaborators-with-photos">
+          {{- range $topPanelSpeakers -}}
+            {{- $speakerSlug := .slug -}}
+            {{- $photopath := "" -}}
+            {{- range $ext := slice ".jpg" ".png" ".jpeg" ".jfif" ".svg" -}}
+              {{- with resources.Get (path.Join "hacker" (printf "%s%s" $speakerSlug $ext)) -}}
+                {{- $img := . -}}
+                {{- if ne $ext ".svg" -}}
+                  {{- with try (.Resize "48x48 q100") -}}
+                    {{- if not .Err -}}
+                      {{- $img = .Value -}}
+                    {{- end -}}
+                  {{- end -}}
+                {{- end -}}
+                {{- $photopath = $img.RelPermalink -}}
+                {{- break -}}
+              {{- end -}}
+            {{- end -}}
+            <a href="/hacker/{{ .slug }}/" class="collaborator-link">
+              {{- if $photopath -}}<img src="{{ $photopath }}" alt="{{ .title }}" class="collaborator-photo" width="24" height="24" loading="lazy">{{- end -}}
+              <span>{{ .title }} ({{ .count }})</span>
+            </a>
+          {{- end -}}
+          </div>
+        </td>
+      </tr>
+      {{- end -}}
+
+      {{- if $hasFocusAreas -}}
+      <tr>
+        <th>Top Focus Areas</th>
+        <td>
+          <div class="focus-area-chips">
+          {{- range $topFocusAreas -}}
+          <a href="/focus/{{ .key }}/" class="focus-chip">{{ .name }} <span class="focus-chip-count">{{ .count }}</span></a>
+          {{- end -}}
+          </div>
+        </td>
+      </tr>
+      {{- end -}}
+    </table>
+  </div>
+</div>
+{{- end -}}

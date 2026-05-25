@@ -29,6 +29,7 @@
 <div class="confcontent">
 {{ .Content  }}
 </div>
+{{ partial "conference-stats.html" (dict "Pages" .Pages "Context" .) }}
 <div class="listing">
   <h2>List of Sessions</h2>
   <hr/>

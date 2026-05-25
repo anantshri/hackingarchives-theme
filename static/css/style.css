@@ -2881,6 +2881,22 @@ a.stat-card-link:visited {
   color: var(--color-accent);
 }
 
+.conference-summary .info-box-table {
+  margin: var(--spacing-md) 0 0;
+  line-height: normal;
+}
+
+.conference-summary .info-box-table th,
+.conference-summary .info-box-table td {
+  vertical-align: top;
+}
+
+.conference-summary .info-box-table th {
+  width: 11rem;
+  min-width: 11rem;
+  white-space: nowrap;
+}
+
 /* Conference list (card-only) */
 .conference-list-grid {
   display: grid;
